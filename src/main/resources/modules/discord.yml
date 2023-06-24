@@ -1,0 +1,6 @@
+discord:
+  enable: true
+  Token: 'OTkzNTQ3Mzc4NTYyOTY5NjAw.GBac6v.0MOJIKCWStuYH09uj1u-8bj3oI4zQ8hlqWMl2c'
+  ActivityType: 'PLAYING'
+  Activity: 'GiantNetwork.de'
+  GuildID: '819108810899324940'

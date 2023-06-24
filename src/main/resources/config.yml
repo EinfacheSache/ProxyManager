@@ -1,0 +1,8 @@
+ServerDomainName: ''
+ManageConnection:
+  enabled: true
+  PlayerHeadAsServerIcon: true
+  VerifyServerDomain: ''
+  VerifyServer: ''
+  AllowedDomains:
+    - ''
