@@ -91,7 +91,7 @@ public class TabCompleteListener implements Listener {
             for (String cmd : cmds) {
 
                 if (!cursor.startsWith(cmd + " ")) {
-                    return completions;
+                    continue;
                 }
 
                 if (splitCursor.length == pos + 1) {

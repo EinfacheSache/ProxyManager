@@ -1,6 +1,6 @@
 package de.cubeattack.proxymanager.core;
 
-import de.cubeattack.api.utils.FileUtils;
+import de.cubeattack.api.util.FileUtils;
 
 import java.util.List;
 

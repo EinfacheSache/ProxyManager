@@ -21,8 +21,10 @@ public class SettingsCommand extends Command {
     }
 
     @Override
-    public void execute(CommandSender commandSender, String[] strings) {
-        if(!(commandSender instanceof ProxiedPlayer p))return;
+    public void execute(CommandSender sender, String[] args) {
+        if(sender == null) return;
+        if(!(sender instanceof ProxiedPlayer p))return;
+
 
         ProtocolizePlayer player = Protocolize.playerProvider().player(p.getUniqueId());
 

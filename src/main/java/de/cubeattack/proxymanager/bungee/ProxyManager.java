@@ -31,7 +31,7 @@ public final class ProxyManager extends Plugin {
     }
 
     public void onEnable() {
-        Core.run();
+        Core.run(getLogger());
         new Metrics(this, ServerID);
 
         if(Config.isManageConnectionEnabled()){pm.registerListener(this, new ManageConnection());}

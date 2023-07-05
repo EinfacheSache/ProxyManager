@@ -2,10 +2,10 @@ package de.cubeattack.proxymanager.core;
 
 import de.cubeattack.api.logger.LogManager;
 import de.cubeattack.api.shutdown.ShutdownHook;
-import de.cubeattack.api.utils.FileUtils;
-import de.cubeattack.api.utils.VersionUtils;
+import de.cubeattack.api.util.FileUtils;
 import de.cubeattack.proxymanager.discord.DiscordAPI;
-import org.slf4j.Logger;
+
+import java.util.logging.Logger;
 
 public class Core{
 
@@ -18,9 +18,12 @@ public class Core{
     private static RedisConnector RedisConnector;
     private static DiscordAPI discordAPI;
     private static DataSourceProvider datasource;
-    private static final Logger logger = LogManager.getLogger();
 
     public static void main(String[] args) {
+        run();
+    }
+    public static void run(Logger logger){
+        LogManager.getLogger().setLogger(logger);
         run();
     }
 
@@ -29,7 +32,7 @@ public class Core{
 
         ShutdownHook.register(Core::shutdown);
 
-        Core.info("running ProxyManager on version " + VersionUtils.getVersion() + " build " +  VersionUtils.getBuild());
+        //Core.info("running ProxyManager on version " + VersionUtils.getPomVersion(VersionUtils.class) + " build " + VersionUtils.getBuild());
 
         tcpServerModule = new FileUtils(Core.class.getResourceAsStream("/modules/tpcServer.yml"), "plugins/ProxyManager","modules/tcpServer.yml");
         discordModule = new FileUtils(Core.class.getResourceAsStream("/modules/discord.yml"), "plugins/ProxyManager","modules/discord.yml");
@@ -51,16 +54,16 @@ public class Core{
         info("Bots successfully stopped");
     }
     public static void debug(String output){
-        logger.debug(output);
+        LogManager.getLogger().debug(output);
     }
     public static void info(String output){
-        logger.info(output);
+        LogManager.getLogger().info(output);
     }
     public static void warn(String output){
-        logger.warn(output);
+        LogManager.getLogger().warn(output);
     }
     public static void severe(String output){
-        logger.error(output);
+        LogManager.getLogger().error(output);
     }
 
     public static RedisConnector getRedisConnector() {

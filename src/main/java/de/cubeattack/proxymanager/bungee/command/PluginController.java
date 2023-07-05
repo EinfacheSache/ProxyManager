@@ -21,8 +21,10 @@ public class PluginController extends Command {
     @Override
     public void execute(CommandSender sender, String[] args) {
         if(sender == null)return;
+
         if(!sender.hasPermission("proxymanager.bpl")) {
-           ProxyManager.sendMessage(sender, "§cDu hast dazu keine Rechte");
+           ProxyManager.sendMessage(sender, "§§Du hast dazu keine Rechte");
+           return;
         }
 
         String pluginName = null;

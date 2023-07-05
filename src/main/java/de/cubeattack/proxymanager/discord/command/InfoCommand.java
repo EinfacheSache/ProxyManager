@@ -1,6 +1,6 @@
 package de.cubeattack.proxymanager.discord.command;
 
-import de.cubeattack.api.utils.RuntimeUsageUtils;
+import de.cubeattack.api.util.RuntimeUsageUtils;
 import de.cubeattack.proxymanager.bungee.ProxyManager;
 import de.cubeattack.proxymanager.core.Core;
 import de.cubeattack.proxymanager.discord.MessageUtils;
@@ -22,7 +22,6 @@ public class InfoCommand extends ListenerAdapter
      * Online Player
      * Server Running
      **/
-
 
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event)
