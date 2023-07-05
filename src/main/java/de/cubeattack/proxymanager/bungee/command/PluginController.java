@@ -23,7 +23,7 @@ public class PluginController extends Command {
         if(sender == null)return;
 
         if(!sender.hasPermission("proxymanager.bpl")) {
-           ProxyManager.sendMessage(sender, "§§Du hast dazu keine Rechte");
+           ProxyManager.sendMessage(sender, "§4Du hast dazu keine Rechte");
            return;
         }
 
