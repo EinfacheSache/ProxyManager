@@ -2,6 +2,7 @@ package de.cubeattack.proxymanager.bungee.listener;
 
 import de.cubeattack.proxymanager.bungee.ProxyManager;
 import de.cubeattack.proxymanager.bungee.command.PluginController;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.TabCompleteEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.plugin.Plugin;
@@ -14,15 +15,17 @@ import java.util.Collections;
 public class TabCompleteListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
-    public void onTabComplete(TabCompleteEvent e) {
+    public void onTabComplete(TabCompleteEvent event) {
 
-        String cursor = e.getCursor().toLowerCase();
+        String cursor = event.getCursor().toLowerCase();
         ArrayList<String> commands = new ArrayList<>();
         ArrayList<String> tablistOne = new ArrayList<>();
         ArrayList<String> tablistTwo = new ArrayList<>();
         String[] cursorSplit = cursor.split(" ");
 
         if (cursor.startsWith("/bpl")) {
+
+            if(event.getSender() instanceof ProxiedPlayer && !((ProxiedPlayer)event.getSender()).hasPermission("proxymanager.bpl"))return;
 
             for (Plugin plugin : ProxyManager.getPluginManger().getPlugins()) {
                 String plName = plugin.getDescription().getName();
@@ -57,16 +60,17 @@ public class TabCompleteListener implements Listener {
             tablistOne.add("restart");
             tablistOne.add("rename");
 
-            e.getSuggestions().addAll(completor(true, cursor, commands, tablistOne, tablistTwo));
+            event.getSuggestions().addAll(completor(true, cursor, commands, tablistOne, tablistTwo));
 
         } else {
+            if(event.getSender() instanceof ProxiedPlayer && (!((ProxiedPlayer)event.getSender()).hasPermission("proxymanager.chat")) && (!((ProxiedPlayer)event.getSender()).hasPermission("proxymanager.command")))return;
 
             commands.add("/gmute");
             commands.add("/commands");
             tablistOne.add("on");
             tablistOne.add("off");
 
-            e.getSuggestions().addAll(completor(true, cursor, commands, tablistOne));
+            event.getSuggestions().addAll(completor(true, cursor, commands, tablistOne));
 
         }
     }
