@@ -5,9 +5,9 @@ import de.cubeattack.proxymanager.core.Core;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.plugin.Command;
 
-public class GlobalMute extends Command {
+public class GlobalMuteCMD extends Command {
 
-    public GlobalMute() {
+    public GlobalMuteCMD() {
         super("gmute");
     }
 

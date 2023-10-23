@@ -1,9 +1,6 @@
 package de.cubeattack.proxymanager.bungee;
 
-import de.cubeattack.proxymanager.bungee.command.Commands;
-import de.cubeattack.proxymanager.bungee.command.GlobalMute;
-import de.cubeattack.proxymanager.bungee.command.PluginController;
-import de.cubeattack.proxymanager.bungee.command.SettingsCommand;
+import de.cubeattack.proxymanager.bungee.command.*;
 import de.cubeattack.proxymanager.bungee.listener.ManageConnection;
 import de.cubeattack.proxymanager.bungee.listener.MessageListener;
 import de.cubeattack.proxymanager.bungee.listener.ServerKickListener;
@@ -35,14 +32,16 @@ public final class ProxyManager extends Plugin {
         new Metrics(this, ServerID);
 
         if(Config.isManageConnectionEnabled()){pm.registerListener(this, new ManageConnection());}
+        if(pm.getPlugin("Protocolize") != null) pm.registerCommand(this, new SettingsCMD());
+
         pm.registerListener(this, new TabCompleteListener());
         pm.registerListener(this, new MessageListener());
         pm.registerListener(this, new ServerKickListener());
 
-        pm.registerCommand(this, new PluginController());
-        pm.registerCommand(this, new SettingsCommand());
-        pm.registerCommand(this, new GlobalMute());
-        pm.registerCommand(this, new Commands());
+        pm.registerCommand(this, new PluginControllerCMD());
+        pm.registerCommand(this, new GlobalMuteCMD());
+        pm.registerCommand(this, new CommandsCMD());
+        pm.registerCommand(this, new ProxyCMD());
 
         Core.info("Plugin was Enabled successful");
     }

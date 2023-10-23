@@ -1,7 +1,7 @@
 package de.cubeattack.proxymanager.bungee.listener;
 
 import de.cubeattack.proxymanager.bungee.ProxyManager;
-import de.cubeattack.proxymanager.bungee.command.PluginController;
+import de.cubeattack.proxymanager.bungee.command.PluginControllerCMD;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.TabCompleteEvent;
 import net.md_5.bungee.api.plugin.Listener;
@@ -41,11 +41,11 @@ public class TabCompleteListener implements Listener {
 
                 if (cursorSplit.length >= 2 && !cursorSplit[1].equalsIgnoreCase("list")) {
 
-                    if ("enable".startsWith(cursorSplit[1]) && !PluginController.getDisabledPluginList().contains(plugin)) {
+                    if ("enable".startsWith(cursorSplit[1]) && !PluginControllerCMD.getDisabledPluginList().contains(plugin)) {
                         continue;
                     }
 
-                    if ("disable".startsWith(cursorSplit[1]) && PluginController.getDisabledPluginList().contains(plugin)) {
+                    if ("disable".startsWith(cursorSplit[1]) && PluginControllerCMD.getDisabledPluginList().contains(plugin)) {
                         continue;
                     }
 

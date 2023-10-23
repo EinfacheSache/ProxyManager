@@ -10,9 +10,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class PluginController extends Command {
+public class PluginControllerCMD extends Command {
 
-    public PluginController() {
+    public PluginControllerCMD() {
         super("bpl");
     }
 
