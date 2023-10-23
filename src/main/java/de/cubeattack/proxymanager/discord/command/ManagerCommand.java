@@ -35,7 +35,7 @@ public class ManagerCommand extends ListenerAdapter {
             }
 
             case "reloadcommands" -> {
-                Core.getDiscordAPI().loadCommands();
+                Core.getDiscordAPI().loadDiscordCommands();
                 embedBuilder.setDescription("Commands wurden reloaded!");
                 Core.info("Updating Discord slash commands\n");
             }

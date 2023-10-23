@@ -17,8 +17,7 @@ public class LookupCommand extends ListenerAdapter {
     private static final String minotar = "https://minotar.net/helm/";
 
     @Override
-    public void onSlashCommandInteraction(SlashCommandInteractionEvent event)
-    {
+    public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
 
         if (!Objects.equals(event.getGuild(), Core.getDiscordAPI().getGuild())) return;
         if (!event.getName().equalsIgnoreCase("lookup")) return;
@@ -27,8 +26,7 @@ public class LookupCommand extends ListenerAdapter {
         String name = Objects.requireNonNull(event.getOption("name")).getAsString();
         User user = MinecraftAPI.load(name);
 
-        if(user == null)
-        {
+        if (user == null) {
             embedBuilder.setDescription("Fehler: Name wurde nicht gefunden");
             embedBuilder.setColor(Color.RED);
             event.replyEmbeds(embedBuilder.build()).queue();
@@ -38,18 +36,23 @@ public class LookupCommand extends ListenerAdapter {
         embedBuilder.setDescription("Loading Data from " + user.getName());
         embedBuilder.setColor(Color.YELLOW);
 
-        event.replyEmbeds(embedBuilder.build()).flatMap(it ->
-                        event.getHook().editOriginalEmbeds(getEmbedBuilder(user, embedBuilder).build()))
+        event.replyEmbeds(embedBuilder.build()).flatMap(it -> {
+                    if (Core.getDatasource().isClosed()) {
+                        embedBuilder.setColor(Color.RED);
+                        return event.getHook().editOriginalEmbeds(embedBuilder.setDescription("Fehler: MySQL Verbindung fehlgeschlagen").build());
+                    }
+                    return event.getHook().editOriginalEmbeds(getEmbedBuilder(user, embedBuilder).build());
+                })
                 .queue();
     }
 
-    private EmbedBuilder getEmbedBuilder(User user, EmbedBuilder embedBuilder){
+    private EmbedBuilder getEmbedBuilder(User user, EmbedBuilder embedBuilder) {
 
         user.loadDataFromMySQL();
 
         embedBuilder.setDescription("");
         embedBuilder.setColor(Color.GREEN);
-        embedBuilder.setTitle("Infos zu " + user.getName(),  namemc + user.getName());
+        embedBuilder.setTitle("Infos zu " + user.getName(), namemc + user.getName());
         embedBuilder.setThumbnail(minotar + user.getName());
         embedBuilder.addField("UUID", user.getUUID().toString(), false);
         embedBuilder.addField("Rang", user.getRang(), false);
@@ -57,7 +60,7 @@ public class LookupCommand extends ListenerAdapter {
         embedBuilder.addField("Coins", user.getCoins(), false);
         embedBuilder.addField("Playtime", user.getPlaytime(), false);
         embedBuilder.addField("Webaccount", user.hasWebAccount(), false);
-        embedBuilder.addField("Mute", user.isMuted() , false);
+        embedBuilder.addField("Mute", user.isMuted(), false);
         embedBuilder.addField("Ban", user.isBanned(), false);
         return embedBuilder;
     }

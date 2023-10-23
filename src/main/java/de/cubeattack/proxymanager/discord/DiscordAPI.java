@@ -61,7 +61,7 @@ public class DiscordAPI extends ListenerAdapter
         }
     }
 
-    public void loadCommands() {
+    public void loadDiscordCommands() {
         JDA.updateCommands().queue();
         JDA.upsertCommand("ping", "Berechne den Ping des Bots").queue();
         JDA.upsertCommand((Commands.message("Count words"))).queue();
@@ -84,7 +84,7 @@ public class DiscordAPI extends ListenerAdapter
                     .upsertCommand("manager", "Befehle für Admins / Developer")
                     .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR))
                     .addSubcommands(new SubcommandData( "restart", "Restart"))
-                    .addSubcommands(new SubcommandData( "reloadcommands", "Reload Commands"))
+                    .addSubcommands(new SubcommandData( "reloadcommands", "Reload Discord Commands"))
                     .addSubcommands(new SubcommandData( "ticketsetup", "Setup TicketBot"))
                     .addSubcommands(new SubcommandData( "closetickets", "Lösche alle Tickets"))
                     .setGuildOnly(true)

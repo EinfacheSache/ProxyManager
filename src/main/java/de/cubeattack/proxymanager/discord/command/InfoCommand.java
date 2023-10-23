@@ -38,7 +38,7 @@ public class InfoCommand extends ListenerAdapter
         boolean isPinged = isReachable();
         currentTime = System.currentTimeMillis() - currentTime;
         String strBasic = "IP: GiantNetwork.de\n" +
-                "Version: 1.8.9 - 1.19.4\n" +
+                "Version: 1.8.9 - 1.20.2\n" +
                 "Ping: " + (isPinged ? currentTime + "ms" : "No Connection") + "\n" +
                 "Spieler Online: " + ProxyManager.getPlugin().getProxy().getOnlineCount();
 
