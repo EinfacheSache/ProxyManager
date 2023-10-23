@@ -62,4 +62,12 @@ public class DataSourceProvider {
             Core.severe("Error whiles updating : " + "\n" + ex.getLocalizedMessage());
         }
     }
+
+    public boolean isClosed() {
+        try {
+            return source.getConnection().isClosed();
+        }catch (Exception exception){
+            return true;
+        }
+    }
 }
