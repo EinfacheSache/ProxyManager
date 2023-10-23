@@ -94,7 +94,7 @@ public class ManageConnection implements Listener {
 
         if (e.getConnection() == null) return;
 
-        String line1 = e.getResponse().getDescriptionComponent().toLegacyText().split("\n")[0].replace("&", "§");
+        String line1 = "§7§kKK§r §6Willkommen auf §l" + Config.getServerDomainName() + "§c§o [1.8-1.20.2] §7§kKK§r";
         String line2 = "";
         String playerName = null;
 
@@ -108,9 +108,9 @@ public class ManageConnection implements Listener {
             }
 
             if(playerName != null) {
-                line2 = "§6Willkommen §b" + playerName + "§6 auf " + Config.getServerDomainName() ;
+                line2 = "§6Willkommen §b" + playerName + "§6 auf " + Config.getServerDomainName();
             }else {
-                line2 = "§6Herzlich willkommen auf " + Config.getServerDomainName();
+                line2 = "            §2§lEarth Server §7+ §b§lAlpha Test";
             }
         }
 
