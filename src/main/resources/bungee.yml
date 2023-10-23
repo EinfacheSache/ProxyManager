@@ -6,8 +6,9 @@ description: Manage your ProxyServer
 softDepends:
   - Protocolize
 libraries:
-  - com.fasterxml.jackson.core:jackson-annotations:2.15.1
-  - ch.qos.logback:logback-classic:1.4.7
-  - redis.clients:jedis:5.0.0-alpha2
-  - net.dv8tion:JDA:5.0.0-beta.9
+  - com.fasterxml.jackson.core:jackson-annotations:2.15.3
+  - com.squareup.okhttp3:okhttp:5.0.0-alpha.11
+  - ch.qos.logback:logback-classic:1.4.11
+  - net.dv8tion:JDA:5.0.0-beta.15
+  - redis.clients:jedis:5.0.2
   - com.zaxxer:HikariCP:5.0.1
