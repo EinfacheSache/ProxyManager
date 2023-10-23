@@ -14,6 +14,8 @@ public class Config {
     private static int portRedis;
     private static boolean connectRedis;
     private static String hostRedis;
+    private static String userRedis;
+    private static String passwdRedis;
 
     private static boolean discordEnable;
     private static String token;
@@ -55,6 +57,8 @@ public class Config {
         connectRedis = redis.getBoolean("redis.connect", true);
         portRedis = redis.getInt("redis.port", 6379);
         hostRedis = redis.getString("redis.host", "127.0.0.1");
+        userRedis = redis.getString("redis.user", "default");
+        passwdRedis = redis.getString("redis.passwd", "");
     }
 
     private static void loadDiscordModule() {
@@ -105,6 +109,14 @@ public class Config {
 
     public static String getHostRedis() {
         return hostRedis;
+    }
+
+    public static String getUserRedis() {
+        return userRedis;
+    }
+
+    public static String getPasswdRedis() {
+        return passwdRedis;
     }
 
 
