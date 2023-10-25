@@ -14,18 +14,10 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Objects;
 
-public class InfoCommand extends ListenerAdapter
-{
-     /**
-     * Ip
-     * Ping
-     * Online Player
-     * Server Running
-     **/
+public class InfoCommand extends ListenerAdapter {
 
     @Override
-    public void onSlashCommandInteraction(SlashCommandInteractionEvent event)
-    {
+    public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
 
         if (!Objects.equals(event.getGuild(), Core.getDiscordAPI().getGuild())) return;
         if (!event.getName().equalsIgnoreCase("info")) return;
@@ -40,12 +32,12 @@ public class InfoCommand extends ListenerAdapter
         String strBasic = "IP: GiantNetwork.de\n" +
                 "Version: 1.8.9 - 1.20.2\n" +
                 "Ping: " + (isPinged ? currentTime + "ms" : "No Connection") + "\n" +
-                "Spieler Online: "  + ProxyManager.getPlugin().getProxy().getOnlineCount() + "/" + ProxyManager.getPlugin().getProxy().getConfig().getPlayerLimit();
+                "Spieler Online: " + ProxyManager.getPlugin().getProxy().getOnlineCount() + "/" + ProxyManager.getPlugin().getProxy().getConfig().getPlayerLimit();
 
-        embedBuilder.addField("Basic Information", strBasic,false);
+        embedBuilder.addField("Basic Information", strBasic, false);
 
-        embedBuilder.addField("Ram Verbrauch", RuntimeUsageUtils.getUsedRam() + " / "+ RuntimeUsageUtils.getMaxRam() + "MB",false);
-        embedBuilder.addField("CPU verbrauch Information", RuntimeUsageUtils.getCpuUsage() + "%",false);
+        embedBuilder.addField("Ram Verbrauch", RuntimeUsageUtils.getUsedRam() + " / " + RuntimeUsageUtils.getMaxRam() + "MB", false);
+        embedBuilder.addField("CPU verbrauch Information", RuntimeUsageUtils.getCpuUsage() + "%", false);
 
         final StringBuilder strServer = new StringBuilder();
 
@@ -56,6 +48,7 @@ public class InfoCommand extends ListenerAdapter
         event.replyEmbeds(embedBuilder.build()).setEphemeral(true).queue();
 
     }
+
     private static boolean isReachable() {
         try (Socket soc = new Socket()) {
             soc.connect(new InetSocketAddress("giantnetwork.de", 80), 1500);

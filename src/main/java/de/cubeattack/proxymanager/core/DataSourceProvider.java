@@ -15,14 +15,12 @@ public class DataSourceProvider {
 
     private javax.sql.DataSource source;
 
-    public DataSourceProvider()
-    {
-        if(!Config.connectMySQL()) return;
+    public DataSourceProvider() {
+        if (!Config.connectMySQL()) return;
         source = connect();
     }
 
-    private DataSource connect()
-    {
+    private DataSource connect() {
         Properties props = new Properties();
 
         props.setProperty("dataSource.user", Config.getMySQLUser());
@@ -40,9 +38,9 @@ public class DataSourceProvider {
 
         return source;
     }
-    public ResultSet query(String qry)
-    {
-        try (PreparedStatement st = source.getConnection().prepareStatement(qry, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE)){
+
+    public ResultSet query(String qry) {
+        try (PreparedStatement st = source.getConnection().prepareStatement(qry, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE)) {
             return st.executeQuery();
         } catch (SQLException ex) {
             connect();
@@ -51,8 +49,7 @@ public class DataSourceProvider {
         return null;
     }
 
-    public void update(String s1,String s2)
-    {
+    public void update(String s1, String s2) {
         try (Connection conn = source.getConnection();
              PreparedStatement stmt = conn.prepareStatement("INSERT INTO Data (keyData, value1) VALUES (?,?)")) {
             stmt.setString(1, s1);
@@ -66,7 +63,7 @@ public class DataSourceProvider {
     public boolean isClosed() {
         try {
             return source.getConnection().isClosed();
-        }catch (Exception exception){
+        } catch (Exception exception) {
             return true;
         }
     }

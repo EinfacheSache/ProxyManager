@@ -20,16 +20,16 @@ public class PluginControllerCMD extends Command {
 
     @Override
     public void execute(CommandSender sender, String[] args) {
-        if(sender == null)return;
+        if (sender == null) return;
 
-        if(!sender.hasPermission("proxymanager.bpl")) {
-           ProxyManager.sendMessage(sender, "§4Du hast dazu keine Rechte");
-           return;
+        if (!sender.hasPermission("proxymanager.bpl")) {
+            ProxyManager.sendMessage(sender, "§4Du hast dazu keine Rechte");
+            return;
         }
 
         String pluginName = null;
         Plugin plugin = null;
-        if(args.length >= 2){
+        if (args.length >= 2) {
             pluginName = args[1];
             plugin = ProxyManager.getPluginManger().getPlugin(pluginName);
         }
@@ -44,11 +44,12 @@ public class PluginControllerCMD extends Command {
                 default -> showHelp(sender);
             }
             return;
-        }catch (Exception ignored){}
+        } catch (Exception ignored) {
+        }
         showHelp(sender);
     }
 
-    public static void list(CommandSender sender){
+    public static void list(CommandSender sender) {
 
         Collection<Plugin> plugins = new ArrayList<>(ProxyManager.getPluginManger().getPlugins());
         StringBuilder pl = new StringBuilder();
@@ -56,20 +57,20 @@ public class PluginControllerCMD extends Command {
 
         plugins.forEach(plugin -> {
             String name = plugin.getDescription().getName();
-            if(!name.startsWith("cmd_") && !name.startsWith("reconnect_yaml")){
+            if (!name.startsWith("cmd_") && !name.startsWith("reconnect_yaml")) {
                 pl.append(plugin.getDescription().getName()).append("§f, §a");
-            }else{
+            } else {
                 i.getAndIncrement();
             }
         });
 
-        ProxyManager.sendMessage(sender,  "§fPlugins (" + (plugins.size() - i.get()) + "): §a" +
+        ProxyManager.sendMessage(sender, "§fPlugins (" + (plugins.size() - i.get()) + "): §a" +
                 pl.substring(0, pl.length() - 4));
     }
 
-    public static void enable(Plugin plugin, String pluginName, CommandSender sender){
+    public static void enable(Plugin plugin, String pluginName, CommandSender sender) {
         try {
-            if(pluginName.startsWith("§")){
+            if (pluginName.startsWith("§")) {
                 pluginName = pluginName.substring(2);
             }
 
@@ -80,19 +81,19 @@ public class PluginControllerCMD extends Command {
 
             disabledPluginList.remove(plugin);
 
-            ProxyManager.sendMessage(sender,"§cDas Plugin §6" + pluginName + "§c wurde§6 erfolgreich §aEnabled.");
-        }catch (NullPointerException e){
-            ProxyManager.sendMessage(sender,"§cDas Plugin §6" + pluginName + "§c gibt es nicht.");
+            ProxyManager.sendMessage(sender, "§cDas Plugin §6" + pluginName + "§c wurde§6 erfolgreich §aEnabled.");
+        } catch (NullPointerException e) {
+            ProxyManager.sendMessage(sender, "§cDas Plugin §6" + pluginName + "§c gibt es nicht.");
         }
     }
 
-    public static void disable(Plugin plugin, String pluginName, CommandSender sender){
+    public static void disable(Plugin plugin, String pluginName, CommandSender sender) {
         try {
 
             ProxyManager.getPluginManger().unregisterListeners(plugin);
             ProxyManager.getPluginManger().unregisterCommands(plugin);
 
-            if(pluginName.startsWith("§")){
+            if (pluginName.startsWith("§")) {
                 pluginName = pluginName.substring(2);
             }
 
@@ -102,33 +103,33 @@ public class PluginControllerCMD extends Command {
 
             disabledPluginList.add(plugin);
 
-            ProxyManager.sendMessage(sender,"§cDas Plugin §6" + pluginName + "§c wurde§6 erfolgreich §4Disabled.");
-        }catch (NullPointerException e){
-            ProxyManager.sendMessage(sender,"§cDas Plugin §6" + pluginName + "§c gibt es nicht.");
+            ProxyManager.sendMessage(sender, "§cDas Plugin §6" + pluginName + "§c wurde§6 erfolgreich §4Disabled.");
+        } catch (NullPointerException e) {
+            ProxyManager.sendMessage(sender, "§cDas Plugin §6" + pluginName + "§c gibt es nicht.");
         }
     }
 
-    public static void restart(Plugin plugin, String pluginName, CommandSender sender){
+    public static void restart(Plugin plugin, String pluginName, CommandSender sender) {
         disable(plugin, pluginName, sender);
         enable(plugin, pluginName, sender);
     }
 
-    public static void rename(Plugin plugin, String pluginName, String newPluginName, CommandSender sender){
+    public static void rename(Plugin plugin, String pluginName, String newPluginName, CommandSender sender) {
         try {
             plugin.getDescription().setName(newPluginName);
-            ProxyManager.sendMessage(sender,"§cDas Plugin §6" + pluginName + "§c wurde§6 erfolgreich §czu §6" + newPluginName + " §eRenamed.");
+            ProxyManager.sendMessage(sender, "§cDas Plugin §6" + pluginName + "§c wurde§6 erfolgreich §czu §6" + newPluginName + " §eRenamed.");
         } catch (NullPointerException e) {
-            ProxyManager.sendMessage(sender,"§cDas Plugin §6" + pluginName + "§c gibt es nicht.");
+            ProxyManager.sendMessage(sender, "§cDas Plugin §6" + pluginName + "§c gibt es nicht.");
         }
     }
 
-    public static void showHelp(CommandSender sender){
-        ProxyManager.sendMessage(sender,"§c--------Help--------");
-        ProxyManager.sendMessage(sender,"§c/bpl list");
-        ProxyManager.sendMessage(sender,"§c/bpl enable (Plugin)");
-        ProxyManager.sendMessage(sender,"§c/bpl disable (Plugin)");
-        ProxyManager.sendMessage(sender,"§c/bpl restart (Plugin)");
-        ProxyManager.sendMessage(sender,"§c/bpl rename (Plugin) (Name)");
+    public static void showHelp(CommandSender sender) {
+        ProxyManager.sendMessage(sender, "§c--------Help--------");
+        ProxyManager.sendMessage(sender, "§c/bpl list");
+        ProxyManager.sendMessage(sender, "§c/bpl enable (Plugin)");
+        ProxyManager.sendMessage(sender, "§c/bpl disable (Plugin)");
+        ProxyManager.sendMessage(sender, "§c/bpl restart (Plugin)");
+        ProxyManager.sendMessage(sender, "§c/bpl rename (Plugin) (Name)");
     }
 
     public static ArrayList<Plugin> getDisabledPluginList() {

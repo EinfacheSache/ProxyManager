@@ -21,7 +21,7 @@ public class MessageListener implements Listener {
     @EventHandler
     public void OnChat(ChatEvent e) {
         ProxiedPlayer p = (ProxiedPlayer) e.getSender();
-        if(p.hasPermission("proxymanager.command.bypass.cooldown")) return;
+        if (p.hasPermission("proxymanager.command.bypass.cooldown")) return;
 
         String messages;
         int counter;
@@ -29,11 +29,11 @@ public class MessageListener implements Listener {
             messages = "§cBitte warte bevor du erneut einen Command sendest";
             counter = 2;
         } else {
-            messages ="§cBitte warte bevor du erneut einen Messages sendest";
+            messages = "§cBitte warte bevor du erneut einen Messages sendest";
             counter = 3;
         }
         if (inCommandCooldown.containsKey(p)) {
-            ProxyManager.sendMessage(p,  messages);
+            ProxyManager.sendMessage(p, messages);
             e.setCancelled(true);
             return;
         }
@@ -50,12 +50,12 @@ public class MessageListener implements Listener {
         }
         removeInCommandCooldownCounter(p);
 
-        if(!Core.getRedisConnector().getJedis().isConnected() || Core.getRedisConnector().getJedis().isBroken()){
+        if (!Core.getRedisConnector().getJedis().isConnected() || Core.getRedisConnector().getJedis().isBroken()) {
             return;
         }
 
-        if(Boolean.parseBoolean(Core.getRedisConnector().getJedis().get("Commands-Disabled"))){
-            if(e.isCommand()) {
+        if (Boolean.parseBoolean(Core.getRedisConnector().getJedis().get("Commands-Disabled"))) {
+            if (e.isCommand()) {
                 if (!p.hasPermission("proxymanager.command.bypass.disabled")) {
                     e.setCancelled(true);
                     ProxyManager.sendMessage(p, "§cAlle Commands sind deaktiviert");
@@ -63,8 +63,8 @@ public class MessageListener implements Listener {
             }
         }
 
-        if(Boolean.parseBoolean(Core.getRedisConnector().getJedis().get("Chat-Disabled"))){
-            if(!e.isCommand()) {
+        if (Boolean.parseBoolean(Core.getRedisConnector().getJedis().get("Chat-Disabled"))) {
+            if (!e.isCommand()) {
                 if (!p.hasPermission("proxymanager.chat.bypass.disabled")) {
                     e.setCancelled(true);
                     ProxyManager.sendMessage(p, "§cDer Chat ist deaktiviert");
@@ -75,7 +75,8 @@ public class MessageListener implements Listener {
 
 
     public static ScheduledTask taskIDForRemoveCooldown;
-    public static void startRemoveCooldownTimer (ProxiedPlayer p){
+
+    public static void startRemoveCooldownTimer(ProxiedPlayer p) {
         stopRemoveCooldownTimer(p);
         taskIDForRemoveCooldown = plugin.getProxy().getScheduler().schedule(ProxyManager.getPlugin(), () -> {
             if (inCommandCooldown.containsKey(p)) {
@@ -91,7 +92,8 @@ public class MessageListener implements Listener {
         }, 1000, 1000, TimeUnit.MILLISECONDS);
         taskIDForCooldown.put(p, taskIDForRemoveCooldown);
     }
-    public static void stopRemoveCooldownTimer (ProxiedPlayer p){
+
+    public static void stopRemoveCooldownTimer(ProxiedPlayer p) {
         if (!taskIDForCooldown.containsKey(p)) {
             return;
         }
@@ -99,7 +101,7 @@ public class MessageListener implements Listener {
         taskIDForCooldown.remove(p);
     }
 
-    public static void removeInCommandCooldownCounter (ProxiedPlayer p){
+    public static void removeInCommandCooldownCounter(ProxiedPlayer p) {
         plugin.getProxy().getScheduler().schedule(ProxyManager.getPlugin(), () -> {
             if (inCommandCooldownCounter.containsKey(p)) {
                 inCommandCooldownCounter.replace(p, inCommandCooldownCounter.get(p) - 1);

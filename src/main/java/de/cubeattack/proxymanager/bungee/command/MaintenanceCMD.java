@@ -13,20 +13,20 @@ public class MaintenanceCMD extends Command {
 
     @Override
     public void execute(CommandSender sender, String[] args) {
-        if(sender == null) return;
+        if (sender == null) return;
 
         if (args.length == 0) {
-            ProxyManager.sendMessage(sender, "§7Die Maintenance ist aktuell §" + (Config.isMaintenanceMode() ? "aaktiviert" : "4deaktivert") );
+            ProxyManager.sendMessage(sender, "§7Die Maintenance ist aktuell §" + (Config.isMaintenanceMode() ? "aaktiviert" : "4deaktivert"));
             return;
         }
 
-        if(args.length == 1) {
+        if (args.length == 1) {
             if (args[0].equalsIgnoreCase("on")) {
-                ProxyManager.sendMessage(sender,"§cDu hast den MaintenanceMode §aaktiviert");
+                ProxyManager.sendMessage(sender, "§cDu hast den MaintenanceMode §aaktiviert");
                 Config.setMaintenanceMode(true);
                 return;
             } else if (args[0].equalsIgnoreCase("off")) {
-                ProxyManager.sendMessage(sender,"§cDu hast den MaintenanceMode §4deaktiviert");
+                ProxyManager.sendMessage(sender, "§cDu hast den MaintenanceMode §4deaktiviert");
                 Config.setMaintenanceMode(false);
                 return;
             }

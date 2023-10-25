@@ -31,8 +31,8 @@ public final class ProxyManager extends Plugin {
         Core.run(getLogger());
         new Metrics(this, ServerID);
 
-        if(Config.isManageConnectionEnabled()){pm.registerListener(this, new ManageConnection());}
-        if(pm.getPlugin("Protocolize") != null) pm.registerCommand(this, new SettingsCMD());
+        if (Config.isManageConnectionEnabled()) pm.registerListener(this, new ManageConnection());
+        if (pm.getPlugin("Protocolize") != null) pm.registerCommand(this, new SettingsCMD());
 
         pm.registerListener(this, new TabCompleteListener());
         pm.registerListener(this, new MessageListener());
@@ -47,11 +47,11 @@ public final class ProxyManager extends Plugin {
         Core.info("Plugin was Enabled successful");
     }
 
-    public void onDisable(){
-        for (Plugin pl: pm.getPlugins()) {
-           if(pl.getDescription().getName().startsWith("§")){
-               pl.getDescription().setName(pl.getDescription().getName().substring(2));
-           }
+    public void onDisable() {
+        for (Plugin pl : pm.getPlugins()) {
+            if (pl.getDescription().getName().startsWith("§")) {
+                pl.getDescription().setName(pl.getDescription().getName().substring(2));
+            }
         }
         Core.shutdown();
         Core.info("Plugin was Disabled successful");
@@ -61,7 +61,7 @@ public final class ProxyManager extends Plugin {
         return pm;
     }
 
-    public static void sendMessage(@NotNull CommandSender sender, String msg){
+    public static void sendMessage(@NotNull CommandSender sender, String msg) {
         sender.sendMessage(new TextComponent(ProxyManager.getPrefix() + msg));
     }
 

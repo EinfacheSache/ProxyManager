@@ -25,13 +25,13 @@ public class TabCompleteListener implements Listener {
 
         if (cursor.startsWith("/bpl")) {
 
-            if(event.getSender() instanceof ProxiedPlayer && !((ProxiedPlayer)event.getSender()).hasPermission("proxymanager.bpl"))return;
+            if (event.getSender() instanceof ProxiedPlayer && !((ProxiedPlayer) event.getSender()).hasPermission("proxymanager.bpl"))
+                return;
 
             for (Plugin plugin : ProxyManager.getPluginManger().getPlugins()) {
                 String plName = plugin.getDescription().getName();
 
-                if (plName.equals("cmd_find") || plName.equals("cmd_server") || plName.equals("cmd_alert") || plName.equals("cmd_send") || plName.equals("cmd_list")
-                        || plName.equals("reconnect_yaml")) {
+                if (plName.equals("cmd_find") || plName.equals("cmd_server") || plName.equals("cmd_alert") || plName.equals("cmd_send") || plName.equals("cmd_list") || plName.equals("reconnect_yaml")) {
                     continue;
                 }
 
@@ -41,11 +41,11 @@ public class TabCompleteListener implements Listener {
 
                 if (cursorSplit.length >= 2 && !cursorSplit[1].equalsIgnoreCase("list")) {
 
-                    if ("enable".startsWith(cursorSplit[1]) && !PluginControllerCMD.getDisabledPluginList().contains(plugin)) {
+                    if ("enable" .startsWith(cursorSplit[1]) && !PluginControllerCMD.getDisabledPluginList().contains(plugin)) {
                         continue;
                     }
 
-                    if ("disable".startsWith(cursorSplit[1]) && PluginControllerCMD.getDisabledPluginList().contains(plugin)) {
+                    if ("disable" .startsWith(cursorSplit[1]) && PluginControllerCMD.getDisabledPluginList().contains(plugin)) {
                         continue;
                     }
 
@@ -63,7 +63,8 @@ public class TabCompleteListener implements Listener {
             event.getSuggestions().addAll(completor(true, cursor, commands, tablistOne, tablistTwo));
 
         } else {
-            if(event.getSender() instanceof ProxiedPlayer && (!((ProxiedPlayer)event.getSender()).hasPermission("proxymanager.chat")) && (!((ProxiedPlayer)event.getSender()).hasPermission("proxymanager.command")))return;
+            if (event.getSender() instanceof ProxiedPlayer && (!((ProxiedPlayer) event.getSender()).hasPermission("proxymanager.chat")) && (!((ProxiedPlayer) event.getSender()).hasPermission("proxymanager.command")))
+                return;
 
             commands.add("/gmute");
             commands.add("/commands");

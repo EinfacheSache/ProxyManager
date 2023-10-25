@@ -14,8 +14,7 @@ import java.util.List;
 public class ReadyListener implements EventListener {
 
     @Override
-    public void onEvent(@NotNull GenericEvent event)
-    {
+    public void onEvent(@NotNull GenericEvent event) {
         if (event instanceof ReadyEvent) {
             JDA jda = event.getJDA();
             List<Guild> guilds = jda.getGuilds();

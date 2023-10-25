@@ -48,12 +48,14 @@ public class Config {
     }
 
     private static final FileUtils tpcServer = Core.tcpServerModule;
+
     private static void loadTCPServerModule() {
         connectTCPServer = tpcServer.getBoolean("tcpServer.connect", false);
         portTCPServer = tpcServer.getInt("tcpServer.port", 6666);
     }
 
     private static final FileUtils redis = Core.redisModule;
+
     private static void loadRedisModule() {
         connectRedis = redis.getBoolean("redis.connect", true);
         portRedis = redis.getInt("redis.port", 6379);
@@ -63,6 +65,7 @@ public class Config {
     }
 
     private static final FileUtils discordModule = Core.discordModule;
+
     private static void loadDiscordModule() {
         discordEnable = discordModule.getBoolean("discord.enable", false);
         token = discordModule.getString("discord.Token", "");
@@ -72,6 +75,7 @@ public class Config {
     }
 
     private static final FileUtils mysql = Core.mysqlModule;
+
     private static void loadMySQLModule() {
         connectMySQl = mysql.getBoolean("mysql.connect", false);
         portMySQL = mysql.getInt("mysql.port", 3306);
@@ -82,6 +86,7 @@ public class Config {
     }
 
     private static final FileUtils config = Core.config;
+
     private static void loadConfigModule() {
         MaintenanceMode = config.getBoolean("MaintenanceMode", false);
         ManageConnectionEnabled = config.getBoolean("ManageConnection.enabled", false);
@@ -203,7 +208,7 @@ public class Config {
         save(config, "MaintenanceMode", maintenanceMode);
     }
 
-    public static void save(FileUtils file, String key, Object value){
+    public static void save(FileUtils file, String key, Object value) {
         file.set(key, value);
         file.save();
     }

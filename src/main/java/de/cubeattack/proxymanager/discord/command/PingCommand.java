@@ -12,8 +12,7 @@ import java.util.Objects;
 public class PingCommand extends ListenerAdapter {
 
     @Override
-    public void onSlashCommandInteraction(SlashCommandInteractionEvent event)
-    {
+    public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
 
         if (event.isFromGuild() & !Objects.equals(event.getGuild(), Core.getDiscordAPI().getGuild())) return;
         if (!event.getName().equalsIgnoreCase("ping")) return;

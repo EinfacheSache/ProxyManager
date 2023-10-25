@@ -13,7 +13,7 @@ public class GlobalMuteCMD extends Command {
 
     @Override
     public void execute(CommandSender sender, String[] args) {
-        if(sender == null) return;
+        if (sender == null) return;
 
         if(!sender.hasPermission("proxymanager.chat")) {
             ProxyManager.sendMessage(sender,"§4Dazu hast du keine Rechte");

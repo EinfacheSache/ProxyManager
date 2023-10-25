@@ -14,7 +14,7 @@ public class MinecraftAPI {
     public static User load(String name) {
         UUID uuid;
         String playerName;
-        try (BufferedReader in = new BufferedReader(new InputStreamReader(new URL("https://api.mojang.com/users/profiles/minecraft/" + name).openStream()))){
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(new URL("https://api.mojang.com/users/profiles/minecraft/" + name).openStream()))) {
             JsonObject response = JsonParser.parseReader(in).getAsJsonObject();
             uuid = UUID.fromString(response.get("id").getAsString().replaceAll("\"", "").replaceAll("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})", "$1-$2-$3-$4-$5"));
             playerName = response.get("name").getAsString();
@@ -23,6 +23,6 @@ public class MinecraftAPI {
             System.out.println("Unable to get UUID of: " + name + "! (" + ex + ")");
             return null;
         }
-        return new User(uuid,playerName);
+        return new User(uuid, playerName);
     }
 }

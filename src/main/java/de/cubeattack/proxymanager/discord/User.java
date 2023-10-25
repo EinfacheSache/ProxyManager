@@ -11,7 +11,7 @@ public class User {
     private final String name;
     private final UUID UUID;
     private final DataSourceProvider source;
-    private String rang  = "none";
+    private String rang = "none";
     private int weight = 100;
     private int rangID = 1;
     private int coins = 0;
@@ -26,13 +26,13 @@ public class User {
         this.source = Core.getDatasource();
     }
 
-    public void loadDataFromMySQL(){
+    public void loadDataFromMySQL() {
 
         try (ResultSet query1 = source.query("SELECT * FROM core_players WHERE uuid='" + this.getUUID() + "';");
-             ResultSet query2 = source.query("SELECT * FROM prime_perms_ranking WHERE uuid='" + this.getUUID() + "';")){
+             ResultSet query2 = source.query("SELECT * FROM prime_perms_ranking WHERE uuid='" + this.getUUID() + "';")) {
 
-            if(!query1.next())return;
-            if(!query2.next())return;
+            if (!query1.next()) return;
+            if (!query2.next()) return;
 
             this.coins = query1.getInt("coins");
             this.playtime = query1.getInt("playtime");
@@ -43,14 +43,14 @@ public class User {
 
         try (ResultSet query1 = source.query("SELECT * FROM prime_perms_groups WHERE id='" + this.rangID + "';");
              ResultSet query2 = source.query("SELECT * FROM prime_bungee_mute WHERE uuid='" + this.getUUID() + "';");
-             ResultSet query3= source.query("SELECT * FROM prime_bungee_bans WHERE uuid='" + this.getUUID() + "';");
-             ResultSet query4 = source.query("SELECT * FROM core_web_accounts WHERE player='" + this.getUUID() + "';")){
+             ResultSet query3 = source.query("SELECT * FROM prime_bungee_bans WHERE uuid='" + this.getUUID() + "';");
+             ResultSet query4 = source.query("SELECT * FROM core_web_accounts WHERE player='" + this.getUUID() + "';")) {
 
             this.weight = query1.getInt("wei ght");
             this.rang = query1.getString("display_name");
             this.isMuted = query2.absolute(1);
             this.isBanned = query3.absolute(1);
-            this.hasWebAccount= query4.absolute(1);
+            this.hasWebAccount = query4.absolute(1);
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
@@ -70,9 +70,9 @@ public class User {
     }
 
     public String getPlaytime() {
-        int days = playtime/60/24%60;
-        int hours = playtime/60%60;
-        int min = playtime%60;
+        int days = playtime / 60 / 24 % 60;
+        int hours = playtime / 60 % 60;
+        int min = playtime % 60;
         return days + " Tage " + hours + " Stunden " + min + " Minuten";
     }
 

@@ -10,21 +10,21 @@ public class TcpServer {
 
     public static void run(int port) {
 
-        if(!Config.isConnectTCPServer())return;
+        if (!Config.isConnectTCPServer()) return;
 
         thread = new Thread(() -> {
-            try (ServerSocket socket =  new ServerSocket(port)){
+            try (ServerSocket socket = new ServerSocket(port)) {
 
                 Core.info("TCP-Server listening on port " + port);
                 Core.info("TCP-Server is waiting for client connections on port " + port);
 
-                while (true){
-                    try(Socket client = socket.accept()){
+                while (true) {
+                    try (Socket client = socket.accept()) {
                         Core.debug("Client with ip " + client.getInetAddress().getHostAddress() + " on port " + client.getPort() + " connected");
                     }
                 }
 
-            }catch (IOException ex){
+            } catch (IOException ex) {
                 ex.printStackTrace();
             }
         }, "TCP-Server");
@@ -33,8 +33,8 @@ public class TcpServer {
     }
 
     @SuppressWarnings("deprecation ")
-    public static void stop()  {
-        if(thread == null)return;
+    public static void stop() {
+        if (thread == null) return;
         thread.stop();
     }
 }

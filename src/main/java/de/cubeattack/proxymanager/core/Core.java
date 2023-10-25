@@ -7,7 +7,7 @@ import de.cubeattack.proxymanager.discord.DiscordAPI;
 
 import java.util.logging.Logger;
 
-public class Core{
+public class Core {
 
     public static FileUtils tcpServerModule;
     public static FileUtils discordModule;
@@ -22,7 +22,8 @@ public class Core{
     public static void main(String[] args) {
         run();
     }
-    public static void run(Logger logger){
+
+    public static void run(Logger logger) {
         LogManager.getLogger().setLogger(logger);
         run();
     }
@@ -34,11 +35,11 @@ public class Core{
 
         //Core.info("running ProxyManager on version " + VersionUtils.getPomVersion(VersionUtils.class) + " build " + VersionUtils.getBuild());
 
-        tcpServerModule = new FileUtils(Core.class.getResourceAsStream("/modules/tpcServer.yml"), "plugins/ProxyManager","modules/tcpServer.yml");
-        discordModule = new FileUtils(Core.class.getResourceAsStream("/modules/discord.yml"), "plugins/ProxyManager","modules/discord.yml");
-        redisModule = new FileUtils(Core.class.getResourceAsStream("/modules/redis.yml"), "plugins/ProxyManager","modules/redis.yml");
-        mysqlModule = new FileUtils(Core.class.getResourceAsStream("/modules/mysql.yml"),"plugins/ProxyManager", "modules/mysql.yml");
-        config = new FileUtils(Core.class.getResourceAsStream("/config.yml"),"plugins/ProxyManager", "config.yml");
+        tcpServerModule = new FileUtils(Core.class.getResourceAsStream("/modules/tpcServer.yml"), "plugins/ProxyManager", "modules/tcpServer.yml");
+        discordModule = new FileUtils(Core.class.getResourceAsStream("/modules/discord.yml"), "plugins/ProxyManager", "modules/discord.yml");
+        redisModule = new FileUtils(Core.class.getResourceAsStream("/modules/redis.yml"), "plugins/ProxyManager", "modules/redis.yml");
+        mysqlModule = new FileUtils(Core.class.getResourceAsStream("/modules/mysql.yml"), "plugins/ProxyManager", "modules/mysql.yml");
+        config = new FileUtils(Core.class.getResourceAsStream("/config.yml"), "plugins/ProxyManager", "config.yml");
 
         Config.loadModules();
 
@@ -47,23 +48,27 @@ public class Core{
         discordAPI = new DiscordAPI();
     }
 
-    public static void shutdown(){
+    public static void shutdown() {
         info("Bots stopping ...");
         RedisConnector.close();
         discordAPI.shutdown();
         TcpServer.stop();
         info("Bots successfully stopped");
     }
-    public static void debug(String output){
+
+    public static void debug(String output) {
         LogManager.getLogger().debug(output);
     }
-    public static void info(String output){
+
+    public static void info(String output) {
         LogManager.getLogger().info(output);
     }
-    public static void warn(String output){
+
+    public static void warn(String output) {
         LogManager.getLogger().warn(output);
     }
-    public static void severe(String output){
+
+    public static void severe(String output) {
         LogManager.getLogger().error(output);
     }
 

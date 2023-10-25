@@ -6,7 +6,7 @@ public class ScreenBuilder {
 
     StringBuilder screen;
 
-    public ScreenBuilder(){
+    public ScreenBuilder() {
         screen = new StringBuilder();
     }
 
@@ -15,7 +15,7 @@ public class ScreenBuilder {
         return this;
     }
 
-    public TextComponent build(){
+    public TextComponent build() {
         return new TextComponent(String.valueOf(screen));
     }
 }

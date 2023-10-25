@@ -54,16 +54,16 @@ public class TicketListener extends ListenerAdapter {
             channel.getManager().putMemberPermissionOverride(event.getUser().getIdLong(), EnumSet.of(Permission.VIEW_CHANNEL), null).queue();
 
             channel.sendMessageEmbeds(MessageUtils.getDefaultEmbed()
-                    .setDescription("# Willkommen bei deinem Ticket " + "<@"+event.getUser().getId() +">\n" +
+                    .setDescription("# Willkommen bei deinem Ticket " + "<@" + event.getUser().getId() + ">\n" +
                             "Es wird Ihnen schnellstmöglich ein Helfer zur Seite stehen.\n" +
                             "Bitte pingen Sie unsere Team nicht selbst an, sondern nur in Notsituationen.\n" +
                             "(Die Nichtbeachtung dieser Regel führt zu einem Timeout/Ban)"
                     ).setColor(Color.GREEN).build()).queue();
 
             long teamID;
-            if(guild.getRolesByName("✦Team✦", true).isEmpty()){
+            if (guild.getRolesByName("✦Team✦", true).isEmpty()) {
                 teamID = guild.createRole().setName("✦Team✦").setColor(Color.RED).complete().getIdLong();
-            }else {
+            } else {
                 teamID = guild.getRolesByName("✦Team✦", true).get(0).getIdLong();
             }
 

@@ -9,22 +9,20 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import java.awt.*;
 import java.util.Objects;
 
-public class CloseCommand extends ListenerAdapter
-{
+public class CloseCommand extends ListenerAdapter {
 
     @Override
-    public void onSlashCommandInteraction(SlashCommandInteractionEvent event)
-    {
+    public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
         if (!Objects.equals(event.getGuild(), Core.getDiscordAPI().getGuild())) return;
         if (!event.getName().equalsIgnoreCase("close")) return;
 
-        if(!(event.getChannel() instanceof TextChannel) || ((TextChannel) event.getChannel()).getParentCategory() == null || !((TextChannel) event.getChannel()).getParentCategory().getName().equals("Tickets")){
+        if (!(event.getChannel() instanceof TextChannel) || ((TextChannel) event.getChannel()).getParentCategory() == null || !((TextChannel) event.getChannel()).getParentCategory().getName().equals("Tickets")) {
             event.replyEmbeds(MessageUtils.getDefaultEmbed().setTitle("Fehler").setDescription("Das ist kein Ticket").build()).setEphemeral(true).queue();
             return;
         }
 
         String reason;
-        if(!event.getOptionsByName("reason").isEmpty()){
+        if (!event.getOptionsByName("reason").isEmpty()) {
             reason = event.getOptionsByName("reason").get(0).getAsString();
         } else {
             reason = null;
@@ -34,11 +32,11 @@ public class CloseCommand extends ListenerAdapter
                 !Objects.requireNonNull(mpOverride.getMember()).getUser().isBot()).forEach(mpOverride ->
                 Objects.requireNonNull(mpOverride.getMember()).getUser().openPrivateChannel().flatMap(privateChannel ->
                         privateChannel.sendMessageEmbeds(MessageUtils.getDefaultEmbed()
-                .setAuthor("GiantNetwork")
-                .setColor(Color.GREEN)
-                .setTitle("Vielen Dank, dass Sie den Support kontaktiert haben!")
-                .setDescription("Ihr Fall wurde aufgrund " + (reason == null ? "einer Lösung" : reason) + " geschlossen. \nWenn Sie ein anderes Problem haben, können Sie möglicherweise ein weiteres Ticket eröffnen.")
-                .build())).queue());
+                                .setAuthor("GiantNetwork")
+                                .setColor(Color.GREEN)
+                                .setTitle("Vielen Dank, dass Sie den Support kontaktiert haben!")
+                                .setDescription("Ihr Fall wurde aufgrund " + (reason == null ? "einer Lösung" : reason) + " geschlossen. \nWenn Sie ein anderes Problem haben, können Sie möglicherweise ein weiteres Ticket eröffnen.")
+                                .build())).queue());
 
         Objects.requireNonNull(Core.getDiscordAPI().getJDA().getTextChannelById("1166486953571663952")).sendMessageEmbeds(MessageUtils
                 .getDefaultEmbed()

@@ -17,8 +17,7 @@ import java.util.Objects;
 public class ManagerCommand extends ListenerAdapter {
 
     @Override
-    public void onSlashCommandInteraction(SlashCommandInteractionEvent event)
-    {
+    public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
 
         if (!Objects.equals(event.getGuild(), Core.getDiscordAPI().getGuild())) return;
         if (!event.getName().equalsIgnoreCase("manager")) return;
@@ -63,11 +62,11 @@ public class ManagerCommand extends ListenerAdapter {
 
                 event.getChannel().sendMessageEmbeds(ticket.build()).addActionRow(menu).queue();
 
-                if(guild != null && guild.getCategoriesByName("Tickets", false).isEmpty()){
+                if (guild != null && guild.getCategoriesByName("Tickets", false).isEmpty()) {
                     long teamID;
-                    if(guild.getRolesByName("✦Team✦", true).isEmpty()){
+                    if (guild.getRolesByName("✦Team✦", true).isEmpty()) {
                         teamID = guild.createRole().setName("✦Team✦").setColor(Color.RED).complete().getIdLong();
-                    }else {
+                    } else {
                         teamID = guild.getRolesByName("✦Team✦", true).get(0).getIdLong();
                     }
 

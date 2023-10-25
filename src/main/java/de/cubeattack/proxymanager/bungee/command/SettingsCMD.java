@@ -21,9 +21,8 @@ public class SettingsCMD extends Command {
 
     @Override
     public void execute(CommandSender sender, String[] args) {
-        if(sender == null) return;
-        if(!(sender instanceof ProxiedPlayer p))return;
-
+        if (sender == null) return;
+        if (!(sender instanceof ProxiedPlayer p)) return;
 
         ProtocolizePlayer player = Protocolize.playerProvider().player(p.getUniqueId());
 
