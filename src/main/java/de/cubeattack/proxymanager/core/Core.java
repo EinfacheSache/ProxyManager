@@ -49,6 +49,7 @@ public class Core{
 
     public static void shutdown(){
         info("Bots stopping ...");
+        RedisConnector.close();
         discordAPI.shutdown();
         TcpServer.stop();
         info("Bots successfully stopped");

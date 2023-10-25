@@ -9,6 +9,7 @@ import redis.clients.jedis.exceptions.JedisConnectionException;
 public class RedisConnector {
 
     private Jedis jedis = null;
+    private JedisPool jedisPool = null;
 
     public RedisConnector() {
 
@@ -16,8 +17,8 @@ public class RedisConnector {
 
         try {
             JedisPoolConfig poolConfig = new JedisPoolConfig();
-            poolConfig.setMaxIdle(1);
-            JedisPool jedisPool = new JedisPool(poolConfig, Config.getHostRedis(), Config.getPortRedis());
+            poolConfig.setMaxIdle(10);
+            jedisPool = new JedisPool(poolConfig, Config.getHostRedis(), Config.getPortRedis());
 
             Core.info("Redis - Try to connect to " + Config.getHostRedis() + ":" + Config.getPortRedis());
 
@@ -35,5 +36,14 @@ public class RedisConnector {
 
     public Jedis getJedis() {
         return jedis;
+    }
+
+    public void close() {
+        if (jedis != null) {
+            jedis.close();
+        }
+        if (jedisPool != null) {
+            jedisPool.close();
+        }
     }
 }
