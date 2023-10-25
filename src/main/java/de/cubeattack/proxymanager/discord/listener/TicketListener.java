@@ -30,7 +30,7 @@ public class TicketListener extends ListenerAdapter {
                     .setMaxLength(2048)
                     .build();
 
-            Modal modal = Modal.create("ticket:describe", event.getSelectedOptions().get(0).getLabel())
+            Modal modal = Modal.create("ticket:describe:" + event.getSelectedOptions().get(0).getValue(), event.getSelectedOptions().get(0).getLabel())
                     .addComponents(ActionRow.of(body))
                     .build();
 
@@ -43,20 +43,20 @@ public class TicketListener extends ListenerAdapter {
     public void onModalInteraction(ModalInteractionEvent event) {
         if (event.getGuild() == null) return;
         if (!Objects.equals(event.getGuild(), Core.getDiscordAPI().getGuild())) return;
-        if (event.getModalId().equals("ticket:describe")) {
+        if (event.getModalId().startsWith("ticket:describe")) {
             event.reply("Danke für ihre Anfrage").setEphemeral(true).queue();
 
             Guild guild = event.getGuild();
             String body = Objects.requireNonNull(event.getValue("body")).getAsString();
 
-            TextChannel channel = guild.getCategoriesByName("Tickets", false).get(0).createTextChannel("Ticket " + event.getUser().getName()).complete();
+            TextChannel channel = guild.getCategoriesByName("Tickets", false).get(0).createTextChannel(event.getModalId().split(":")[2] + "-" + event.getUser().getName()).complete();
 
             channel.getManager().putMemberPermissionOverride(event.getUser().getIdLong(), EnumSet.of(Permission.VIEW_CHANNEL), null).queue();
 
             channel.sendMessageEmbeds(MessageUtils.getDefaultEmbed()
                     .setDescription("# Willkommen bei deinem Ticket " + "<@"+event.getUser().getId() +">\n" +
                             "Es wird Ihnen schnellstmöglich ein Helfer zur Seite stehen.\n" +
-                            "Bitte pingen Sie unsere Mitarbeiter nicht selbst an, sondern nur in Notsituationen.\n" +
+                            "Bitte pingen Sie unsere Team nicht selbst an, sondern nur in Notsituationen.\n" +
                             "(Die Nichtbeachtung dieser Regel führt zu einem Timeout/Ban)"
                     ).setColor(Color.GREEN).build()).queue();
 

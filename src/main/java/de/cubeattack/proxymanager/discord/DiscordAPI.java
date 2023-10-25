@@ -74,11 +74,12 @@ public class DiscordAPI extends ListenerAdapter
             guild
                     .upsertCommand("close", "Schließe ein Ticket")
                     .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MODERATE_MEMBERS))
+                    .addOptions(new OptionData(OptionType.STRING, "reason", "Grund für die Schließung", false, false))
                     .queue();
             guild
                     .upsertCommand("lookup", "Zeige Informationen über einen Minecraft Spieler")
                     .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MODERATE_MEMBERS))
-                    .addOptions(new OptionData(OptionType.STRING, "name", "Name des Minecraft Spielers", true, true))
+                    .addOptions(new OptionData(OptionType.STRING, "name", "Name des Minecraft Spielers", true, false))
                     .queue();
             guild
                     .upsertCommand("manager", "Befehle für Admins / Developer")

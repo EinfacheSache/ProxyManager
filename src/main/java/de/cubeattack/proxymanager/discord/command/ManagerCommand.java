@@ -37,7 +37,7 @@ public class ManagerCommand extends ListenerAdapter {
             case "reloadcommands" -> {
                 Core.getDiscordAPI().loadDiscordCommands();
                 embedBuilder.setDescription("Commands wurden reloaded!");
-                Core.info("Updating Discord slash commands\n");
+                Core.info("Updating Discord slash commands");
             }
 
             case "closetickets" -> {
@@ -50,13 +50,14 @@ public class ManagerCommand extends ListenerAdapter {
                 EmbedBuilder ticket = MessageUtils.getDefaultEmbed()
                         .setColor(Color.BLUE)
                         .setDescription("""
-                                # Ticket
+                                # Erstelle ein Ticket
                                  Derzeit werden Tickets nur auf Englisch oder Deutsch beantwortet.
                                  Alle anderen Tickets werden sofort geschlossen. Sie können mit Antworten in max. 12 Stunden.""");
                 SelectMenu menu = StringSelectMenu.create("ticket:select")
                         .setPlaceholder("Wähle ein Thema")
-                        .addOption("Generell", "general", "Für generelle Fragen oder Probleme")
-                        .addOption("Report", "report", "Für Spieler und Bugs Reports")
+                        .addOption("Generell", "general", "Für generelle Fragen und Probleme")
+                        .addOption("Report", "report", "Für Spieler und Bug-Reports")
+                        .addOption("Käufe", "käufe", "Für Probleme oder Fragen bezüglich Käufen z.B. Ränge")
                         .addOption("Bewerbung", "application", "Bewerbe dich als Builder, Supporter, Developer...")
                         .build();
 
