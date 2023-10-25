@@ -32,6 +32,7 @@ public class Config {
 
     private static boolean ManageConnectionEnabled;
     private static boolean PlayerHeadAsServerIcon;
+    private static boolean MaintenanceMode;
     private static String ServerDomainName;
     private static String VerifyServerDomain;
     private static String VerifyServer;
@@ -46,14 +47,14 @@ public class Config {
         loadRedisModule();
     }
 
+    private static final FileUtils tpcServer = Core.tcpServerModule;
     private static void loadTCPServerModule() {
-        FileUtils tpcServer = Core.tcpServerModule;
         connectTCPServer = tpcServer.getBoolean("tcpServer.connect", false);
         portTCPServer = tpcServer.getInt("tcpServer.port", 6666);
     }
 
+    private static final FileUtils redis = Core.redisModule;
     private static void loadRedisModule() {
-        FileUtils redis = Core.redisModule;
         connectRedis = redis.getBoolean("redis.connect", true);
         portRedis = redis.getInt("redis.port", 6379);
         hostRedis = redis.getString("redis.host", "127.0.0.1");
@@ -61,8 +62,8 @@ public class Config {
         passwdRedis = redis.getString("redis.passwd", "");
     }
 
+    private static final FileUtils discordModule = Core.discordModule;
     private static void loadDiscordModule() {
-        FileUtils discordModule = Core.discordModule;
         discordEnable = discordModule.getBoolean("discord.enable", false);
         token = discordModule.getString("discord.Token", "");
         guildID = discordModule.getString("discord.GuildID", "");
@@ -70,8 +71,8 @@ public class Config {
         activity = discordModule.getString("discord.Activity", "");
     }
 
+    private static final FileUtils mysql = Core.mysqlModule;
     private static void loadMySQLModule() {
-        FileUtils mysql = Core.mysqlModule;
         connectMySQl = mysql.getBoolean("mysql.connect", false);
         portMySQL = mysql.getInt("mysql.port", 3306);
         hostMySQL = mysql.getString("mysql.host", "127.0.0.1");
@@ -79,8 +80,10 @@ public class Config {
         password = mysql.getString("mysql.password", "");
         database = mysql.getString("mysql.database", "");
     }
+
+    private static final FileUtils config = Core.config;
     private static void loadConfigModule() {
-        FileUtils config = Core.config;
+        MaintenanceMode = config.getBoolean("MaintenanceMode", false);
         ManageConnectionEnabled = config.getBoolean("ManageConnection.enabled", false);
         PlayerHeadAsServerIcon = config.getBoolean("ManageConnection.PlayerHeadAsServerIcon", false);
         ServerDomainName = config.getString("ServerDomainName", "yourdomain.com");
@@ -174,6 +177,10 @@ public class Config {
         return PlayerHeadAsServerIcon;
     }
 
+    public static boolean isMaintenanceMode() {
+        return MaintenanceMode;
+    }
+
     public static String getServerDomainName() {
         return ServerDomainName;
     }
@@ -190,5 +197,15 @@ public class Config {
         return AllowedDomains;
     }
 
+
+    public static void setMaintenanceMode(boolean maintenanceMode) {
+        MaintenanceMode = maintenanceMode;
+        save(config, "MaintenanceMode", maintenanceMode);
+    }
+
+    public static void save(FileUtils file, String key, Object value){
+        file.set(key, value);
+        file.save();
+    }
 }
 

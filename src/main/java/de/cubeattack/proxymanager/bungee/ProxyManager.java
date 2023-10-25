@@ -39,6 +39,7 @@ public final class ProxyManager extends Plugin {
         pm.registerListener(this, new ServerKickListener());
 
         pm.registerCommand(this, new PluginControllerCMD());
+        pm.registerCommand(this, new MaintenanceCMD());
         pm.registerCommand(this, new GlobalMuteCMD());
         pm.registerCommand(this, new CommandsCMD());
         pm.registerCommand(this, new ProxyCMD());

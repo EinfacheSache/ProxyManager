@@ -41,7 +41,6 @@ public class CommandsCMD extends Command {
                 ProxyManager.sendMessage(sender,"§4Du hast alle Commands deaktiviert");
                 Core.getRedisConnector().getJedis().set("Commands-Disabled", "true");
             }
-
         }
     }
 }

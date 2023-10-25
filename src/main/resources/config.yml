@@ -1,4 +1,5 @@
 ServerDomainName: ''
+MaintenanceMode: false
 ManageConnection:
   enabled: true
   PlayerHeadAsServerIcon: true

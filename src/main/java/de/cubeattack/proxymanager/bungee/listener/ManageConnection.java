@@ -10,6 +10,7 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.event.LoginEvent;
 import net.md_5.bungee.api.event.PreLoginEvent;
 import net.md_5.bungee.api.event.ProxyPingEvent;
+import net.md_5.bungee.api.event.ServerConnectEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
@@ -27,6 +28,12 @@ public class ManageConnection implements Listener {
     ServerPing.Protocol version;
 
     @EventHandler(priority = EventPriority.LOWEST)
+    public void onFirstPing(ProxyPingEvent e) {
+        int versionNumber = e.getResponse().getVersion().getProtocol();
+        version = new ServerPing.Protocol("1.8 - 1.20.2 (Eric ist zu fett für den Server)", versionNumber);
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPreLogin(PreLoginEvent e) {
         if(!redisConnector.getJedis().isConnected() || redisConnector.getJedis().isBroken()){
             return;
@@ -36,9 +43,18 @@ public class ManageConnection implements Listener {
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
-    public void onFirstPing(ProxyPingEvent e) {
-        int versionNumber = e.getResponse().getVersion().getProtocol();
-        version = new ServerPing.Protocol("", versionNumber);
+    public void initialServerConnect(ServerConnectEvent event) {
+        if(!Config.isMaintenanceMode())
+            return;
+
+        if (event.isCancelled() || event.getReason() != ServerConnectEvent.Reason.JOIN_PROXY)
+            return;
+
+        if(event.getPlayer().hasPermission("proxy.maintenance.bypass"))
+            return;
+
+        event.setCancelled(true);
+        event.getPlayer().disconnect(new TextComponent("§cDu bist nicht auf der Maintenance-Whitelist"));
     }
     
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -60,6 +76,45 @@ public class ManageConnection implements Listener {
         e.getConnection().disconnect(builder.build());
     }
 
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onPing(ProxyPingEvent e) {
+
+        if (e.getConnection() == null) return;
+
+        String line1 = "§7§kKK§r §6Willkommen auf §l" + Config.getServerDomainName() + "§c§o [1.8-1.20.2] §7§kKK§r";
+        String line2 = "";
+        String playerName = null;
+
+        if (Config.isPlayerHeadAsServerIcon()){
+
+            if(redisConnector.getJedis().isConnected() && !redisConnector.getJedis().isBroken()){
+                playerName = redisConnector.getJedis().get(e.getConnection().getAddress().getHostString());
+                if (images.containsKey(playerName)) {
+                    e.getResponse().setFavicon(images.get(playerName));
+                }
+            }
+
+            if(e.getConnection().getVirtualHost() != null && e.getConnection().getVirtualHost().getHostName().toLowerCase().startsWith("builder.")){
+                line2 = "          §6Eric scheißt auf unsere Builder :)";
+            }else if(playerName != null) {
+                line2 = "§6Willkommen §b" + playerName + "§6 auf " + Config.getServerDomainName();
+            }else {
+                line2 = "            §2§lEarth Server §7+ §b§lAlpha Test";
+            }
+        }
+
+        e.getResponse().setDescriptionComponent(new TextComponent(line1 + "\n" + line2));
+        e.getResponse().setVersion(version);
+    }
+
+    private Favicon getFavicon(String playerName){
+        Favicon favicon = null;
+        try {
+            favicon = Favicon.create(ImageIO.read(new URL("https://minotar.net/helm/" + playerName + "/64.png")));
+        } catch (IOException ignored) {}
+        return favicon;
+    }
+}
 
     /*@EventHandler(priority = EventPriority.LOWEST)
     public void onServerConnect(ServerConnectEvent e) {
@@ -88,41 +143,3 @@ public class ManageConnection implements Listener {
         e.getPlayer().disconnect(new TextComponent("§4Server not found\n§4Verifikations Server konnte nicht gefunden werden"));
 
     }*/
-
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void onPing(ProxyPingEvent e) {
-
-        if (e.getConnection() == null) return;
-
-        String line1 = "§7§kKK§r §6Willkommen auf §l" + Config.getServerDomainName() + "§c§o [1.8-1.20.2] §7§kKK§r";
-        String line2 = "";
-        String playerName = null;
-
-        if (Config.isPlayerHeadAsServerIcon()){
-
-            if(redisConnector.getJedis().isConnected() && !redisConnector.getJedis().isBroken()){
-                playerName = redisConnector.getJedis().get(e.getConnection().getAddress().getHostString());
-                if (images.containsKey(playerName)) {
-                    e.getResponse().setFavicon(images.get(playerName));
-                }
-            }
-
-            if(playerName != null) {
-                line2 = "§6Willkommen §b" + playerName + "§6 auf " + Config.getServerDomainName();
-            }else {
-                line2 = "            §2§lEarth Server §7+ §b§lAlpha Test";
-            }
-        }
-
-        e.getResponse().setDescriptionComponent(new TextComponent(line1 + "\n" + line2));
-        e.getResponse().setVersion(version);
-    }
-
-    private Favicon getFavicon(String playerName){
-        Favicon favicon = null;
-        try {
-            favicon = Favicon.create(ImageIO.read(new URL("https://minotar.net/helm/" + playerName + "/64.png")));
-        } catch (IOException ignored) {}
-        return favicon;
-    }
-}
