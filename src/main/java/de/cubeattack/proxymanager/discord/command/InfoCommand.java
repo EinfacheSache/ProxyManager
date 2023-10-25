@@ -40,7 +40,7 @@ public class InfoCommand extends ListenerAdapter
         String strBasic = "IP: GiantNetwork.de\n" +
                 "Version: 1.8.9 - 1.20.2\n" +
                 "Ping: " + (isPinged ? currentTime + "ms" : "No Connection") + "\n" +
-                "Spieler Online: " + ProxyManager.getPlugin().getProxy().getOnlineCount();
+                "Spieler Online: "  + ProxyManager.getPlugin().getProxy().getOnlineCount() + "/" + ProxyManager.getPlugin().getProxy().getConfig().getPlayerLimit();
 
         embedBuilder.addField("Basic Information", strBasic,false);
 
