@@ -7,6 +7,7 @@ import net.md_5.bungee.api.event.ChatEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.scheduler.ScheduledTask;
 import net.md_5.bungee.event.EventHandler;
+import redis.clients.jedis.Jedis;
 
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
@@ -21,7 +22,7 @@ public class MessageListener implements Listener {
     @EventHandler
     public void OnChat(ChatEvent e) {
         ProxiedPlayer p = (ProxiedPlayer) e.getSender();
-        if (p.hasPermission("proxymanager.command.bypass.cooldown")) return;
+        if (p.hasPermission("proxy.cooldown.bypass")) return;
 
         String messages;
         int counter;
@@ -50,29 +51,30 @@ public class MessageListener implements Listener {
         }
         removeInCommandCooldownCounter(p);
 
-        if (!Core.getRedisConnector().getJedis().isConnected() || Core.getRedisConnector().getJedis().isBroken()) {
-            return;
-        }
+        try (Jedis jedis = Core.getRedisConnector().getJedisPool().getResource()) {
+            if (!jedis.isConnected() || jedis.isBroken()) {
+                return;
+            }
 
-        if (Boolean.parseBoolean(Core.getRedisConnector().getJedis().get("Commands-Disabled"))) {
-            if (e.isCommand()) {
-                if (!p.hasPermission("proxymanager.command.bypass.disabled")) {
-                    e.setCancelled(true);
-                    ProxyManager.sendMessage(p, "§cAlle Commands sind deaktiviert");
+            if (Boolean.parseBoolean(jedis.get("Commands-Disabled"))) {
+                if (e.isCommand()) {
+                    if (!p.hasPermission("proxy.command.disabled.bypass")) {
+                        e.setCancelled(true);
+                        ProxyManager.sendMessage(p, "§cAlle Commands sind deaktiviert");
+                    }
                 }
             }
-        }
 
-        if (Boolean.parseBoolean(Core.getRedisConnector().getJedis().get("Chat-Disabled"))) {
-            if (!e.isCommand()) {
-                if (!p.hasPermission("proxymanager.chat.bypass.disabled")) {
-                    e.setCancelled(true);
-                    ProxyManager.sendMessage(p, "§cDer Chat ist deaktiviert");
+            if (Boolean.parseBoolean(jedis.get("Chat-Disabled"))) {
+                if (!e.isCommand()) {
+                    if (!p.hasPermission("proxy.chat.disabled.bypass")) {
+                        e.setCancelled(true);
+                        ProxyManager.sendMessage(p, "§cDer Chat ist deaktiviert");
+                    }
                 }
             }
         }
     }
-
 
     public static ScheduledTask taskIDForRemoveCooldown;
 

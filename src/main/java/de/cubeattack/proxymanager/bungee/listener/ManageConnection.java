@@ -3,7 +3,6 @@ package de.cubeattack.proxymanager.bungee.listener;
 import de.cubeattack.proxymanager.bungee.ScreenBuilder;
 import de.cubeattack.proxymanager.core.Config;
 import de.cubeattack.proxymanager.core.Core;
-import de.cubeattack.proxymanager.core.RedisConnector;
 import net.md_5.bungee.api.Favicon;
 import net.md_5.bungee.api.ServerPing;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -14,6 +13,7 @@ import net.md_5.bungee.api.event.ServerConnectEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
+import redis.clients.jedis.Jedis;
 
 import javax.imageio.ImageIO;
 import java.io.IOException;
@@ -24,7 +24,6 @@ import java.util.concurrent.CompletableFuture;
 @SuppressWarnings("deprecation")
 public class ManageConnection implements Listener {
     private final HashMap<String, Favicon> images = new HashMap<>();
-    private final RedisConnector redisConnector = Core.getRedisConnector();
     ServerPing.Protocol version;
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -35,11 +34,13 @@ public class ManageConnection implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPreLogin(PreLoginEvent e) {
-        if(!redisConnector.getJedis().isConnected() || redisConnector.getJedis().isBroken()){
-            return;
+        try(Jedis jedis = Core.getRedisConnector().getJedisPool().getResource()) {
+            if (!jedis.isConnected() || jedis.isBroken()) {
+                return;
+            }
+            CompletableFuture.runAsync(() -> jedis.set(e.getConnection().getAddress().getHostString(), e.getConnection().getName()));
+            CompletableFuture.runAsync(() -> images.put(e.getConnection().getName(), getFavicon(e.getConnection().getName())));
         }
-        CompletableFuture.runAsync(() -> redisConnector.getJedis().set(e.getConnection().getAddress().getHostString(), e.getConnection().getName()));
-        CompletableFuture.runAsync(() -> images.put(e.getConnection().getName(), getFavicon(e.getConnection().getName())));
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -87,19 +88,21 @@ public class ManageConnection implements Listener {
 
         if (Config.isPlayerHeadAsServerIcon()){
 
-            if(redisConnector.getJedis().isConnected() && !redisConnector.getJedis().isBroken()){
-                playerName = redisConnector.getJedis().get(e.getConnection().getAddress().getHostString());
-                if (images.containsKey(playerName)) {
-                    e.getResponse().setFavicon(images.get(playerName));
+            try(Jedis jedis = Core.getRedisConnector().getJedisPool().getResource()) {
+                if (jedis.isConnected() && !jedis.isBroken()) {
+                    playerName = jedis.get(e.getConnection().getAddress().getHostString());
+                    if (images.containsKey(playerName)) {
+                        e.getResponse().setFavicon(images.get(playerName));
+                    }
                 }
-            }
 
-            if(e.getConnection().getVirtualHost() != null && e.getConnection().getVirtualHost().getHostName().toLowerCase().startsWith("builder.")){
-                line2 = "          §6Eric scheißt auf unsere Builder :)";
-            }else if(playerName != null) {
-                line2 = "§6Willkommen §b" + playerName + "§6 auf " + Config.getServerDomainName();
-            }else {
-                line2 = "            §2§lEarth Server §7+ §b§lAlpha Test";
+                if (e.getConnection().getVirtualHost() != null && e.getConnection().getVirtualHost().getHostName().toLowerCase().startsWith("builder.")) {
+                    line2 = "          §6Eric scheißt auf unsere Builder :)";
+                } else if (playerName != null) {
+                    line2 = "§6Willkommen §b" + playerName + "§6 auf " + Config.getServerDomainName();
+                } else {
+                    line2 = "            §2§lEarth Server §7+ §b§lAlpha Test";
+                }
             }
         }
 

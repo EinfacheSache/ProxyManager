@@ -1,3 +1,0 @@
-tcpServer:
-  connect: false # require discord module enabled
-  port: 6666

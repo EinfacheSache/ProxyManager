@@ -16,7 +16,7 @@ import net.md_5.bungee.api.plugin.Command;
 public class SettingsCMD extends Command {
 
     public SettingsCMD() {
-        super("settings");
+        super("settings", "proxy.execute.settings");
     }
 
     @Override
@@ -30,7 +30,7 @@ public class SettingsCMD extends Command {
         playerInventory.update();
 
         Inventory inventory = new Inventory(InventoryType.GENERIC_9X3).title("§6§lSettings");
-        inventory.item(13, new ItemStack(ItemType.REDSTONE_LAMP));
+        inventory.item(13, new ItemStack(ItemType.REDSTONE_LAMP).displayName("Schlüssel"));
 
         inventory.onClick(event -> {
 

@@ -1,7 +1,9 @@
 package de.cubeattack.proxymanager.discord.command;
 
+import de.cubeattack.proxymanager.core.Config;
 import de.cubeattack.proxymanager.core.Core;
 import de.cubeattack.proxymanager.discord.MessageUtils;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -16,7 +18,9 @@ public class CloseCommand extends ListenerAdapter {
         if (!Objects.equals(event.getGuild(), Core.getDiscordAPI().getGuild())) return;
         if (!event.getName().equalsIgnoreCase("close")) return;
 
-        if (!(event.getChannel() instanceof TextChannel) || ((TextChannel) event.getChannel()).getParentCategory() == null || !((TextChannel) event.getChannel()).getParentCategory().getName().equals("Tickets")) {
+        Guild guild = event.getGuild();
+
+        if (!(event.getChannel() instanceof TextChannel) || ((TextChannel) event.getChannel()).getParentCategory() == null || !((TextChannel) event.getChannel()).getParentCategory().getId().equals(Config.getCategoryID())) {
             event.replyEmbeds(MessageUtils.getDefaultEmbed().setTitle("Fehler").setDescription("Das ist kein Ticket").build()).setEphemeral(true).queue();
             return;
         }
@@ -38,7 +42,12 @@ public class CloseCommand extends ListenerAdapter {
                                 .setDescription("Ihr Fall wurde aufgrund " + (reason == null ? "einer Lösung" : reason) + " geschlossen. \nWenn Sie ein anderes Problem haben, können Sie möglicherweise ein weiteres Ticket eröffnen.")
                                 .build())).queue());
 
-        Objects.requireNonNull(Core.getDiscordAPI().getJDA().getTextChannelById("1166486953571663952")).sendMessageEmbeds(MessageUtils
+        if (guild != null && (Config.getLogChannelID().isEmpty() || guild.getTextChannelById(Config.getLogChannelID()) == null)) {
+            TextChannel textChannel = guild.createTextChannel("\uD83D\uDCBE│server-logs").complete();
+            Config.setLogChannelID(textChannel.getId());
+        }
+
+        Objects.requireNonNull(Core.getDiscordAPI().getJDA().getTextChannelById(Config.getLogChannelID())).sendMessageEmbeds(MessageUtils
                 .getDefaultEmbed()
                 .setAuthor("GiantNetwork")
                 .setColor(Color.GREEN)

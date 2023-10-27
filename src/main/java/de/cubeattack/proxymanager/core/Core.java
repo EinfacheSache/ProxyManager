@@ -9,7 +9,6 @@ import java.util.logging.Logger;
 
 public class Core {
 
-    public static FileUtils tcpServerModule;
     public static FileUtils discordModule;
     public static FileUtils redisModule;
     public static FileUtils mysqlModule;
@@ -35,7 +34,6 @@ public class Core {
 
         //Core.info("running ProxyManager on version " + VersionUtils.getPomVersion(VersionUtils.class) + " build " + VersionUtils.getBuild());
 
-        tcpServerModule = new FileUtils(Core.class.getResourceAsStream("/modules/tpcServer.yml"), "plugins/ProxyManager", "modules/tcpServer.yml");
         discordModule = new FileUtils(Core.class.getResourceAsStream("/modules/discord.yml"), "plugins/ProxyManager", "modules/discord.yml");
         redisModule = new FileUtils(Core.class.getResourceAsStream("/modules/redis.yml"), "plugins/ProxyManager", "modules/redis.yml");
         mysqlModule = new FileUtils(Core.class.getResourceAsStream("/modules/mysql.yml"), "plugins/ProxyManager", "modules/mysql.yml");

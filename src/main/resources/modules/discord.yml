@@ -1,6 +1,13 @@
 discord:
-  enable: true
-  Token: 'OTkzNTQ3Mzc4NTYyOTY5NjAw.GBac6v.0MOJIKCWStuYH09uj1u-8bj3oI4zQ8hlqWMl2c'
-  ActivityType: 'PLAYING'
-  Activity: 'GiantNetwork.de'
-  GuildID: '819108810899324940'
+  enabled: true
+  token: 'OTkzNTQ3Mzc4NTYyOTY5NjAw.GBac6v.0MOJIKCWStuYH09uj1u-8bj3oI4zQ8hlqWMl2c'
+  activity-type: 'PLAYING'
+  activity: 'GiantNetwork.de'
+  guild-id: '819108810899324940'
+  tickets:
+    category-id: ''
+    team-role-id: ''
+    log-channel-id: ''
+  tcp-server:
+    connect: false # require discord module enabled
+    port: 6666

@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class PluginControllerCMD extends Command {
 
     public PluginControllerCMD() {
-        super("bpl");
+        super("bpl", "proxy.execute.bpl", "bungeeplugins");
     }
 
     private static final ArrayList<Plugin> disabledPluginList = new ArrayList<>();
@@ -21,11 +21,6 @@ public class PluginControllerCMD extends Command {
     @Override
     public void execute(CommandSender sender, String[] args) {
         if (sender == null) return;
-
-        if (!sender.hasPermission("proxymanager.bpl")) {
-            ProxyManager.sendMessage(sender, "§4Du hast dazu keine Rechte");
-            return;
-        }
 
         String pluginName = null;
         Plugin plugin = null;

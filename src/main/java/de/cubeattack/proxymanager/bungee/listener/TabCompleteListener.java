@@ -25,7 +25,7 @@ public class TabCompleteListener implements Listener {
 
         if (cursor.startsWith("/bpl")) {
 
-            if (event.getSender() instanceof ProxiedPlayer && !((ProxiedPlayer) event.getSender()).hasPermission("proxymanager.bpl"))
+            if (event.getSender() instanceof ProxiedPlayer && !((ProxiedPlayer) event.getSender()).hasPermission("proxy.execute.bpl"))
                 return;
 
             for (Plugin plugin : ProxyManager.getPluginManger().getPlugins()) {
@@ -63,7 +63,7 @@ public class TabCompleteListener implements Listener {
             event.getSuggestions().addAll(completor(true, cursor, commands, tablistOne, tablistTwo));
 
         } else {
-            if (event.getSender() instanceof ProxiedPlayer && (!((ProxiedPlayer) event.getSender()).hasPermission("proxymanager.chat")) && (!((ProxiedPlayer) event.getSender()).hasPermission("proxymanager.command")))
+            if (event.getSender() instanceof ProxiedPlayer && (!((ProxiedPlayer) event.getSender()).hasPermission("proxy.execute.gmute")) && (!((ProxiedPlayer) event.getSender()).hasPermission("proxymanager.command")))
                 return;
 
             commands.add("/gmute");

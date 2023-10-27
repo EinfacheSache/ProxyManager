@@ -1,9 +1,11 @@
 package de.cubeattack.proxymanager.discord.listener;
 
+import de.cubeattack.proxymanager.core.Config;
 import de.cubeattack.proxymanager.core.Core;
 import de.cubeattack.proxymanager.discord.MessageUtils;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
@@ -49,7 +51,21 @@ public class TicketListener extends ListenerAdapter {
             Guild guild = event.getGuild();
             String body = Objects.requireNonNull(event.getValue("body")).getAsString();
 
-            TextChannel channel = guild.getCategoriesByName("Tickets", false).get(0).createTextChannel(event.getModalId().split(":")[2] + "-" + event.getUser().getName()).complete();
+            String teamID = Config.getTeamRoleID();
+            if (teamID.isEmpty() || guild.getRoleById(teamID) == null) {
+                teamID = guild.createRole().setName("✦Team✦").setColor(Color.RED).complete().getId();
+                Config.setTeamRoleID(teamID);
+            }
+
+            if (Config.getCategoryID().isEmpty() || guild.getCategoryById(Config.getCategoryID()) == null) {
+                Category category = guild.createCategory("[Tickets]").complete();
+                category.getManager()
+                        .putRolePermissionOverride(Long.parseLong(teamID), EnumSet.of(Permission.VIEW_CHANNEL), null)
+                        .putRolePermissionOverride(guild.getPublicRole().getIdLong(), null, EnumSet.of(Permission.VIEW_CHANNEL)).queue();
+                Config.setCategoryID(category.getId());
+            }
+
+            TextChannel channel = Objects.requireNonNull(guild.getCategoryById(Config.getCategoryID())).createTextChannel(event.getModalId().split(":")[2] + "-" + event.getUser().getName()).complete();
 
             channel.getManager().putMemberPermissionOverride(event.getUser().getIdLong(), EnumSet.of(Permission.VIEW_CHANNEL), null).queue();
 
@@ -59,13 +75,6 @@ public class TicketListener extends ListenerAdapter {
                             "Bitte pingen Sie unsere Team nicht selbst an, sondern nur in Notsituationen.\n" +
                             "(Die Nichtbeachtung dieser Regel führt zu einem Timeout/Ban)"
                     ).setColor(Color.GREEN).build()).queue();
-
-            long teamID;
-            if (guild.getRolesByName("✦Team✦", true).isEmpty()) {
-                teamID = guild.createRole().setName("✦Team✦").setColor(Color.RED).complete().getIdLong();
-            } else {
-                teamID = guild.getRolesByName("✦Team✦", true).get(0).getIdLong();
-            }
 
             channel.sendMessage("<@&" + teamID + ">").queue();
             channel.sendMessageEmbeds(MessageUtils.getDefaultEmbed()

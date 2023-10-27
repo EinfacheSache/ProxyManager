@@ -1,10 +1,12 @@
 package de.cubeattack.proxymanager.discord.command;
 
+import de.cubeattack.proxymanager.core.Config;
 import de.cubeattack.proxymanager.core.Core;
 import de.cubeattack.proxymanager.discord.MessageUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
@@ -40,7 +42,7 @@ public class ManagerCommand extends ListenerAdapter {
             }
 
             case "closetickets" -> {
-                Objects.requireNonNull(event.getGuild()).getCategoriesByName("Tickets", false).get(0).getChannels().forEach(c -> c.delete().queue());
+                Objects.requireNonNull(Objects.requireNonNull(event.getGuild()).getCategoryById(Config.getCategoryID())).getChannels().forEach(c -> c.delete().queue());
                 embedBuilder.setDescription("Alle Tickets gelöscht");
             }
 
@@ -62,17 +64,18 @@ public class ManagerCommand extends ListenerAdapter {
 
                 event.getChannel().sendMessageEmbeds(ticket.build()).addActionRow(menu).queue();
 
-                if (guild != null && guild.getCategoriesByName("Tickets", false).isEmpty()) {
-                    long teamID;
-                    if (guild.getRolesByName("✦Team✦", true).isEmpty()) {
-                        teamID = guild.createRole().setName("✦Team✦").setColor(Color.RED).complete().getIdLong();
-                    } else {
-                        teamID = guild.getRolesByName("✦Team✦", true).get(0).getIdLong();
-                    }
+                long teamID = Long.parseLong(Config.getTeamRoleID());
+                if (guild != null && guild.getRoleById(teamID) == null) {
+                    teamID = guild.createRole().setName("✦Team✦").setColor(Color.RED).complete().getIdLong();
+                    Config.setTeamRoleID(String.valueOf(teamID));
+                }
 
-                    guild.createCategory("Tickets").complete().getManager()
+                if (guild != null && guild.getCategoryById(Config.getCategoryID()) == null) {
+                    Category category = guild.createCategory("[Tickets]").complete();
+                    category.getManager()
                             .putRolePermissionOverride(teamID, EnumSet.of(Permission.VIEW_CHANNEL), null)
                             .putRolePermissionOverride(guild.getPublicRole().getIdLong(), null, EnumSet.of(Permission.VIEW_CHANNEL)).queue();
+                    Config.setCategoryID(category.getId());
                 }
             }
         }

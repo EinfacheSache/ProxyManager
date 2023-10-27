@@ -21,6 +21,7 @@ public final class ProxyManager extends Plugin {
     private final static String PREFIX = "§7[§bNetwork§7] ";
     private final static int ServerID = 15836;
     private static ProxyManager plugin;
+    private static Long uptime = 0L;
 
     @Override
     public void onLoad() {
@@ -45,6 +46,7 @@ public final class ProxyManager extends Plugin {
         pm.registerCommand(this, new ProxyCMD());
 
         Core.info("Plugin was Enabled successful");
+        uptime = System.currentTimeMillis();
     }
 
     public void onDisable() {
@@ -69,6 +71,9 @@ public final class ProxyManager extends Plugin {
         return plugin;
     }
 
+    public static Long getUptime() {
+        return uptime;
+    }
 
     public static String getPrefix() {
         return PREFIX;

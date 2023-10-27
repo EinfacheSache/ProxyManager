@@ -1,9 +1,9 @@
-ServerDomainName: ''
-MaintenanceMode: false
-ManageConnection:
+server-domain-name: ''
+maintenance-mode: false
+manage-connections:
   enabled: true
-  PlayerHeadAsServerIcon: true
-  VerifyServerDomain: ''
-  VerifyServer: ''
-  AllowedDomains:
+  player-head-as-server-icon: true
+  verify-server-domain: ''
+  verify-server: ''
+  allowed-domains:
     - ''
