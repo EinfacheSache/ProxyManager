@@ -1,5 +1,7 @@
 #ProxyManger
 plugins/
+/src/main/resources/application.properties
+
 # User-specific stuff
 .idea/
 

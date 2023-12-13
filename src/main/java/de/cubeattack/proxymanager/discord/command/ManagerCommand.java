@@ -66,7 +66,7 @@ public class ManagerCommand extends ListenerAdapter {
 
                 long teamID = Long.parseLong(Config.getTeamRoleID());
                 if (guild != null && guild.getRoleById(teamID) == null) {
-                    teamID = guild.createRole().setName("✦Team✦").setColor(Color.RED).complete().getIdLong();
+                    teamID = guild.createRole().setName("✦Team✦").setColor(Color.GREEN).complete().getIdLong();
                     Config.setTeamRoleID(String.valueOf(teamID));
                 }
 

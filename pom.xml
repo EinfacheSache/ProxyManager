@@ -104,7 +104,7 @@
         <dependency>
             <groupId>com.github.CubeAttack</groupId>
             <artifactId>EasyAPI</artifactId>
-            <version>837175a3cd</version>
+            <version>291ae1fdda</version>
         </dependency>
         <dependency>
             <groupId>net.dv8tion</groupId>

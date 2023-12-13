@@ -1,8 +1,11 @@
 package de.cubeattack.proxymanager.core;
 
 import de.cubeattack.api.util.FileUtils;
+import de.cubeattack.proxymanager.discord.DiscordAPI;
 
+import java.io.InputStream;
 import java.util.List;
+import java.util.Properties;
 
 @SuppressWarnings("unused")
 public class Config {
@@ -14,7 +17,6 @@ public class Config {
     private static String passwordRedis;
 
     private static boolean discordEnable;
-    private static String token;
     private static String activity;
     private static String activityType;
     private static String guildID;
@@ -84,7 +86,6 @@ public class Config {
 
     private static void loadDiscordModule() {
         discordEnable = discordModule.getBoolean("discord.enabled", false);
-        token = discordModule.getString("discord.token", "");
         guildID = discordModule.getString("discord.guild-id", "");
         activityType = discordModule.getString("discord.activity-type", "");
         activity = discordModule.getString("discord.activity", "");
@@ -122,7 +123,15 @@ public class Config {
     }
 
     public static String getToken() {
-        return token;
+        try {
+            Properties prop = new Properties();
+            InputStream in = DiscordAPI.class.getResourceAsStream("/application.properties");
+            prop.load(in);
+
+            return prop.getProperty("TOKEN");
+        }catch (Exception ex){
+            return "NOT_FOUND";
+        }
     }
 
     public static String getActivity() {
@@ -228,7 +237,7 @@ public class Config {
 
     public static void setMaintenanceMode(boolean maintenanceMode) {
         Config.maintenanceMode = maintenanceMode;
-        save(config, "MaintenanceMode", maintenanceMode);
+        save(config, "maintenance-mode", maintenanceMode);
     }
 
     public static void save(FileUtils file, String key, Object value) {

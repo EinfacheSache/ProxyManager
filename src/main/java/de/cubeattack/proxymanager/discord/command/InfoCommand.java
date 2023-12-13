@@ -34,7 +34,7 @@ public class InfoCommand extends ListenerAdapter {
         currentTime = System.currentTimeMillis() - currentTime;
 
         String strBasic = "IP: GiantNetwork.de\n" +
-                "Version: 1.8.9 - 1.20.2\n" +
+                "Version: 1.8.8 - 1.20.2\n" +
                 "Ping: " + (isPinged ? currentTime + "ms" : "No Connection") + "\n" +
                 "Spieler Online: " + ProxyManager.getPlugin().getProxy().getOnlineCount() + "/" + ProxyManager.getPlugin().getProxy().getConfig().getPlayerLimit() + "\n" +
                 "Up-Time: " + Duration.ofMillis(System.currentTimeMillis() - ProxyManager.getUptime()).toString().substring(2).replaceAll("(\\d[HMS])(?!$)", "$1 ").toLowerCase() + "\n";
@@ -47,7 +47,7 @@ public class InfoCommand extends ListenerAdapter {
         final StringBuilder strServer = new StringBuilder();
 
         ProxyManager.getPlugin().getProxy().getServersCopy().values().stream().filter(values -> !values.getName().equals("fallback")).forEach((serverInfo) ->
-                strServer.append("  **-** ").append(serverInfo.getName()).append(" : Spieler Online: ").append(serverInfo.getPlayers().size()).append("\n"));
+                strServer.append("**-**⠀").append(serverInfo.getName()).append("⠀->⠀Spieler Online: ").append(serverInfo.getPlayers().size()).append("\n"));
 
         embedBuilder.addField("Servers:", strServer.toString(), false);
 

@@ -1,5 +1,6 @@
 package de.cubeattack.proxymanager.bungee.listener;
 
+import de.cubeattack.api.API;
 import de.cubeattack.proxymanager.bungee.ScreenBuilder;
 import de.cubeattack.proxymanager.core.Config;
 import de.cubeattack.proxymanager.core.Core;
@@ -7,9 +8,9 @@ import net.md_5.bungee.api.Favicon;
 import net.md_5.bungee.api.ServerPing;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.event.LoginEvent;
+import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.event.PreLoginEvent;
 import net.md_5.bungee.api.event.ProxyPingEvent;
-import net.md_5.bungee.api.event.ServerConnectEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
@@ -19,7 +20,7 @@ import javax.imageio.ImageIO;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
-import java.util.concurrent.CompletableFuture;
+
 
 @SuppressWarnings("deprecation")
 public class ManageConnection implements Listener {
@@ -38,24 +39,25 @@ public class ManageConnection implements Listener {
             if (!jedis.isConnected() || jedis.isBroken()) {
                 return;
             }
-            CompletableFuture.runAsync(() -> jedis.set(e.getConnection().getAddress().getHostString(), e.getConnection().getName()));
-            CompletableFuture.runAsync(() -> images.put(e.getConnection().getName(), getFavicon(e.getConnection().getName())));
+            API.getExecutorService().submit(() -> jedis.set(e.getConnection().getAddress().getHostString(), e.getConnection().getName()));
+            API.getExecutorService().submit(() -> images.put(e.getConnection().getName(), getFavicon(e.getConnection().getName())));
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void initialServerConnect(ServerConnectEvent event) {
+    @EventHandler
+    public void initialServerConnect(PostLoginEvent event) {
         if(!Config.isMaintenanceMode())
-            return;
-
-        if (event.isCancelled() || event.getReason() != ServerConnectEvent.Reason.JOIN_PROXY)
             return;
 
         if(event.getPlayer().hasPermission("proxy.maintenance.bypass"))
             return;
 
-        event.setCancelled(true);
-        event.getPlayer().disconnect(new TextComponent("§cDu bist nicht auf der Maintenance-Whitelist"));
+        event.getPlayer().getPendingConnection().disconnect(new ScreenBuilder()
+                .addLine("§cServer Maintenance Alert")
+                .addLine("§cSorry, but our server is currently under maintenance.")
+                .addLine("§ePlease check our Discord for updates:")
+                .addLine("§7§n§o§nwww.giantnetwork.de/discord")
+                .build());
     }
     
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -65,12 +67,12 @@ public class ManageConnection implements Listener {
 
         for (String allowedDomain: Config.getAllowedDomains()) {
             if(allowedDomain.equalsIgnoreCase(serverHost))return;
-            if(allowedDomain.startsWith("*") && serverHost.endsWith(allowedDomain.replace("*.", "")))return;
+            if(allowedDomain.startsWith("*") && serverHost.toLowerCase().endsWith(allowedDomain.toLowerCase().replace("*.", "")))return;
         }
 
         ScreenBuilder builder = new ScreenBuilder()
                 .addLine("§4-----------------------------")
-                .addLine("§4Login over IP is not allowed")
+                .addLine("§4Login over " + serverHost + " is not allowed")
                 .addLine("§4Please join over " + Config.getServerDomainName())
                 .addLine("§4-----------------------------");
 

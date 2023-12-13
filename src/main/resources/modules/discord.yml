@@ -1,6 +1,5 @@
 discord:
   enabled: true
-  token: 'OTkzNTQ3Mzc4NTYyOTY5NjAw.GBac6v.0MOJIKCWStuYH09uj1u-8bj3oI4zQ8hlqWMl2c'
   activity-type: 'PLAYING'
   activity: 'GiantNetwork.de'
   guild-id: '819108810899324940'

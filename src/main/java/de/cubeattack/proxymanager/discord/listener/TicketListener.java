@@ -53,7 +53,7 @@ public class TicketListener extends ListenerAdapter {
 
             String teamID = Config.getTeamRoleID();
             if (teamID.isEmpty() || guild.getRoleById(teamID) == null) {
-                teamID = guild.createRole().setName("✦Team✦").setColor(Color.RED).complete().getId();
+                teamID = guild.createRole().setName("✦Team✦").setColor(Color.GREEN).complete().getId();
                 Config.setTeamRoleID(teamID);
             }
 
