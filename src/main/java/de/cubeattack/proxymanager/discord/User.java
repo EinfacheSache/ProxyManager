@@ -38,7 +38,7 @@ public class User {
             this.playtime = query1.getInt("playtime");
             this.rangID = query2.getInt("group");
         } catch (SQLException ex) {
-            ex.printStackTrace();
+            Core.severe("Error while loading data from MySQL", ex);
         }
 
         try (ResultSet query1 = source.query("SELECT * FROM prime_perms_groups WHERE id='" + this.rangID + "';");
@@ -48,11 +48,11 @@ public class User {
 
             this.weight = query1.getInt("wei ght");
             this.rang = query1.getString("display_name");
-            this.isMuted = query2.absolute(1);
-            this.isBanned = query3.absolute(1);
-            this.hasWebAccount = query4.absolute(1);
+            this.isMuted = query2.next();
+            this.isBanned = query3.next();
+            this.hasWebAccount = query4.next();
         } catch (SQLException ex) {
-            ex.printStackTrace();
+            Core.severe("Error while loading data from MySQL", ex);
         }
     }
 

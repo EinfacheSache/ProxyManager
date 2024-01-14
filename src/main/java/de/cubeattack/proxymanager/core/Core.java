@@ -70,6 +70,10 @@ public class Core {
         LogManager.getLogger().error(output);
     }
 
+    public static void severe(String output, Exception err) {
+        LogManager.getLogger().error(output, err);
+    }
+
     public static RedisConnector getRedisConnector() {
         return RedisConnector;
     }

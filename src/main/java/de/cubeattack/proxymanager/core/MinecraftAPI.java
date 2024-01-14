@@ -20,7 +20,7 @@ public class MinecraftAPI {
             playerName = response.get("name").getAsString();
 
         } catch (Exception ex) {
-            System.out.println("Unable to get UUID of: " + name + "! (" + ex + ")");
+            Core.severe("Unable to get UUID of: " + name, ex);
             return null;
         }
         return new User(uuid, playerName);

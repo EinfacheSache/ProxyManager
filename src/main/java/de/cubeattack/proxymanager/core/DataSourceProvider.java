@@ -40,23 +40,24 @@ public class DataSourceProvider {
     }
 
     public ResultSet query(String qry) {
-        try (PreparedStatement st = source.getConnection().prepareStatement(qry, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE)) {
-            return st.executeQuery();
+        try (PreparedStatement st = source.getConnection().prepareStatement(qry, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+             ResultSet rs = st.executeQuery()) {
+            return rs;
         } catch (SQLException ex) {
             connect();
-            Core.severe("Error whiles loading : " + qry + "\n" + ex.getLocalizedMessage());
+            Core.severe("Error executing query: " + qry, ex);
         }
         return null;
     }
 
-    public void update(String s1, String s2) {
+    public void insertData(String key, String value) {
         try (Connection conn = source.getConnection();
              PreparedStatement stmt = conn.prepareStatement("INSERT INTO Data (keyData, value1) VALUES (?,?)")) {
-            stmt.setString(1, s1);
-            stmt.setString(2, s2);
+            stmt.setString(1, key);
+            stmt.setString(2, value);
             stmt.executeUpdate();
         } catch (SQLException ex) {
-            Core.severe("Error whiles updating : " + "\n" + ex.getLocalizedMessage());
+            Core.severe("Error while inserting data into the database", ex);
         }
     }
 

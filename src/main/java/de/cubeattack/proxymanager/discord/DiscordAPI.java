@@ -57,7 +57,7 @@ public class DiscordAPI extends ListenerAdapter
         }
         catch (InterruptedException exception)
         {
-            exception.printStackTrace();
+            Core.severe("Error initializing Discord API", exception);
         }
     }
 

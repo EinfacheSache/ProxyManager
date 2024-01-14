@@ -24,7 +24,7 @@ public class RedisConnector {
         } catch (JedisConnectionException | JedisAccessControlException ex) {
             Core.severe("Redis - " + ex.getMessage());
         } catch (Exception ex) {
-            ex.printStackTrace();
+            Core.severe("Redis - ", ex);
         }
     }
 

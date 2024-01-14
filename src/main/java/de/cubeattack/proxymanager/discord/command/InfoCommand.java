@@ -57,7 +57,7 @@ public class InfoCommand extends ListenerAdapter {
 
     private static boolean isReachable() {
         try (Socket soc = new Socket()) {
-            soc.connect(new InetSocketAddress("giantnetwork.de", 80), 1500);
+            soc.connect(new InetSocketAddress("giantnetwork.de", 25565), 1500);
             return true;
         } catch (IOException ex) {
             return false;

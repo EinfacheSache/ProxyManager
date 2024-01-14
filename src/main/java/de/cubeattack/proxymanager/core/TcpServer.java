@@ -25,16 +25,15 @@ public class TcpServer {
                 }
 
             } catch (IOException ex) {
-                ex.printStackTrace();
+                Core.severe("Error in TCP-Server", ex);
             }
         }, "TCP-Server");
         thread.start();
 
     }
 
-    @SuppressWarnings("deprecation ")
     public static void stop() {
         if (thread == null) return;
-        thread.stop();
+        thread.interrupt();
     }
 }
