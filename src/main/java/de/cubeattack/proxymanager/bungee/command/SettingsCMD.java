@@ -2,10 +2,9 @@ package de.cubeattack.proxymanager.bungee.command;
 
 import de.cubeattack.proxymanager.bungee.ProxyManager;
 import dev.simplix.protocolize.api.Protocolize;
+import dev.simplix.protocolize.api.chat.ChatElement;
 import dev.simplix.protocolize.api.inventory.Inventory;
-import dev.simplix.protocolize.api.inventory.PlayerInventory;
 import dev.simplix.protocolize.api.item.ItemStack;
-import dev.simplix.protocolize.api.player.ProtocolizePlayer;
 import dev.simplix.protocolize.data.ItemType;
 import dev.simplix.protocolize.data.inventory.InventoryType;
 import net.md_5.bungee.api.CommandSender;
@@ -24,22 +23,12 @@ public class SettingsCMD extends Command {
         if (sender == null) return;
         if (!(sender instanceof ProxiedPlayer p)) return;
 
-        ProtocolizePlayer player = Protocolize.playerProvider().player(p.getUniqueId());
+        Inventory inventory = new Inventory(InventoryType.GENERIC_9X3).title(ChatElement.ofLegacyText("§6§lSettings"));
+        inventory.item(13, new ItemStack(new ItemStack(ItemType.REDSTONE).displayName(ChatElement.ofLegacyText("§4API settings"))));
 
-        PlayerInventory playerInventory = player.proxyInventory();
-        playerInventory.update();
-
-        Inventory inventory = new Inventory(InventoryType.GENERIC_9X3).title("§6§lSettings");
-        inventory.item(13, new ItemStack(ItemType.REDSTONE_LAMP).displayName("Schlüssel"));
-
-        inventory.onClick(event -> {
-
-            playerInventory.cursorItem(new ItemStack(ItemType.STONE));
-            playerInventory.update();
-            p.sendMessage(new TextComponent("Aufgeführt"));
-        });
+        inventory.onClick(event -> p.sendMessage(new TextComponent("Aufgeführt")));
 
         Protocolize.playerProvider().player(p.getUniqueId()).openInventory(inventory);
-        ProxyManager.getPlugin().getProxy().getPlayer(p.getUniqueId()).sendMessage(new TextComponent("Super"));
+        ProxyManager.getPlugin().getProxy().getPlayer(p.getUniqueId()).sendMessage(new TextComponent("§aOpening settings..."));
     }
 }

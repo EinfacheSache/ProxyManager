@@ -4,8 +4,7 @@ import de.cubeattack.api.logger.LogManager;
 import de.cubeattack.api.shutdown.ShutdownHook;
 import de.cubeattack.api.util.FileUtils;
 import de.cubeattack.proxymanager.discord.DiscordAPI;
-
-import java.util.logging.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Core {
 
@@ -19,10 +18,10 @@ public class Core {
     private static DataSourceProvider datasource;
 
     public static void main(String[] args) {
-        run();
+        run(LoggerFactory.getLogger("de.cubeattack"));
     }
 
-    public static void run(Logger logger) {
+    public static void run(Object logger) {
         LogManager.getLogger().setLogger(logger);
         run();
     }
@@ -70,7 +69,7 @@ public class Core {
         LogManager.getLogger().error(output);
     }
 
-    public static void severe(String output, Exception err) {
+    public static void severe(String output, Throwable err) {
         LogManager.getLogger().error(output, err);
     }
 

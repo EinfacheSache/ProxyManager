@@ -46,7 +46,7 @@ public class InfoCommand extends ListenerAdapter {
 
         final StringBuilder strServer = new StringBuilder();
 
-        ProxyManager.getPlugin().getProxy().getServersCopy().values().stream().filter(values -> !values.getName().equals("fallback")).forEach((serverInfo) ->
+        ProxyManager.getPlugin().getProxy().getServers().values().stream().filter(values -> !values.getName().equals("fallback")).forEach((serverInfo) ->
                 strServer.append("**-**⠀").append(serverInfo.getName()).append("⠀->⠀Spieler Online: ").append(serverInfo.getPlayers().size()).append("\n"));
 
         embedBuilder.addField("Servers:", strServer.toString(), false);

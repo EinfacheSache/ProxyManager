@@ -9,8 +9,8 @@ public class ServerKickListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onKick(ServerKickEvent e) {
-        if (!e.getCause().toString().contains("disconnect.spam")
-                && !e.getCause().toString().contains("Kicked for spamming")) return;
+        if (!e.getReason().toString().contains("disconnect.spam")
+                && !e.getReason().toString().contains("Kicked for spamming")) return;
         e.setCancelled(true);
     }
 }

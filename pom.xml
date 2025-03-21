@@ -9,7 +9,7 @@
     <packaging>jar</packaging>
 
     <name>ProxyManager</name>
-    <url>https://github.com/CubeAttack/ProxyManager</url>
+    <url>https://github.com/EinfacheSache/ProxyManager</url>
     <description>ProxyManager for BungeeCord with Discord Bot</description>
 
     <properties>
@@ -91,8 +91,8 @@
             <url>https://jitpack.io</url>
         </repository>
         <repository>
-            <id>paper</id>
-            <url>https://repo.papermc.io/repository/maven-public/</url>
+            <id>bungeecord-repo</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </repository>
         <repository>
             <id>exceptionflug</id>
@@ -104,12 +104,12 @@
         <dependency>
             <groupId>com.github.CubeAttack</groupId>
             <artifactId>EasyAPI</artifactId>
-            <version>291ae1fdda</version>
+            <version>084dc19708</version>
         </dependency>
         <dependency>
             <groupId>net.dv8tion</groupId>
             <artifactId>JDA</artifactId>
-            <version>5.0.0-beta.20</version>
+            <version>5.0.0-beta.24</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -137,9 +137,9 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>io.github.waterfallmc</groupId>
-            <artifactId>waterfall-api</artifactId>
-            <version>1.20-R0.2-SNAPSHOT</version>
+            <groupId>net.md-5</groupId>
+            <artifactId>bungeecord-api</artifactId>
+            <version>1.20-R0.2</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

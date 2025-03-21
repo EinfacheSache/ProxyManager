@@ -22,7 +22,6 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
-import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 
 import java.util.EnumSet;
@@ -62,6 +61,7 @@ public class DiscordAPI extends ListenerAdapter
     }
 
     public void loadDiscordCommands() {
+        JDA.updateCommands().complete().forEach(cmd -> JDA.deleteCommandById(cmd.getApplicationIdLong()).queue());
         JDA.updateCommands().queue();
         JDA.upsertCommand("ping", "Berechne den Ping des Bots").queue();
         JDA.upsertCommand((Commands.message("Count words"))).queue();
@@ -104,9 +104,9 @@ public class DiscordAPI extends ListenerAdapter
         }
 
         jdaBuilder.setChunkingFilter(ChunkingFilter.ALL);
-        jdaBuilder.setMemberCachePolicy(MemberCachePolicy.ALL);
-        jdaBuilder.enableCache(EnumSet.of(CacheFlag.ONLINE_STATUS, CacheFlag.CLIENT_STATUS, CacheFlag.EMOJI, CacheFlag.VOICE_STATE));
-        jdaBuilder.enableIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_PRESENCES, GatewayIntent.GUILD_VOICE_STATES, GatewayIntent.DIRECT_MESSAGE_TYPING, GatewayIntent.DIRECT_MESSAGES);
+        // jdaBuilder.setMemberCachePolicy(MemberCachePolicy.ALL);
+        jdaBuilder.enableCache(EnumSet.of(/* CacheFlag.ONLINE_STATUS, CacheFlag.CLIENT_STATUS, */ CacheFlag.EMOJI, CacheFlag.VOICE_STATE));
+        jdaBuilder.enableIntents(/* GatewayIntent.MESSAGE_CONTENT,m   GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_PRESENCES, */ GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_VOICE_STATES, GatewayIntent.DIRECT_MESSAGE_TYPING, GatewayIntent.DIRECT_MESSAGES);
 
         return jdaBuilder;
     }

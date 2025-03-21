@@ -130,6 +130,7 @@ public class Config {
 
             return prop.getProperty("TOKEN");
         }catch (Exception ex){
+            Core.severe("./application.properties file can't be found", ex);
             return "NOT_FOUND";
         }
     }

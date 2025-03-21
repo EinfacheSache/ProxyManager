@@ -53,10 +53,8 @@ public class ManageConnection implements Listener {
             return;
 
         event.getPlayer().getPendingConnection().disconnect(new ScreenBuilder()
-                .addLine("§cServer Maintenance Alert")
-                .addLine("§cSorry, but our server is currently under maintenance.")
-                .addLine("§ePlease check our Discord for updates:")
-                .addLine("§7§n§o§nwww.giantnetwork.de/discord")
+                .addLine("§4§lWe are currently in maintenance\n")
+                .addLine("§7Discord: §bgiantnetwork.de/discord")
                 .build());
     }
     
@@ -84,7 +82,7 @@ public class ManageConnection implements Listener {
 
         if (e.getConnection() == null) return;
 
-        String line1 = "§7§kKK§r §6Willkommen auf §l" + Config.getServerDomainName() + "§c§o [1.8-1.20.4] §7§kKK§r";
+        String line1 = "§7§kKK§r §6Welcome to §l" + Config.getServerDomainName() + "§c§o [1.8-1.20.4] §7§kKK§r";
         String line2 = "";
         String playerName = null;
 
