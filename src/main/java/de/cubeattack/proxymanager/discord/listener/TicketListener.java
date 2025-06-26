@@ -74,7 +74,9 @@ public class TicketListener extends ListenerAdapter {
                             "Es wird Ihnen schnellstmöglich ein Helfer zur Seite stehen.\n" +
                             "Bitte pingen Sie unsere Team nicht selbst an, sondern nur in Notsituationen.\n" +
                             "(Die Nichtbeachtung dieser Regel führt zu einem Timeout/Ban)"
-                    ).setColor(Color.GREEN).build()).queue();
+                    ).setColor(Color.GREEN).build())
+                    .addActionRow(Button.danger("delete_ticket", "\uD83D\uDDD1\uFE0F Ticket schließen"))
+                    .queue();
 
             channel.sendMessage("<@&" + teamID + ">").queue();
             channel.sendMessageEmbeds(MessageUtils.getDefaultEmbed()
