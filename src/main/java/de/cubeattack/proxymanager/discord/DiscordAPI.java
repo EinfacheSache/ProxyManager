@@ -91,7 +91,6 @@ public class DiscordAPI extends ListenerAdapter
                     .addSubcommands(new SubcommandData( "reloadcommands", "Reload Discord Commands"))
                     .addSubcommands(new SubcommandData( "ticketsetup", "Setup TicketBot"))
                     .addSubcommands(new SubcommandData( "closetickets", "Lösche alle Tickets"))
-                    .setGuildOnly(true)
                     .queue();
         }
     }
