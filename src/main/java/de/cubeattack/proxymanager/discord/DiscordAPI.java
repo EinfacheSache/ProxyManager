@@ -61,6 +61,9 @@ public class DiscordAPI extends ListenerAdapter
     }
 
     public void loadDiscordCommands() {
+
+        Core.warn("Discord commands are reloading yet");
+
         JDA.updateCommands().complete().forEach(cmd -> JDA.deleteCommandById(cmd.getApplicationIdLong()).queue());
         JDA.updateCommands().queue();
         JDA.upsertCommand("ping", "Berechne den Ping des Bots").queue();
