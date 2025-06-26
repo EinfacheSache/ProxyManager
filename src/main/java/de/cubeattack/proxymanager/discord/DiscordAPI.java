@@ -107,9 +107,9 @@ public class DiscordAPI extends ListenerAdapter
         }
 
         jdaBuilder.setChunkingFilter(ChunkingFilter.ALL);
-        // jdaBuilder.setMemberCachePolicy(MemberCachePolicy.ALL);
-        jdaBuilder.enableCache(EnumSet.of(/* CacheFlag.ONLINE_STATUS, CacheFlag.CLIENT_STATUS, */ CacheFlag.EMOJI, CacheFlag.VOICE_STATE));
-        jdaBuilder.enableIntents(/* GatewayIntent.MESSAGE_CONTENT,m   GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_PRESENCES, */ GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_VOICE_STATES, GatewayIntent.DIRECT_MESSAGE_TYPING, GatewayIntent.DIRECT_MESSAGES);
+        jdaBuilder.setMemberCachePolicy(MemberCachePolicy.ALL);
+        jdaBuilder.enableCache(EnumSet.of(CacheFlag.ONLINE_STATUS, CacheFlag.CLIENT_STATUS,  CacheFlag.EMOJI, CacheFlag.VOICE_STATE));
+        jdaBuilder.enableIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_PRESENCES, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_VOICE_STATES, GatewayIntent.DIRECT_MESSAGE_TYPING, GatewayIntent.DIRECT_MESSAGES);
 
         return jdaBuilder;
     }
