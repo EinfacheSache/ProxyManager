@@ -1,0 +1,9 @@
+server-domain-name: ''
+maintenance-mode: false
+manage-connections:
+  enabled: true
+  player-head-as-server-icon: true
+  verify-server-domain: ''
+  verify-server: ''
+  allowed-domains:
+    - ''
