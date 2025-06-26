@@ -64,19 +64,27 @@ public class ManagerCommand extends ListenerAdapter {
 
                 event.getChannel().sendMessageEmbeds(ticket.build()).addActionRow(menu).queue();
 
+                if(guild == null){
+                    Core.severe("Guild was null! ID");
+                    return;
+                }
+
                 long teamID = Long.parseLong(Config.getTeamRoleID());
-                if (guild != null && guild.getRoleById(teamID) == null) {
+                if (guild.getRoleById(teamID) == null) {
                     teamID = guild.createRole().setName("✦Team✦").setColor(Color.GREEN).complete().getIdLong();
                     Config.setTeamRoleID(String.valueOf(teamID));
                 }
 
-                if (guild != null && guild.getCategoryById(Config.getCategoryID()) == null) {
-                    Category category = guild.createCategory("[Tickets]").complete();
-                    category.getManager()
-                            .putRolePermissionOverride(teamID, EnumSet.of(Permission.VIEW_CHANNEL), null)
-                            .putRolePermissionOverride(guild.getPublicRole().getIdLong(), null, EnumSet.of(Permission.VIEW_CHANNEL)).queue();
-                    Config.setCategoryID(category.getId());
+                Category ticketCategory = guild.getCategoryById(Config.getCategoryID());
+
+                if (ticketCategory == null) {
+                    ticketCategory = guild.createCategory("[Tickets]").complete();
+                    Config.setCategoryID(ticketCategory.getId());
                 }
+
+                ticketCategory.getManager()
+                        .putRolePermissionOverride(teamID, EnumSet.of(Permission.VIEW_CHANNEL), null)
+                        .putRolePermissionOverride(guild.getPublicRole().getIdLong(), null, EnumSet.of(Permission.VIEW_CHANNEL)).queue();
             }
         }
         event.replyEmbeds(embedBuilder.build()).setEphemeral(true).queue();
