@@ -10,6 +10,8 @@ import java.util.Properties;
 @SuppressWarnings("unused")
 public class Config {
 
+    private static String serverName;
+
     private static int portRedis;
     private static boolean connectRedis;
     private static String hostRedis;
@@ -23,6 +25,7 @@ public class Config {
     private static String categoryID;
     private static String teamRoleID;
     private static String logChannelID;
+    private static String userRoleID;
     private static int portTCPServer;
     private static boolean connectTCPServer;
 
@@ -43,10 +46,17 @@ public class Config {
 
 
     public static void loadModules() {
+        loadMinecraftModule();
         loadDiscordModule();
         loadConfigModule();
         loadMySQLModule();
         loadRedisModule();
+    }
+
+    private static final FileUtils config = Core.config;
+
+    private static void loadConfigModule() {
+        serverName = config.getString("server-name", "YourServerName");
     }
 
     private static final FileUtils redis = Core.redisModule;
@@ -70,17 +80,19 @@ public class Config {
         database = mysql.getString("mysql.database", "");
     }
 
-    private static final FileUtils config = Core.config;
 
-    private static void loadConfigModule() {
-        maintenanceMode = config.getBoolean("maintenance-mode", false);
-        manageConnectionEnabled = config.getBoolean("manage-connections.enabled", false);
-        playerHeadAsServerIcon = config.getBoolean("manage-connections.player-head-as-server-icon", false);
-        serverDomainName = config.getString("server-domain-name", "yourdomain.com");
-        verifyServerDomain = config.getString("manage-connections.verify-server-domain", "verify.yourdomain.com");
-        verifyServer = config.getString("manage-connections.verify-server", "Verify");
-        allowedDomains = config.getListAsList("manage-connections.allowed-domains");
+    private static final FileUtils minecraftModule = Core.minecraftModule;
+
+    private static void loadMinecraftModule() {
+        maintenanceMode = minecraftModule.getBoolean("maintenance-mode", false);
+        manageConnectionEnabled = minecraftModule.getBoolean("manage-connections.enabled", false);
+        playerHeadAsServerIcon = minecraftModule.getBoolean("manage-connections.player-head-as-server-icon", false);
+        serverDomainName = minecraftModule.getString("server-domain-name", "yourdomain.com");
+        verifyServerDomain = minecraftModule.getString("manage-connections.verify-server-domain", "verify.yourdomain.com");
+        verifyServer = minecraftModule.getString("manage-connections.verify-server", "Verify");
+        allowedDomains = minecraftModule.getListAsList("manage-connections.allowed-domains");
     }
+
 
     private static final FileUtils discordModule = Core.discordModule;
 
@@ -89,6 +101,7 @@ public class Config {
         guildID = discordModule.getString("discord.guild-id", "");
         activityType = discordModule.getString("discord.activity-type", "");
         activity = discordModule.getString("discord.activity", "");
+        userRoleID = discordModule.getString("discord.user-role-id", "");
         categoryID = discordModule.getString("discord.tickets.category-id", "");
         teamRoleID = discordModule.getString("discord.tickets.team-role-id", "");
         logChannelID = discordModule.getString("discord.tickets.log-channel-id", "");
@@ -96,6 +109,9 @@ public class Config {
         portTCPServer = discordModule.getInt("discord.tcp-server.port", 6666);
     }
 
+    public static String getServerName() {
+        return serverName;
+    }
 
     public static int getPortRedis() {
         return portRedis;
@@ -127,7 +143,6 @@ public class Config {
             Properties prop = new Properties();
             InputStream in = DiscordAPI.class.getResourceAsStream("/application.properties");
             prop.load(in);
-
             return prop.getProperty("TOKEN");
         }catch (Exception ex){
             Core.severe("./application.properties file can't be found", ex);
@@ -145,6 +160,10 @@ public class Config {
 
     public static String getGuildID() {
         return guildID;
+    }
+
+    public static String getUserRoleID() {
+        return userRoleID;
     }
 
     public static String getCategoryID() {
@@ -238,7 +257,7 @@ public class Config {
 
     public static void setMaintenanceMode(boolean maintenanceMode) {
         Config.maintenanceMode = maintenanceMode;
-        save(config, "maintenance-mode", maintenanceMode);
+        save(minecraftModule, "maintenance-mode", maintenanceMode);
     }
 
     public static void save(FileUtils file, String key, Object value) {

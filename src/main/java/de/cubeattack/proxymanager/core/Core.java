@@ -8,6 +8,9 @@ import org.slf4j.LoggerFactory;
 
 public class Core {
 
+    private static boolean isMinecraftServer;
+
+    public static FileUtils minecraftModule;
     public static FileUtils discordModule;
     public static FileUtils redisModule;
     public static FileUtils mysqlModule;
@@ -18,10 +21,11 @@ public class Core {
     private static DataSourceProvider datasource;
 
     public static void main(String[] args) {
-        run(LoggerFactory.getLogger("de.cubeattack"));
+        run(false, LoggerFactory.getLogger("de.cubeattack"));
     }
 
-    public static void run(Object logger) {
+    public static void run(boolean isMinecraftServer, Object logger) {
+        Core.isMinecraftServer = isMinecraftServer;
         LogManager.getLogger().setLogger(logger);
         run();
     }
@@ -33,10 +37,11 @@ public class Core {
 
         //Core.info("running ProxyManager on version " + VersionUtils.getPomVersion(VersionUtils.class) + " build " + VersionUtils.getBuild());
 
-        discordModule = new FileUtils(Core.class.getResourceAsStream("/modules/discord.yml"), "plugins/ProxyManager", "modules/discord.yml");
-        redisModule = new FileUtils(Core.class.getResourceAsStream("/modules/redis.yml"), "plugins/ProxyManager", "modules/redis.yml");
-        mysqlModule = new FileUtils(Core.class.getResourceAsStream("/modules/mysql.yml"), "plugins/ProxyManager", "modules/mysql.yml");
-        config = new FileUtils(Core.class.getResourceAsStream("/config.yml"), "plugins/ProxyManager", "config.yml");
+        minecraftModule = new FileUtils(Core.class.getResourceAsStream("/modules/minecraft.yml"), isMinecraftServer ? "plugins/ProxyManager" : "./", "modules/minecraft.yml");
+        discordModule = new FileUtils(Core.class.getResourceAsStream("/modules/discord.yml"), isMinecraftServer ? "plugins/ProxyManager" : "./", "modules/discord.yml");
+        redisModule = new FileUtils(Core.class.getResourceAsStream("/modules/redis.yml"), isMinecraftServer ? "plugins/ProxyManager" : "./", "modules/redis.yml");
+        mysqlModule = new FileUtils(Core.class.getResourceAsStream("/modules/mysql.yml"), isMinecraftServer ? "plugins/ProxyManager" : "./", "modules/mysql.yml");
+        config = new FileUtils(Core.class.getResourceAsStream("/config.yml"), isMinecraftServer ? "plugins/ProxyManager" : "./", "config.yml");
 
         Config.loadModules();
 

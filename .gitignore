@@ -1,5 +1,6 @@
 #ProxyManger
-plugins/
+config.yml
+modules/
 /src/main/resources/application.properties
 
 # User-specific stuff

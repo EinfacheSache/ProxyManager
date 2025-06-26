@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.Modal;
@@ -75,7 +76,7 @@ public class TicketListener extends ListenerAdapter {
                             "Bitte pingen Sie unsere Team nicht selbst an, sondern nur in Notsituationen.\n" +
                             "(Die Nichtbeachtung dieser Regel führt zu einem Timeout/Ban)"
                     ).setColor(Color.GREEN).build())
-                    .addActionRow(Button.danger("delete_ticket", "\uD83D\uDDD1\uFE0F Ticket schließen"))
+                    .addActionRow(Button.danger("delete_ticket", "\uD83D\uDDD1️ Ticket schließen"))
                     .queue();
 
             channel.sendMessage("<@&" + teamID + ">").queue();

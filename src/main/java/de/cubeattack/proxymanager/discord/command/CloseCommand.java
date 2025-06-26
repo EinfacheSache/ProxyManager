@@ -31,23 +31,6 @@ public class CloseCommand extends ListenerAdapter {
         String reason = null;
         if (!event.getOptionsByName("reason").isEmpty()) {
             reason = event.getOptionsByName("reason").get(0).getAsString();
-        } else {
-            reason = null;
-        }
-
-        ((TextChannel) event.getChannel()).getMemberPermissionOverrides().stream().filter(mpOverride ->
-                !Objects.requireNonNull(mpOverride.getMember()).getUser().isBot()).forEach(mpOverride ->
-                Objects.requireNonNull(mpOverride.getMember()).getUser().openPrivateChannel().flatMap(privateChannel ->
-                        privateChannel.sendMessageEmbeds(MessageUtils.getDefaultEmbed()
-                                .setAuthor("GiantNetwork")
-                                .setColor(Color.GREEN)
-                                .setTitle("Vielen Dank, dass Sie den Support kontaktiert haben!")
-                                .setDescription("Ihr Fall wurde aufgrund " + (reason == null ? "einer Lösung" : reason) + " geschlossen. \nWenn Sie ein anderes Problem haben, können Sie möglicherweise ein weiteres Ticket eröffnen.")
-                                .build())).queue());
-
-        if (guild != null && (Config.getLogChannelID().isEmpty() || guild.getTextChannelById(Config.getLogChannelID()) == null)) {
-            TextChannel textChannel = guild.createTextChannel("\uD83D\uDCBE│server-logs").complete();
-            Config.setLogChannelID(textChannel.getId());
         }
 
         ticketClosed(guild, channel, event.getMember(), reason);

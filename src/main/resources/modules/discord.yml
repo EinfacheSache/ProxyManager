@@ -1,12 +1,13 @@
 discord:
   enabled: true
   activity-type: 'PLAYING'
-  activity: 'GiantNetwork.de'
-  guild-id: '819108810899324940'
+  activity: 'Flareon.de'
+  guild-id: '1371518487234871408'
   tickets:
-    category-id: ''
-    team-role-id: ''
-    log-channel-id: ''
+    category-id: '1387775866309972160'
+    team-role-id: '1371586526470869013'
+    log-channel-id: '1387774747030458508'
+  user-role-id: '1371583572368031915'
   tcp-server:
-    connect: false # require discord module enabled
+    connect: true # require discord module enabled
     port: 6666

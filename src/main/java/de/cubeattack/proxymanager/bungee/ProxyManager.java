@@ -32,7 +32,7 @@ public final class ProxyManager extends Plugin {
     }
 
     public void onEnable() {
-        Core.run(getLogger());
+        Core.run(true, getLogger());
         new Metrics(this, ServerID);
         statsUUID = getPlugin().getProxy().getConfig().getUuid();
 
