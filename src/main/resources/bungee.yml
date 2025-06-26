@@ -1,7 +1,7 @@
 main: de.cubeattack.proxymanager.bungee.ProxyManager
 name: ProxyManager
 version: '${project.version}:${buildNumber}'
-author: CubeAttack
+author: EinfacheSache | Tom (aka CubeAttack)
 description: Manage your ProxyServer
 softDepends:
   - Protocolize
