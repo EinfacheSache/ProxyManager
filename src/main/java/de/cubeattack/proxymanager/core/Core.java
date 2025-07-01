@@ -15,6 +15,7 @@ public class Core {
     public static FileUtils redisModule;
     public static FileUtils mysqlModule;
     public static FileUtils config;
+    public static FileUtils data;
 
     private static RedisConnector RedisConnector;
     private static DiscordAPI discordAPI;
@@ -42,6 +43,7 @@ public class Core {
         redisModule = new FileUtils(Core.class.getResourceAsStream("/modules/redis.yml"), isMinecraftServer ? "plugins/ProxyManager" : "./", "modules/redis.yml");
         mysqlModule = new FileUtils(Core.class.getResourceAsStream("/modules/mysql.yml"), isMinecraftServer ? "plugins/ProxyManager" : "./", "modules/mysql.yml");
         config = new FileUtils(Core.class.getResourceAsStream("/config.yml"), isMinecraftServer ? "plugins/ProxyManager" : "./", "config.yml");
+        data = new FileUtils(Core.class.getResourceAsStream("/data.yml"), isMinecraftServer ? "plugins/ProxyManager" : "./", "data.yml");
 
         Config.loadModules();
 
@@ -89,4 +91,9 @@ public class Core {
     public static DataSourceProvider getDatasource() {
         return datasource;
     }
+
+    public static boolean isMinecraftServer() {
+        return isMinecraftServer;
+    }
+
 }

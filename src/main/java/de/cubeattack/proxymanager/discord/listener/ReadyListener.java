@@ -21,6 +21,13 @@ public class ReadyListener implements EventListener {
             Core.info("DiscordAPI is ready!");
             Core.info("Logged in as " + jda.getSelfUser().getName() + "#" + jda.getSelfUser().getDiscriminator());
             Core.info("Connected to " + guilds.size() + " Guilds : " + Arrays.toString(guilds.toArray()));
+
+            guilds.forEach(guild -> {
+                    Core.info("Load retrieve invites from " + guild.getName());
+                    guild.retrieveInvites().queue(invites -> invites.forEach(invite -> MemberGuildJoinListener.getInviteUses().put(invite.getCode(), invite.getUses()))
+                    );
+                }
+            );
         }
     }
 }

@@ -12,6 +12,7 @@ public class RedisConnector {
     public RedisConnector() {
 
         if (!Config.connectRedis()) return;
+        if (!Core.isMinecraftServer()) return;
 
         try {
             JedisPoolConfig poolConfig = new JedisPoolConfig();

@@ -1,13 +1,15 @@
 discord:
   enabled: true
   activity-type: 'PLAYING'
-  activity: 'Flareon.de'
+  activity: 'FlareonEvents.de'
   guild-id: '1371518487234871408'
+  user-role-id: '1371583572368031915'
+  beta-tester-role-id: '1371594399003443200'
   tickets:
     category-id: '1387775866309972160'
     team-role-id: '1371586526470869013'
     log-channel-id: '1387774747030458508'
-  user-role-id: '1371583572368031915'
+  counting-channel-id: '1371576765843247106'
   tcp-server:
     connect: true # require discord module enabled
     port: 6666

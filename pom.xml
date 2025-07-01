@@ -101,12 +101,12 @@
     </repositories>
 
     <dependencies>
-        <dependency>
-            <groupId>com.github.CubeAttack</groupId>
-            <artifactId>EasyAPI</artifactId>
-            <version>776e33d372</version>
-        </dependency>
 
+        <dependency>
+            <groupId>com.github.EinfacheSache</groupId>
+            <artifactId>easyapi</artifactId>
+            <version>f8667ef35a</version>
+        </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
@@ -117,11 +117,12 @@
             <groupId>net.dv8tion</groupId>
             <artifactId>JDA</artifactId>
             <version>5.6.1</version>
+
         </dependency>
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
-            <version>5.0.0-alpha.12</version>
+            <version>5.0.0-alpha.14</version>
 
         </dependency>
         <dependency>
@@ -136,11 +137,12 @@
             <version>5.1.0</version>
             <scope>provided</scope>
         </dependency>
+
         <dependency>
             <groupId>dev.simplix</groupId>
             <artifactId>protocolize-api</artifactId>
             <version>2.3.3</version>
-
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>net.md-5</groupId>
@@ -148,5 +150,6 @@
             <version>1.21-R0.3</version>
             <scope>provided</scope>
         </dependency>
+
     </dependencies>
 </project>

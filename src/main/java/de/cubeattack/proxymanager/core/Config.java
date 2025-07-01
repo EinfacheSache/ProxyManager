@@ -12,6 +12,8 @@ public class Config {
 
     private static String serverName;
 
+    private static Integer countingNumber;
+
     private static int portRedis;
     private static boolean connectRedis;
     private static String hostRedis;
@@ -25,6 +27,8 @@ public class Config {
     private static String categoryID;
     private static String teamRoleID;
     private static String logChannelID;
+    private static String countingChannelID;
+    private static String betaTesterRoleID;
     private static String userRoleID;
     private static int portTCPServer;
     private static boolean connectTCPServer;
@@ -48,14 +52,21 @@ public class Config {
     public static void loadModules() {
         loadMinecraftModule();
         loadDiscordModule();
-        loadConfigModule();
         loadMySQLModule();
         loadRedisModule();
+        loadConfig();
+        loadData();
+    }
+
+    private static final FileUtils data = Core.data;
+
+    private static void loadData() {
+        countingNumber = data.getInt("counting.current-number");
     }
 
     private static final FileUtils config = Core.config;
 
-    private static void loadConfigModule() {
+    private static void loadConfig() {
         serverName = config.getString("server-name", "YourServerName");
     }
 
@@ -102,11 +113,17 @@ public class Config {
         activityType = discordModule.getString("discord.activity-type", "");
         activity = discordModule.getString("discord.activity", "");
         userRoleID = discordModule.getString("discord.user-role-id", "");
+        betaTesterRoleID = discordModule.getString("discord.beta-tester-role-id", "");
         categoryID = discordModule.getString("discord.tickets.category-id", "");
         teamRoleID = discordModule.getString("discord.tickets.team-role-id", "");
         logChannelID = discordModule.getString("discord.tickets.log-channel-id", "");
+        countingChannelID = discordModule.getString("discord.counting-channel-id", "");
         connectTCPServer = discordModule.getBoolean("discord.tcp-server.connect", false);
         portTCPServer = discordModule.getInt("discord.tcp-server.port", 6666);
+    }
+
+    public static Integer getCountingNumber() {
+        return countingNumber;
     }
 
     public static String getServerName() {
@@ -166,6 +183,10 @@ public class Config {
         return userRoleID;
     }
 
+    public static String getBetaTesterRoleID() {
+        return betaTesterRoleID;
+    }
+
     public static String getCategoryID() {
         return categoryID;
     }
@@ -176,6 +197,10 @@ public class Config {
 
     public static String getLogChannelID() {
         return logChannelID;
+    }
+
+    public static String getCountingChannelID() {
+        return countingChannelID;
     }
 
     public static int getPortTCPServer() {
@@ -238,6 +263,11 @@ public class Config {
 
     public static List<String> getAllowedDomains() {
         return allowedDomains;
+    }
+
+    public static void setCountingNumber(Integer countingNumber) {
+        Config.countingNumber = countingNumber;
+        save(data, "counting.current-number", countingNumber);
     }
 
     public static void setCategoryID(String categoryID) {

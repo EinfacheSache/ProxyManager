@@ -44,6 +44,7 @@ public class DiscordAPI extends ListenerAdapter
             jdaBuilder.addEventListeners(new ReadyListener());
             jdaBuilder.addEventListeners(new TicketListener());
             jdaBuilder.addEventListeners(new ManagerCommand());
+            jdaBuilder.addEventListeners(new MessageListener());
             jdaBuilder.addEventListeners(new CommandListener());
             jdaBuilder.addEventListeners(new ContextMenuListener());
             jdaBuilder.addEventListeners(new BotGuildJoinListener());
