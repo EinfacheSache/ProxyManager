@@ -3,10 +3,15 @@ package de.cubeattack.proxymanager.core;
 import de.cubeattack.api.logger.LogManager;
 import de.cubeattack.api.shutdown.ShutdownHook;
 import de.cubeattack.api.util.FileUtils;
+import de.cubeattack.api.util.versioning.VersionUtils;
 import de.cubeattack.proxymanager.discord.DiscordAPI;
 import org.slf4j.LoggerFactory;
 
+import java.util.UUID;
+
 public class Core {
+
+    public static final UUID ALLOWED_UUID = UUID.fromString("201e5046-24df-4830-8b4a-82b635eb7cc7");
 
     private static boolean isMinecraftServer;
 
@@ -21,8 +26,10 @@ public class Core {
     private static DiscordAPI discordAPI;
     private static DataSourceProvider datasource;
 
+    public static Long UPTIME = 0L;
+
     public static void main(String[] args) {
-        run(false, LoggerFactory.getLogger("de.cubeattack"));
+        run(false, LoggerFactory.getLogger(Core.class));
     }
 
     public static void run(boolean isMinecraftServer, Object logger) {
@@ -32,11 +39,11 @@ public class Core {
     }
 
     public static void run() {
-        Thread.currentThread().setName("NETWORK");
+        Thread.currentThread().setName("PROXY MANAGER");
 
         ShutdownHook.register(Core::shutdown);
 
-        //Core.info("running ProxyManager on version " + VersionUtils.getPomVersion(VersionUtils.class) + " build " + VersionUtils.getBuild());
+        Core.info("running ProxyManager on version " + VersionUtils.getPomVersion(Core.class));
 
         minecraftModule = new FileUtils(Core.class.getResourceAsStream("/modules/minecraft.yml"), isMinecraftServer ? "plugins/ProxyManager" : "./", "modules/minecraft.yml");
         discordModule = new FileUtils(Core.class.getResourceAsStream("/modules/discord.yml"), isMinecraftServer ? "plugins/ProxyManager" : "./", "modules/discord.yml");
@@ -79,6 +86,7 @@ public class Core {
     public static void severe(String output, Throwable err) {
         LogManager.getLogger().error(output, err);
     }
+
 
     public static RedisConnector getRedisConnector() {
         return RedisConnector;

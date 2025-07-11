@@ -4,6 +4,8 @@ import de.cubeattack.api.API;
 import de.cubeattack.proxymanager.bungee.ScreenBuilder;
 import de.cubeattack.proxymanager.core.Config;
 import de.cubeattack.proxymanager.core.Core;
+import de.cubeattack.proxymanager.core.MOTDUtils;
+import de.cubeattack.proxymanager.core.RedisConnector;
 import net.md_5.bungee.api.Favicon;
 import net.md_5.bungee.api.ServerPing;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -14,10 +16,10 @@ import net.md_5.bungee.api.event.ProxyPingEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
-import redis.clients.jedis.Jedis;
 
 import javax.imageio.ImageIO;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.URL;
 import java.util.HashMap;
 
@@ -30,42 +32,45 @@ public class ManageConnection implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onFirstPing(ProxyPingEvent e) {
         int versionNumber = e.getResponse().getVersion().getProtocol();
-        version = new ServerPing.Protocol("1.8 - 1.20.4 (Eric ist zu fett für den Server)", versionNumber);
+        version = new ServerPing.Protocol("Version 1.21.x", versionNumber);
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPreLogin(PreLoginEvent e) {
-        try(Jedis jedis = Core.getRedisConnector().getJedisPool().getResource()) {
-            if (!jedis.isConnected() || jedis.isBroken()) {
-                return;
-            }
-            API.getExecutorService().submit(() -> jedis.set(e.getConnection().getAddress().getHostString(), e.getConnection().getName()));
-            API.getExecutorService().submit(() -> images.put(e.getConnection().getName(), getFavicon(e.getConnection().getName())));
-        }
+        RedisConnector jedis = Core.getRedisConnector();
+
+        API.getExecutorService().submit(() -> jedis.set(e.getConnection().getAddress().getHostString(), e.getConnection().getName()));
+        API.getExecutorService().submit(() -> images.put(e.getConnection().getName(), getFavicon(e.getConnection().getName())));
     }
 
     @EventHandler
     public void initialServerConnect(PostLoginEvent event) {
-        if(!Config.isMaintenanceMode())
+        if (!Config.isMaintenanceMode())
             return;
 
-        if(event.getPlayer().hasPermission("proxy.maintenance.bypass"))
+        if (event.getPlayer().hasPermission("proxy.maintenance.bypass"))
             return;
 
         event.getPlayer().getPendingConnection().disconnect(new ScreenBuilder()
                 .addLine("§4§lWe are currently in maintenance\n")
-                .addLine("§7Discord: §bgiantnetwork.de/discord")
+                .addLine("§7Discord: §b" + Config.getServerDomainName() + "/discord")
                 .build());
     }
-    
+
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onLogin(LoginEvent e) {
-        if(e.getConnection().getVirtualHost() == null) return;
+        if (e.getConnection().getVirtualHost() == null) return;
         String serverHost = e.getConnection().getVirtualHost().getHostName();
+        String localHost = ((InetSocketAddress) e.getConnection().getSocketAddress()).getHostString();
 
-        for (String allowedDomain: Config.getAllowedDomains()) {
-            if(allowedDomain.equalsIgnoreCase(serverHost))return;
-            if(allowedDomain.startsWith("*") && serverHost.toLowerCase().endsWith(allowedDomain.toLowerCase().replace("*.", "")))return;
+        if (localHost.startsWith("192.168.178.")) {
+            return;
+        }
+
+        for (String allowedDomain : Config.getAllowedDomains()) {
+            if (allowedDomain.equalsIgnoreCase(serverHost)) return;
+            if (allowedDomain.startsWith("*") && serverHost.toLowerCase().endsWith(allowedDomain.toLowerCase().replace("*.", "")))
+                return;
         }
 
         ScreenBuilder builder = new ScreenBuilder()
@@ -82,27 +87,23 @@ public class ManageConnection implements Listener {
 
         if (e.getConnection() == null) return;
 
-        String line1 = "§7§kKK§r §6Welcome to §l" + Config.getServerDomainName() + "§c§o [1.8-1.20.4] §7§kKK§r";
-        String line2 = "";
-        String playerName = null;
+        String line1 = "§7§kKK§r §2§l100 Spieler Events §7§l| §b§lAlpha Test §c[1.21.x] §7§kKK§r";
+        String line2 =  MOTDUtils.getCenteredMessage("§7§kK§r §6Willkommen auf §l" + Config.getServerDomainName() + " §7§kK§r");
 
-        if (Config.isPlayerHeadAsServerIcon()){
+        if (Config.isManageConnectionEnabled()) {
+            RedisConnector jedis = Core.getRedisConnector();
+            String playerName = jedis.get(e.getConnection().getAddress().getHostString());
 
-            try(Jedis jedis = Core.getRedisConnector().getJedisPool().getResource()) {
-                if (jedis.isConnected() && !jedis.isBroken()) {
-                    playerName = jedis.get(e.getConnection().getAddress().getHostString());
-                    if (images.containsKey(playerName)) {
-                        e.getResponse().setFavicon(images.get(playerName));
-                    }
+            if(Config.isPlayerHeadAsServerIcon()) {
+                if (images.containsKey(playerName)) {
+                    e.getResponse().setFavicon(images.get(playerName));
                 }
+            }
 
-                if (e.getConnection().getVirtualHost() != null && e.getConnection().getVirtualHost().getHostName().toLowerCase().startsWith("builder.")) {
-                    line2 = "          §6Eric scheißt auf unsere Builder :)";
-                } else if (playerName != null) {
-                    line2 = "§6Willkommen §b" + playerName + "§6 auf " + Config.getServerDomainName();
-                } else {
-                    line2 = "            §2§lEarth Server §7+ §b§lAlpha Test";
-                }
+            if (e.getConnection().getVirtualHost() != null && e.getConnection().getVirtualHost().getHostName().toLowerCase().startsWith("builder.")) {
+                line2 = "          §6Chaya aka Beda scheißt auf unsere Builder :)";
+            } else if (playerName != null) {
+                line2 = MOTDUtils.getCenteredMessage("§7§kK §6Willkommen §b" + playerName + "§6 auf " + Config.getServerDomainName()) + " §7§kK";
             }
         }
 
@@ -110,14 +111,17 @@ public class ManageConnection implements Listener {
         e.getResponse().setVersion(version);
     }
 
-    private Favicon getFavicon(String playerName){
+    private Favicon getFavicon(String playerName) {
         Favicon favicon = null;
         try {
             favicon = Favicon.create(ImageIO.read(new URL("https://minotar.net/helm/" + playerName + "/64.png")));
-        } catch (IOException ignored) {}
+        } catch (IOException ignored) {
+        }
         return favicon;
     }
 }
+
+
 
     /*@EventHandler(priority = EventPriority.LOWEST)
     public void onServerConnect(ServerConnectEvent e) {

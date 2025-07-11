@@ -1,6 +1,7 @@
 package de.cubeattack.proxymanager.core;
 
 import java.io.IOException;
+import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -24,6 +25,8 @@ public class TcpServer {
                     }
                 }
 
+            }catch (BindException ex) {
+                Core.warn("TCP-Server is already running: " + ex.getLocalizedMessage());
             } catch (IOException ex) {
                 Core.severe("Error in TCP-Server", ex);
             }

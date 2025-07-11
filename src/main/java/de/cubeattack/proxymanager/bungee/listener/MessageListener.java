@@ -1,97 +1,91 @@
 package de.cubeattack.proxymanager.bungee.listener;
 
-import de.cubeattack.proxymanager.bungee.ProxyManager;
+import de.cubeattack.proxymanager.bungee.BungeeProxyManager;
 import de.cubeattack.proxymanager.core.Core;
+import de.cubeattack.proxymanager.core.RedisConnector;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.ChatEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.scheduler.ScheduledTask;
 import net.md_5.bungee.event.EventHandler;
-import redis.clients.jedis.Jedis;
 
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
 public class MessageListener implements Listener {
 
-    public static ProxyManager plugin = ProxyManager.getPlugin();
-    public static HashMap<ProxiedPlayer, Integer> inCommandCooldownCounter = new HashMap<>();
-    public static HashMap<ProxiedPlayer, Integer> inCommandCooldown = new HashMap<>();
+    public static BungeeProxyManager plugin = BungeeProxyManager.getPlugin();
+    public static HashMap<ProxiedPlayer, Integer> cooldownCounter = new HashMap<>();
+    public static HashMap<ProxiedPlayer, Long> inCooldown = new HashMap<>();
     public static HashMap<ProxiedPlayer, ScheduledTask> taskIDForCooldown = new HashMap<>();
 
     @EventHandler
     public void OnChat(ChatEvent e) {
         ProxiedPlayer p = (ProxiedPlayer) e.getSender();
+
+        RedisConnector jedis = Core.getRedisConnector();
+        if (Boolean.parseBoolean(jedis.get("Commands-Disabled"))) {
+            if (e.isCommand()) {
+                if (!p.hasPermission("proxy.command.disabled.bypass")) {
+                    e.setCancelled(true);
+                    BungeeProxyManager.sendMessage(p, "§cAlle Commands sind deaktiviert");
+                    return;
+                }
+            }
+        }
+
+        if (Boolean.parseBoolean(jedis.get("Chat-Disabled"))) {
+            if (!e.isCommand()) {
+                if (!p.hasPermission("proxy.chat.disabled.bypass")) {
+                    e.setCancelled(true);
+                    BungeeProxyManager.sendMessage(p, "§cDer Chat ist deaktiviert");
+                    return;
+                }
+            }
+        }
+
         if (p.hasPermission("proxy.cooldown.bypass")) return;
 
         String messages;
-        int counter;
+        int maxCounter;
+
         if (e.isCommand()) {
             messages = "§cBitte warte bevor du erneut einen Command sendest";
-            counter = 2;
+            maxCounter = 3;
         } else {
             messages = "§cBitte warte bevor du erneut einen Messages sendest";
-            counter = 3;
+            maxCounter = 4;
         }
-        if (inCommandCooldown.containsKey(p)) {
-            ProxyManager.sendMessage(p, messages);
+
+        if (inCooldown.containsKey(p) && ((System.currentTimeMillis() - inCooldown.get(p)) / 1000) <= 5) {
+            BungeeProxyManager.sendMessage(p, messages);
             e.setCancelled(true);
             return;
         }
 
-        if (inCommandCooldownCounter.containsKey(p)) {
-            inCommandCooldownCounter.replace(p, inCommandCooldownCounter.get(p) + 1);
-            if (inCommandCooldownCounter.get(p) >= counter) {
-                inCommandCooldown.put(p, 5);
-                startRemoveCooldownTimer(p);
-                inCommandCooldownCounter.remove(p);
+        if (cooldownCounter.containsKey(p)) {
+            cooldownCounter.replace(p, cooldownCounter.get(p) + 1);
+            if (cooldownCounter.get(p) >= maxCounter) {
+                inCooldown.put(p, System.currentTimeMillis());
+                cooldownCounter.remove(p);
             }
         } else {
-            inCommandCooldownCounter.put(p, 1);
+            cooldownCounter.put(p, 1);
         }
+
         removeInCommandCooldownCounter(p);
-
-        try (Jedis jedis = Core.getRedisConnector().getJedisPool().getResource()) {
-            if (!jedis.isConnected() || jedis.isBroken()) {
-                return;
-            }
-
-            if (Boolean.parseBoolean(jedis.get("Commands-Disabled"))) {
-                if (e.isCommand()) {
-                    if (!p.hasPermission("proxy.command.disabled.bypass")) {
-                        e.setCancelled(true);
-                        ProxyManager.sendMessage(p, "§cAlle Commands sind deaktiviert");
-                    }
-                }
-            }
-
-            if (Boolean.parseBoolean(jedis.get("Chat-Disabled"))) {
-                if (!e.isCommand()) {
-                    if (!p.hasPermission("proxy.chat.disabled.bypass")) {
-                        e.setCancelled(true);
-                        ProxyManager.sendMessage(p, "§cDer Chat ist deaktiviert");
-                    }
-                }
-            }
-        }
     }
 
-    public static ScheduledTask taskIDForRemoveCooldown;
-
-    public static void startRemoveCooldownTimer(ProxiedPlayer p) {
-        stopRemoveCooldownTimer(p);
-        taskIDForRemoveCooldown = plugin.getProxy().getScheduler().schedule(ProxyManager.getPlugin(), () -> {
-            if (inCommandCooldown.containsKey(p)) {
-                if (inCommandCooldown.get(p) <= 1) {
-                    inCommandCooldown.remove(p);
-                    stopRemoveCooldownTimer(p);
-                } else {
-                    int counter = inCommandCooldown.get(p);
-                    counter--;
-                    inCommandCooldown.replace(p, counter);
+    public static void removeInCommandCooldownCounter(ProxiedPlayer p) {
+        ScheduledTask taskIDForRemoveCooldown = plugin.getProxy().getScheduler().schedule(BungeeProxyManager.getPlugin(), () -> {
+            if (cooldownCounter.containsKey(p)) {
+                cooldownCounter.replace(p, cooldownCounter.get(p) - 1);
+                if (cooldownCounter.get(p) < 1) {
+                    inCooldown.remove(p);
                 }
-            }
-        }, 1000, 1000, TimeUnit.MILLISECONDS);
+            }else
+                stopRemoveCooldownTimer(p);
+        }, 1500, TimeUnit.MILLISECONDS);
         taskIDForCooldown.put(p, taskIDForRemoveCooldown);
     }
 
@@ -101,17 +95,6 @@ public class MessageListener implements Listener {
         }
         plugin.getProxy().getScheduler().cancel(taskIDForCooldown.get(p));
         taskIDForCooldown.remove(p);
-    }
-
-    public static void removeInCommandCooldownCounter(ProxiedPlayer p) {
-        plugin.getProxy().getScheduler().schedule(ProxyManager.getPlugin(), () -> {
-            if (inCommandCooldownCounter.containsKey(p)) {
-                inCommandCooldownCounter.replace(p, inCommandCooldownCounter.get(p) - 1);
-                if (inCommandCooldownCounter.get(p) <= 1) {
-                    inCommandCooldown.remove(p);
-                }
-            }
-        }, 1500, TimeUnit.MILLISECONDS);
     }
 }
 

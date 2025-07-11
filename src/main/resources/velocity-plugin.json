@@ -1,0 +1,10 @@
+{
+  "id":"proxymanager",
+  "name":"ProxyManager",
+  "version":"${project.version}:${buildNumber}",
+  "authors":["EinfacheSache"],
+  "url":"https://einfachesache.de/discord/",
+  "main":"de.cubeattack.proxymanager.velocity.VelocityProxyManager",
+  "description":"A Plugin for interact with the intern NeoProtect system"
+}
+

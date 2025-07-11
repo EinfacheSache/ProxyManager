@@ -1,7 +1,6 @@
-package de.cubeattack.proxymanager.bungee;
+package de.cubeattack.proxymanager.velocity;
 
-
-import net.md_5.bungee.api.chat.TextComponent;
+import net.kyori.adventure.text.Component;
 
 public class ScreenBuilder {
 
@@ -16,7 +15,7 @@ public class ScreenBuilder {
         return this;
     }
 
-    public TextComponent build() {
-        return new TextComponent(String.valueOf(screen));
+    public Component build() {
+        return Component.text(String.valueOf(screen));
     }
 }

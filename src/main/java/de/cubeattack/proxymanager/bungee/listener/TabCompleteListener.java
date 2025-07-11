@@ -1,6 +1,6 @@
 package de.cubeattack.proxymanager.bungee.listener;
 
-import de.cubeattack.proxymanager.bungee.ProxyManager;
+import de.cubeattack.proxymanager.bungee.BungeeProxyManager;
 import de.cubeattack.proxymanager.bungee.command.PluginControllerCMD;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.TabCompleteEvent;
@@ -28,7 +28,7 @@ public class TabCompleteListener implements Listener {
             if (event.getSender() instanceof ProxiedPlayer && !((ProxiedPlayer) event.getSender()).hasPermission("proxy.execute.bpl"))
                 return;
 
-            for (Plugin plugin : ProxyManager.getPluginManger().getPlugins()) {
+            for (Plugin plugin : BungeeProxyManager.getPluginManger().getPlugins()) {
                 String plName = plugin.getDescription().getName();
 
                 if (plName.equals("cmd_find") || plName.equals("cmd_server") || plName.equals("cmd_alert") || plName.equals("cmd_send") || plName.equals("cmd_list") || plName.equals("reconnect_yaml")) {

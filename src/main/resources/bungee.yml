@@ -1,4 +1,4 @@
-main: de.cubeattack.proxymanager.bungee.ProxyManager
+main: de.cubeattack.proxymanager.bungee.BungeeProxyManager
 name: ProxyManager
 version: '${project.version}:${buildNumber}'
 author: EinfacheSache | Tom (aka CubeAttack)

@@ -1,9 +1,9 @@
-server-domain-name: ''
+server-domain-name: 'YourServerName.de'
 maintenance-mode: false
 manage-connections:
   enabled: true
-  player-head-as-server-icon: true
+  player-head-as-server-icon: false
   verify-server-domain: ''
   verify-server: ''
   allowed-domains:
-    - ''
+    - 'YourServerName.de'

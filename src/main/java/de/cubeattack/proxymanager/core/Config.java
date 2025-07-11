@@ -48,7 +48,6 @@ public class Config {
     private static String verifyServer;
     private static List<String> allowedDomains;
 
-
     public static void loadModules() {
         loadMinecraftModule();
         loadDiscordModule();
@@ -67,17 +66,17 @@ public class Config {
     private static final FileUtils config = Core.config;
 
     private static void loadConfig() {
-        serverName = config.getString("server-name", "YourServerName");
+        serverName = config.get("server-name", "YourServerName");
     }
 
     private static final FileUtils redis = Core.redisModule;
 
     private static void loadRedisModule() {
         connectRedis = redis.getBoolean("redis.connect", true);
-        portRedis = redis.getInt("redis.port", 6379);
-        hostRedis = redis.getString("redis.host", "127.0.0.1");
-        userRedis = redis.getString("redis.user", "default");
-        passwordRedis = redis.getString("redis.password", "");
+        portRedis = redis.getInt("redis.port", 1337);
+        hostRedis = redis.get("redis.host", "127.0.0.1").replace("localhost", "127.0.0.1");
+        userRedis = redis.get("redis.user", "default");
+        passwordRedis = redis.get("redis.password", "");
     }
 
     private static final FileUtils mysql = Core.mysqlModule;
@@ -85,10 +84,10 @@ public class Config {
     private static void loadMySQLModule() {
         connectMySQl = mysql.getBoolean("mysql.connect", false);
         portMySQL = mysql.getInt("mysql.port", 3306);
-        hostMySQL = mysql.getString("mysql.host", "127.0.0.1");
-        user = mysql.getString("mysql.user", "root");
-        password = mysql.getString("mysql.password", "");
-        database = mysql.getString("mysql.database", "");
+        hostMySQL = mysql.get("mysql.host", "127.0.0.1");
+        user = mysql.get("mysql.user", "root");
+        password = mysql.get("mysql.password", "");
+        database = mysql.get("mysql.database", "");
     }
 
 
@@ -98,10 +97,10 @@ public class Config {
         maintenanceMode = minecraftModule.getBoolean("maintenance-mode", false);
         manageConnectionEnabled = minecraftModule.getBoolean("manage-connections.enabled", false);
         playerHeadAsServerIcon = minecraftModule.getBoolean("manage-connections.player-head-as-server-icon", false);
-        serverDomainName = minecraftModule.getString("server-domain-name", "yourdomain.com");
-        verifyServerDomain = minecraftModule.getString("manage-connections.verify-server-domain", "verify.yourdomain.com");
-        verifyServer = minecraftModule.getString("manage-connections.verify-server", "Verify");
-        allowedDomains = minecraftModule.getListAsList("manage-connections.allowed-domains");
+        serverDomainName = minecraftModule.get("server-domain-name", "yourdomain.com");
+        verifyServerDomain = minecraftModule.get("manage-connections.verify-server-domain", "verify.yourdomain.com");
+        verifyServer = minecraftModule.get("manage-connections.verify-server", "Verify");
+        allowedDomains = minecraftModule.getStringList("manage-connections.allowed-domains");
     }
 
 
@@ -109,15 +108,15 @@ public class Config {
 
     private static void loadDiscordModule() {
         discordEnable = discordModule.getBoolean("discord.enabled", false);
-        guildID = discordModule.getString("discord.guild-id", "");
-        activityType = discordModule.getString("discord.activity-type", "");
-        activity = discordModule.getString("discord.activity", "");
-        userRoleID = discordModule.getString("discord.user-role-id", "");
-        betaTesterRoleID = discordModule.getString("discord.beta-tester-role-id", "");
-        categoryID = discordModule.getString("discord.tickets.category-id", "");
-        teamRoleID = discordModule.getString("discord.tickets.team-role-id", "");
-        logChannelID = discordModule.getString("discord.tickets.log-channel-id", "");
-        countingChannelID = discordModule.getString("discord.counting-channel-id", "");
+        guildID = discordModule.get("discord.guild-id", "");
+        activityType = discordModule.get("discord.activity-type", "");
+        activity = discordModule.get("discord.activity", "");
+        userRoleID = discordModule.get("discord.user-role-id", "");
+        betaTesterRoleID = discordModule.get("discord.beta-tester-role-id", "");
+        categoryID = discordModule.get("discord.tickets.category-id", "");
+        teamRoleID = discordModule.get("discord.tickets.team-role-id", "");
+        logChannelID = discordModule.get("discord.tickets.log-channel-id", "");
+        countingChannelID = discordModule.get("discord.counting-channel-id", "");
         connectTCPServer = discordModule.getBoolean("discord.tcp-server.connect", false);
         portTCPServer = discordModule.getInt("discord.tcp-server.port", 6666);
     }

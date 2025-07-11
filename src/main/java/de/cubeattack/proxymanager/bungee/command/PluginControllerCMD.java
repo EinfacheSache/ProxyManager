@@ -1,6 +1,6 @@
 package de.cubeattack.proxymanager.bungee.command;
 
-import de.cubeattack.proxymanager.bungee.ProxyManager;
+import de.cubeattack.proxymanager.bungee.BungeeProxyManager;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.plugin.Command;
@@ -26,7 +26,7 @@ public class PluginControllerCMD extends Command {
         Plugin plugin = null;
         if (args.length >= 2) {
             pluginName = args[1];
-            plugin = ProxyManager.getPluginManger().getPlugin(pluginName);
+            plugin = BungeeProxyManager.getPluginManger().getPlugin(pluginName);
         }
 
         try {
@@ -46,7 +46,7 @@ public class PluginControllerCMD extends Command {
 
     public static void list(CommandSender sender) {
 
-        Collection<Plugin> plugins = new ArrayList<>(ProxyManager.getPluginManger().getPlugins());
+        Collection<Plugin> plugins = new ArrayList<>(BungeeProxyManager.getPluginManger().getPlugins());
         StringBuilder pl = new StringBuilder();
         AtomicInteger i = new AtomicInteger();
 
@@ -59,7 +59,7 @@ public class PluginControllerCMD extends Command {
             }
         });
 
-        ProxyManager.sendMessage(sender, "§fPlugins (" + (plugins.size() - i.get()) + "): §a" +
+        BungeeProxyManager.sendMessage(sender, "§fPlugins (" + (plugins.size() - i.get()) + "): §a" +
                 pl.substring(0, pl.length() - 4));
     }
 
@@ -76,17 +76,17 @@ public class PluginControllerCMD extends Command {
 
             disabledPluginList.remove(plugin);
 
-            ProxyManager.sendMessage(sender, "§cDas Plugin §6" + pluginName + "§c wurde§6 erfolgreich §aEnabled.");
+            BungeeProxyManager.sendMessage(sender, "§cDas Plugin §6" + pluginName + "§c wurde§6 erfolgreich §aEnabled.");
         } catch (NullPointerException e) {
-            ProxyManager.sendMessage(sender, "§cDas Plugin §6" + pluginName + "§c gibt es nicht.");
+            BungeeProxyManager.sendMessage(sender, "§cDas Plugin §6" + pluginName + "§c gibt es nicht.");
         }
     }
 
     public static void disable(Plugin plugin, String pluginName, CommandSender sender) {
         try {
 
-            ProxyManager.getPluginManger().unregisterListeners(plugin);
-            ProxyManager.getPluginManger().unregisterCommands(plugin);
+            BungeeProxyManager.getPluginManger().unregisterListeners(plugin);
+            BungeeProxyManager.getPluginManger().unregisterCommands(plugin);
 
             if (pluginName.startsWith("§")) {
                 pluginName = pluginName.substring(2);
@@ -98,9 +98,9 @@ public class PluginControllerCMD extends Command {
 
             disabledPluginList.add(plugin);
 
-            ProxyManager.sendMessage(sender, "§cDas Plugin §6" + pluginName + "§c wurde§6 erfolgreich §4Disabled.");
+            BungeeProxyManager.sendMessage(sender, "§cDas Plugin §6" + pluginName + "§c wurde§6 erfolgreich §4Disabled.");
         } catch (NullPointerException e) {
-            ProxyManager.sendMessage(sender, "§cDas Plugin §6" + pluginName + "§c gibt es nicht.");
+            BungeeProxyManager.sendMessage(sender, "§cDas Plugin §6" + pluginName + "§c gibt es nicht.");
         }
     }
 
@@ -112,19 +112,19 @@ public class PluginControllerCMD extends Command {
     public static void rename(Plugin plugin, String pluginName, String newPluginName, CommandSender sender) {
         try {
             plugin.getDescription().setName(newPluginName);
-            ProxyManager.sendMessage(sender, "§cDas Plugin §6" + pluginName + "§c wurde§6 erfolgreich §czu §6" + newPluginName + " §eRenamed.");
+            BungeeProxyManager.sendMessage(sender, "§cDas Plugin §6" + pluginName + "§c wurde§6 erfolgreich §czu §6" + newPluginName + " §eRenamed.");
         } catch (NullPointerException e) {
-            ProxyManager.sendMessage(sender, "§cDas Plugin §6" + pluginName + "§c gibt es nicht.");
+            BungeeProxyManager.sendMessage(sender, "§cDas Plugin §6" + pluginName + "§c gibt es nicht.");
         }
     }
 
     public static void showHelp(CommandSender sender) {
-        ProxyManager.sendMessage(sender, "§c--------Help--------");
-        ProxyManager.sendMessage(sender, "§c/bpl list");
-        ProxyManager.sendMessage(sender, "§c/bpl enable (Plugin)");
-        ProxyManager.sendMessage(sender, "§c/bpl disable (Plugin)");
-        ProxyManager.sendMessage(sender, "§c/bpl restart (Plugin)");
-        ProxyManager.sendMessage(sender, "§c/bpl rename (Plugin) (Name)");
+        BungeeProxyManager.sendMessage(sender, "§c--------Help--------");
+        BungeeProxyManager.sendMessage(sender, "§c/bpl list");
+        BungeeProxyManager.sendMessage(sender, "§c/bpl enable (Plugin)");
+        BungeeProxyManager.sendMessage(sender, "§c/bpl disable (Plugin)");
+        BungeeProxyManager.sendMessage(sender, "§c/bpl restart (Plugin)");
+        BungeeProxyManager.sendMessage(sender, "§c/bpl rename (Plugin) (Name)");
     }
 
     public static ArrayList<Plugin> getDisabledPluginList() {
