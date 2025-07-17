@@ -6,21 +6,26 @@ import com.velocitypowered.api.event.EventManager;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
+import com.velocitypowered.api.plugin.Dependency;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import de.cubeattack.api.minecraft.stats.Stats;
 import de.cubeattack.api.minecraft.stats.StatsManager;
 import de.cubeattack.api.minecraft.stats.StatsProvider;
+import de.cubeattack.proxymanager.ProxyInstance;
 import de.cubeattack.proxymanager.core.Config;
 import de.cubeattack.proxymanager.core.Core;
 import de.cubeattack.proxymanager.velocity.command.*;
+import de.cubeattack.proxymanager.velocity.listener.CommandListener;
 import de.cubeattack.proxymanager.velocity.listener.ManageConnection;
 import de.cubeattack.proxymanager.velocity.listener.MessageListener;
 import net.kyori.adventure.text.Component;
 
+import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 @Plugin(
         id = "proxymanger",
@@ -28,9 +33,12 @@ import java.util.logging.Logger;
         version = "${project.version}:${buildNumber}",
         url = "https://einfachesache.de/discord",
         description = "Manage your ProxyServer",
-        authors = {"EinfacheSache"}
+        authors = {"EinfacheSache"},
+        dependencies = {
+                @Dependency(id = "protocolize", optional = true)
+        }
 )
-public class VelocityProxyManager implements StatsProvider {
+public class VelocityProxyManager implements ProxyInstance, StatsProvider {
 
     private static ProxyServer proxy;
     private static Logger logger;
@@ -47,7 +55,7 @@ public class VelocityProxyManager implements StatsProvider {
     @Subscribe
     public void onInitialize(ProxyInitializeEvent event) {
 
-        Core.run(true, logger);
+        Core.run(this, logger);
 
         register();
 
@@ -66,8 +74,8 @@ public class VelocityProxyManager implements StatsProvider {
         cm.register(cm.metaBuilder("velocityplugins").aliases("vpl").build(), new PluginControllerCMD(this));
         cm.register(cm.metaBuilder("maintenance").aliases("wartungsarbeiten").build(), new MaintenanceCMD());
         cm.register(cm.metaBuilder("globalmute").aliases("gmute").build(), new GlobalMuteCMD());
-        cm.register(cm.metaBuilder("proxy").aliases("pr").build(), new ProxyCMD());
-        cm.register(cm.metaBuilder("commands").build(), new CommandsCMD());
+        cm.register(cm.metaBuilder("proxy").aliases("pr", "proxygui").build(), new ProxyCMD());
+        cm.register(cm.metaBuilder("commands").aliases("cmd").build(), new CommandsCMD());
         cm.register(cm.metaBuilder("settings").build(), new SettingsCMD());
 
 
@@ -76,15 +84,8 @@ public class VelocityProxyManager implements StatsProvider {
         }
 
         em.register(this, new MessageListener(this));
+        em.register(this, new CommandListener(this));
 
-        /*
-
-        em.register(this, new JoinListener(this));
-        em.register(this, new SessionChatListener(this));
-        em.register(this, new KeyedCommandListener(this));
-        em.register(this, new SessionCommandListener(this));
-
-         */
     }
 
     @Subscribe
@@ -122,11 +123,28 @@ public class VelocityProxyManager implements StatsProvider {
         );
     }
 
-    public Logger getLogger() {
-        return logger;
-    }
-
     public ProxyServer getProxy() {
         return proxy;
+    }
+
+
+    @Override
+    public int getOnlinePlayerCount() {
+        return proxy.getAllPlayers().size();
+    }
+
+    @Override
+    public int getPlayerLimit() {
+        return proxy.getConfiguration().getShowMaxPlayers();
+    }
+
+    @Override
+    public List<BackendServer> getBackendServerAsString() {
+        return proxy.getAllServers().stream()
+                .map(registeredServer -> new BackendServer(
+                        registeredServer.getServerInfo().getName(),
+                        registeredServer.getPlayersConnected().size()
+                ))
+                .collect(Collectors.toList());
     }
 }

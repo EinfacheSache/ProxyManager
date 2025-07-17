@@ -1,7 +1,7 @@
 package de.cubeattack.proxymanager.discord.command;
 
 import de.cubeattack.api.util.RuntimeUsageUtils;
-import de.cubeattack.proxymanager.bungee.BungeeProxyManager;
+import de.cubeattack.proxymanager.ProxyInstance;
 import de.cubeattack.proxymanager.core.Config;
 import de.cubeattack.proxymanager.core.Core;
 import de.cubeattack.proxymanager.discord.MessageUtils;
@@ -13,11 +13,19 @@ import java.awt.*;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.net.*;
+import java.net.Inet4Address;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.time.Duration;
 import java.util.Objects;
 
 public class InfoCommand extends ListenerAdapter {
+
+    private final ProxyInstance proxyInstance;
+
+    public InfoCommand(ProxyInstance proxyInstance) {
+        this.proxyInstance = proxyInstance;
+    }
 
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
@@ -26,17 +34,17 @@ public class InfoCommand extends ListenerAdapter {
         if (!event.getName().equalsIgnoreCase("info")) return;
 
         EmbedBuilder embedBuilder = MessageUtils.getDefaultEmbed();
-        embedBuilder.setTitle("GianNetwork Informationen");
+        embedBuilder.setTitle(Config.getServerName() + " Informationen");
         embedBuilder.setColor(Color.GREEN);
 
         long currentTime = System.currentTimeMillis();
-        boolean isPinged = isReachable("mc.einfachesache.de", 25565, 2000);
+        boolean isPinged = isReachable("mc." + "einfachesache.de" /*Config.getServerDomainName().toLowerCase()*/, 25565, 2000);
         currentTime = System.currentTimeMillis() - currentTime;
 
         String strBasic = "IP: " + Config.getServerDomainName() + "\n" +
                 "Version: 1.21.4+ \n" +
                 "Ping: " + (isPinged ? currentTime + "ms" : "No Connection") + "\n" +
-                "Spieler Online: " + BungeeProxyManager.getPlugin().getProxy().getOnlineCount() + "/" + BungeeProxyManager.getPlugin().getProxy().getConfig().getPlayerLimit() + "\n" +
+                "Spieler Online: " + proxyInstance.getOnlinePlayerCount() + "/" + proxyInstance.getPlayerLimit() + "\n" +
                 "Up-Time: " + Duration.ofMillis(System.currentTimeMillis() - Core.UPTIME).toString().substring(2).replaceAll("(\\d[HMS])(?!$)", "$1 ").toLowerCase() + "\n";
 
         embedBuilder.addField("Basic Information", strBasic, false);
@@ -46,12 +54,12 @@ public class InfoCommand extends ListenerAdapter {
 
         final StringBuilder strServer = new StringBuilder();
 
-        BungeeProxyManager.getPlugin().getProxy().getServers().values().stream().filter(values -> !values.getName().equals("fallback")).forEach((serverInfo) ->
-                strServer.append("**-**⠀").append(serverInfo.getName()).append("⠀->⠀Spieler Online: ").append(serverInfo.getPlayers().size()).append("\n"));
+        proxyInstance.getBackendServerAsString().stream().filter(backendServer -> !backendServer.serverName().equals("fallback")).forEach((serverInfo) ->
+                strServer.append("**-**⠀").append(serverInfo.serverName()).append("⠀->⠀Spieler Online: ").append(serverInfo.playerCount()).append("\n"));
 
         embedBuilder.addField("Servers:", strServer.toString(), false);
 
-        event.replyEmbeds(embedBuilder.build()).setEphemeral(true).queue();
+        event.replyEmbeds(embedBuilder.build()).queue();
 
     }
 

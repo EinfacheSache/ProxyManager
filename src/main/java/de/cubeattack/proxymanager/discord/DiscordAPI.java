@@ -1,5 +1,6 @@
 package de.cubeattack.proxymanager.discord;
 
+import de.cubeattack.proxymanager.ProxyInstance;
 import de.cubeattack.proxymanager.core.Config;
 import de.cubeattack.proxymanager.core.Core;
 import de.cubeattack.proxymanager.core.TcpServer;
@@ -30,14 +31,14 @@ public class DiscordAPI extends ListenerAdapter
     private JDA JDA;
     private Guild guild;
 
-    public DiscordAPI()
+    public DiscordAPI(ProxyInstance proxyInstance)
     {
         try
         {
             if(Config.isDiscordDisabled())return;
 
             JDABuilder jdaBuilder = createDefault(Config.getToken(), Config.getActivityType(), Config.getActivity());
-            jdaBuilder.addEventListeners(new InfoCommand());
+            jdaBuilder.addEventListeners(new InfoCommand(proxyInstance));
             jdaBuilder.addEventListeners(new PingCommand());
             jdaBuilder.addEventListeners(new CloseCommand());
             jdaBuilder.addEventListeners(new LookupCommand());

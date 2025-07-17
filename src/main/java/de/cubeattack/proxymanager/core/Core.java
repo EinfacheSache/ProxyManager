@@ -4,6 +4,7 @@ import de.cubeattack.api.logger.LogManager;
 import de.cubeattack.api.shutdown.ShutdownHook;
 import de.cubeattack.api.util.FileUtils;
 import de.cubeattack.api.util.versioning.VersionUtils;
+import de.cubeattack.proxymanager.ProxyInstance;
 import de.cubeattack.proxymanager.discord.DiscordAPI;
 import org.slf4j.LoggerFactory;
 
@@ -13,7 +14,7 @@ public class Core {
 
     public static final UUID ALLOWED_UUID = UUID.fromString("201e5046-24df-4830-8b4a-82b635eb7cc7");
 
-    private static boolean isMinecraftServer;
+    private static ProxyInstance proxyInstance;
 
     public static FileUtils minecraftModule;
     public static FileUtils discordModule;
@@ -29,11 +30,11 @@ public class Core {
     public static Long UPTIME = 0L;
 
     public static void main(String[] args) {
-        run(false, LoggerFactory.getLogger(Core.class));
+        run(null, LoggerFactory.getLogger(Core.class));
     }
 
-    public static void run(boolean isMinecraftServer, Object logger) {
-        Core.isMinecraftServer = isMinecraftServer;
+    public static void run(ProxyInstance proxyInstance, Object logger) {
+        Core.proxyInstance = proxyInstance;
         LogManager.getLogger().setLogger(logger);
         run();
     }
@@ -45,18 +46,18 @@ public class Core {
 
         Core.info("running ProxyManager on version " + VersionUtils.getPomVersion(Core.class));
 
-        minecraftModule = new FileUtils(Core.class.getResourceAsStream("/modules/minecraft.yml"), isMinecraftServer ? "plugins/ProxyManager" : "./", "modules/minecraft.yml");
-        discordModule = new FileUtils(Core.class.getResourceAsStream("/modules/discord.yml"), isMinecraftServer ? "plugins/ProxyManager" : "./", "modules/discord.yml");
-        redisModule = new FileUtils(Core.class.getResourceAsStream("/modules/redis.yml"), isMinecraftServer ? "plugins/ProxyManager" : "./", "modules/redis.yml");
-        mysqlModule = new FileUtils(Core.class.getResourceAsStream("/modules/mysql.yml"), isMinecraftServer ? "plugins/ProxyManager" : "./", "modules/mysql.yml");
-        config = new FileUtils(Core.class.getResourceAsStream("/config.yml"), isMinecraftServer ? "plugins/ProxyManager" : "./", "config.yml");
-        data = new FileUtils(Core.class.getResourceAsStream("/data.yml"), isMinecraftServer ? "plugins/ProxyManager" : "./", "data.yml");
+        minecraftModule = new FileUtils(Core.class.getResourceAsStream("/modules/minecraft.yml"), isMinecraftServer() ? "plugins/ProxyManager" : ".", "modules/minecraft.yml");
+        discordModule = new FileUtils(Core.class.getResourceAsStream("/modules/discord.yml"), isMinecraftServer() ? "plugins/ProxyManager" : ".", "modules/discord.yml");
+        redisModule = new FileUtils(Core.class.getResourceAsStream("/modules/redis.yml"), isMinecraftServer() ? "plugins/ProxyManager" : ".", "modules/redis.yml");
+        mysqlModule = new FileUtils(Core.class.getResourceAsStream("/modules/mysql.yml"), isMinecraftServer() ? "plugins/ProxyManager" : ".", "modules/mysql.yml");
+        config = new FileUtils(Core.class.getResourceAsStream("/config.yml"), isMinecraftServer() ? "plugins/ProxyManager" : ".", "config.yml");
+        data = new FileUtils(Core.class.getResourceAsStream("/data.yml"), isMinecraftServer() ? "plugins/ProxyManager" : ".", "data.yml");
 
         Config.loadModules();
 
         RedisConnector = new RedisConnector();
         datasource = new DataSourceProvider();
-        discordAPI = new DiscordAPI();
+        discordAPI = new DiscordAPI(proxyInstance);
     }
 
     public static void shutdown() {
@@ -101,7 +102,6 @@ public class Core {
     }
 
     public static boolean isMinecraftServer() {
-        return isMinecraftServer;
+        return proxyInstance != null;
     }
-
 }

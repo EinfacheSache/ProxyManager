@@ -17,7 +17,12 @@ public class RedisConnector {
 
 
     public RedisConnector() {
-        if (!Config.connectRedis() || !Core.isMinecraftServer()) {
+
+        if(!Core.isMinecraftServer()){
+            return;
+        }
+
+        if (!Config.connectRedis()) {
             Core.info("Redis - no connection established (Redis disabled or not a Minecraft server)");
             return;
         }
@@ -41,7 +46,8 @@ public class RedisConnector {
 
             Core.info("Redis - connection established successfully");
         } catch (JedisConnectionException e) {
-            Core.severe("Redis - no connection established");
+            Core.warn("Redis - no connection established");
+            Core.warn("Redis - fallback to in-memory storage (ConcurrentHashMap)");
             jedisPool = null;
         } catch (JedisAccessControlException e) {
             Core.severe("Redis - access denied (invalid credentials)");

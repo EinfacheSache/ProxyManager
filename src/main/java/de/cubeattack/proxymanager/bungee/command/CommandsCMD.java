@@ -9,7 +9,7 @@ import net.md_5.bungee.api.plugin.Command;
 public class CommandsCMD extends Command {
 
     public CommandsCMD() {
-        super("commands", "proxy.execute.commands");
+        super("commands", "proxymanager.*", "cmd");
     }
 
     @Override

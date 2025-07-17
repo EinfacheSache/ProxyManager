@@ -8,7 +8,7 @@ import net.md_5.bungee.api.plugin.Command;
 public class MaintenanceCMD extends Command {
 
     public MaintenanceCMD() {
-        super("maintenance", "*", "wartungsarbeiten");
+        super("maintenance", "proxymanager.*", "wartungsarbeiten");
     }
 
     @Override

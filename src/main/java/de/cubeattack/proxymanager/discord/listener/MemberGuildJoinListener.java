@@ -48,13 +48,20 @@ public class MemberGuildJoinListener extends ListenerAdapter {
                         Collections.emptyList())
                 .reason("Automatische Zuweisung nach Beitritt") // optional
                 .queue(
-                        success -> Core.info("✅ Rollen Spieler & BetaTester zugewiesen."),
-                        error   -> Core.info("⚠️ Fehler beim Rollenzuweisen: " + error.getMessage())
+                        success -> Core.info("✅ Rollen Spieler & BetaTester zugewiesen. User: " + event.getMember().getUser().getName()),
+                        error   -> Core.info("⚠️ Fehler beim Rollenzuweisen. User: " + event.getMember().getUser().getName() + " Error: " + error.getMessage())
                 );
     }
 
     public void trackInvite(GuildMemberJoinEvent event) {
-        event.getGuild().retrieveInvites().queue(invites -> {
+        Guild guild = event.getGuild();
+        TextChannel inviteLogChannel = guild.getChannelById(TextChannel.class, "1389721957318000825");
+        Path logFilePath = Path.of((Core.isMinecraftServer() ? "plugins/ProxyManager/" : "./" ) + "logs/Invites.log");
+
+        guild.retrieveInvites().queue(invites -> {
+
+            boolean foundInviter = false;
+
             for (Invite invite : invites) {
                 int oldUses = inviteUses.getOrDefault(invite.getCode(), 0);
                 if (invite.getUses() > oldUses) {
@@ -62,16 +69,36 @@ public class MemberGuildJoinListener extends ListenerAdapter {
                     User inviter = invite.getInviter();
 
                     if(inviter == null) {
-                        Core.severe("Member joined, but inviter is null. Possibly joined via deleted invite or vanity URL. User: " + event.getUser().getAsTag());
+                        Core.severe("Member joined, but inviter is null. Possibly the inviter has left the server. User: " + event.getUser().getName());
                         return;
                     }
 
-                    Objects.requireNonNull(event.getGuild().getChannelById(TextChannel.class, "1389721957318000825"))
-                            .sendMessage("📥 " + event.getMember().getAsMention() + " wurde eingeladen von " + inviter.getAsMention())
-                            .queue();
-                    Logs.write(Path.of("logs/Invites.log"), LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")) + " " + event.getUser().getName() + " wurde eingeladen von " + inviter.getName());
+                    foundInviter = true;
+
+                    if (inviteLogChannel != null)
+                        inviteLogChannel.sendMessage("📥 " + event.getMember().getAsMention() + " wurde eingeladen von " + inviter.getAsMention()).queue();
+
+                    Logs.write(logFilePath, LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")) + " " + event.getUser().getName() + " wurde eingeladen von " + inviter.getName());
                     break;
                 }
+            }
+
+            if (!foundInviter) {
+                guild.retrieveVanityInvite().queue(vanity -> {
+                    String code = vanity.getCode();
+                    int uses = vanity.getUses();
+
+
+                    if (inviteLogChannel != null) {
+                        inviteLogChannel.sendMessage("📥 " + event.getMember().getAsMention() +
+                                " ist dem Server über die Vanity-URL `discord.gg/" + code + "` beigetreten. " +
+                                "(**Total: " + uses + "**)").queue();
+                    }
+
+                    Logs.write(logFilePath,
+                            LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")) + " " +
+                                    event.getUser().getName() + " ist über Vanity-URL discord.gg/" + code + " beigetreten. (Total: " + uses + ")");
+                }, error -> Core.severe("Error while retrieving the vanity URL: " + error.getMessage()));
             }
         });
     }

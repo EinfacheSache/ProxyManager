@@ -14,7 +14,7 @@ import net.md_5.bungee.api.plugin.Command;
 public class SettingsCMD extends Command {
 
     public SettingsCMD() {
-        super("settings", "proxy.execute.settings");
+        super("settings");
     }
 
     @Override

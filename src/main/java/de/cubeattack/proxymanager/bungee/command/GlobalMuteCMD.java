@@ -9,7 +9,7 @@ import net.md_5.bungee.api.plugin.Command;
 public class GlobalMuteCMD extends Command {
 
     public GlobalMuteCMD() {
-        super("gmute", "proxy.execute.gmute", "globalmute");
+        super("globalmute", "proxymanager.*", "gmute");
     }
 
     @Override

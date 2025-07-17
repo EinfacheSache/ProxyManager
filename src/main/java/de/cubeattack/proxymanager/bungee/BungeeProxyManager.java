@@ -3,6 +3,7 @@ package de.cubeattack.proxymanager.bungee;
 import de.cubeattack.api.minecraft.stats.Stats;
 import de.cubeattack.api.minecraft.stats.StatsManager;
 import de.cubeattack.api.minecraft.stats.StatsProvider;
+import de.cubeattack.proxymanager.ProxyInstance;
 import de.cubeattack.proxymanager.bungee.command.*;
 import de.cubeattack.proxymanager.bungee.listener.ManageConnection;
 import de.cubeattack.proxymanager.bungee.listener.MessageListener;
@@ -17,8 +18,11 @@ import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.api.plugin.PluginManager;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @SuppressWarnings("unused")
-public final class BungeeProxyManager extends Plugin implements StatsProvider {
+public final class BungeeProxyManager extends Plugin implements ProxyInstance, StatsProvider {
 
     private static final PluginManager pm = ProxyServer.getInstance().getPluginManager();
     private final static String PREFIX = "§7[§bNetwork§7] ";
@@ -30,7 +34,7 @@ public final class BungeeProxyManager extends Plugin implements StatsProvider {
     }
 
     public void onEnable() {
-        Core.run(true, getLogger());
+        Core.run(this, getLogger());
 
         if (Config.isManageConnectionEnabled()) pm.registerListener(this, new ManageConnection());
         if (pm.getPlugin("Protocolize") != null) pm.registerCommand(this, new SettingsCMD());
@@ -99,5 +103,23 @@ public final class BungeeProxyManager extends Plugin implements StatsProvider {
                 getProxy().getConfig().isOnlineMode(),
                 getProxy().getConfig().getListeners().stream().toList().get(0).isProxyProtocol()
         );
+    }
+
+
+    @Override
+    public int getOnlinePlayerCount() {
+        return getProxy().getPlayers().size();
+    }
+
+    @Override
+    public int getPlayerLimit() {
+        return getProxy().getConfig().getPlayerLimit();
+    }
+
+    @Override
+    public List<BackendServer> getBackendServerAsString() {
+        return ProxyServer.getInstance().getServers().values().stream()
+                .map(serverInfo -> new BackendServer(serverInfo.getName(), serverInfo.getPlayers().size()))
+                .collect(Collectors.toList());
     }
 }

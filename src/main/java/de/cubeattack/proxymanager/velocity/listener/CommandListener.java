@@ -1,7 +1,7 @@
 package de.cubeattack.proxymanager.velocity.listener;
 
 import com.velocitypowered.api.event.Subscribe;
-import com.velocitypowered.api.event.player.PlayerChatEvent;
+import com.velocitypowered.api.event.command.CommandExecuteEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.scheduler.ScheduledTask;
 import de.cubeattack.proxymanager.core.Core;
@@ -13,27 +13,28 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-@SuppressWarnings("deprecation")
-public class MessageListener {
+public class CommandListener {
 
     private final VelocityProxyManager proxy;
     private static final Map<Player, Integer> cooldownCounter = new ConcurrentHashMap<>();
     private static final Map<Player, Long> inCooldown = new ConcurrentHashMap<>();
     private static final Map<Player, ScheduledTask> taskIDForCooldown = new ConcurrentHashMap<>();
 
-    public MessageListener(VelocityProxyManager proxy) {
+    public CommandListener(VelocityProxyManager proxy) {
         this.proxy = proxy;
     }
 
     @Subscribe
-    public void onChat(PlayerChatEvent event) {
-        Player player = event.getPlayer();
+    public void onCommand(CommandExecuteEvent event) {
+
+        if (!(event.getCommandSource() instanceof Player player))
+            return;
 
         RedisConnector jedis = Core.getRedisConnector();
-        if (Boolean.parseBoolean(jedis.get("Chat-Disabled"))) {
-            if (!player.hasPermission("proxy.chat.disabled.bypass")) {
-                event.setResult(PlayerChatEvent.ChatResult.denied());
-                player.sendMessage(Component.text(VelocityProxyManager.PREFIX + "§cDer Chat ist deaktiviert"));
+        if (Boolean.parseBoolean(jedis.get("Commands-Disabled"))) {
+            if (!player.hasPermission("proxy.command.disabled.bypass")) {
+                event.setResult(CommandExecuteEvent.CommandResult.denied());
+                player.sendMessage(Component.text(VelocityProxyManager.PREFIX + "§cAlle Commands sind deaktiviert"));
                 return;
             }
         }
@@ -45,13 +46,13 @@ public class MessageListener {
 
         long now = System.currentTimeMillis();
         if (inCooldown.containsKey(player) && (now - inCooldown.get(player)) / 1000 <= 5) {
-            event.setResult(PlayerChatEvent.ChatResult.denied());
-            player.sendMessage(Component.text(VelocityProxyManager.PREFIX + "§cBitte warte bevor du erneut eine Nachricht sendest"));
+            event.setResult(CommandExecuteEvent.CommandResult.denied());
+            player.sendMessage(Component.text(VelocityProxyManager.PREFIX + "§cBitte warte bevor du erneut einen Command sendest"));
             return;
         }
 
         cooldownCounter.merge(player, 1, Integer::sum);
-        if (cooldownCounter.get(player) >= 4) {
+        if (cooldownCounter.get(player) >= 3) {
             inCooldown.put(player, now);
             cooldownCounter.remove(player);
         }

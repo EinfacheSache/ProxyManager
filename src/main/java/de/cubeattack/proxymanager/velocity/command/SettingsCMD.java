@@ -17,7 +17,6 @@ public class SettingsCMD implements SimpleCommand {
     public void execute(Invocation invocation) {
         CommandSource source = invocation.source();
 
-        // Check ob Spieler
         if (!(source instanceof Player player)) {
             source.sendMessage(Component.text("§cDiesen Befehl kannst du nur als Spieler ausführen."));
             return;
@@ -33,7 +32,6 @@ public class SettingsCMD implements SimpleCommand {
 
         inventory.onClick(event -> player.sendMessage(Component.text("§7Aufgeführt")));
 
-        // Inventar öffnen + Feedback
         Protocolize.playerProvider().player(player.getUniqueId()).openInventory(inventory);
         player.sendMessage(Component.text("§aOpening settings..."));
     }

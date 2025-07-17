@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class PluginControllerCMD extends Command {
 
     public PluginControllerCMD() {
-        super("bpl", "proxy.execute.bpl", "bungeeplugins");
+        super("bungeeplugins", "proxymanager.*", "bpl");
     }
 
     private static final ArrayList<Plugin> disabledPluginList = new ArrayList<>();

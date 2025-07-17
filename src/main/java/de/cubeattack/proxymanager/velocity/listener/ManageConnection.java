@@ -2,10 +2,10 @@ package de.cubeattack.proxymanager.velocity.listener;
 
 import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
-import com.velocitypowered.api.event.proxy.ProxyPingEvent;
-import com.velocitypowered.api.event.connection.PreLoginEvent;
-import com.velocitypowered.api.event.connection.PostLoginEvent;
 import com.velocitypowered.api.event.connection.LoginEvent;
+import com.velocitypowered.api.event.connection.PostLoginEvent;
+import com.velocitypowered.api.event.connection.PreLoginEvent;
+import com.velocitypowered.api.event.proxy.ProxyPingEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerPing;
 import com.velocitypowered.api.util.Favicon;
@@ -20,8 +20,8 @@ import net.kyori.adventure.text.Component;
 import javax.imageio.ImageIO;
 import java.io.IOException;
 import java.net.URL;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @SuppressWarnings("deprecation")
 public class ManageConnection {
@@ -68,15 +68,13 @@ public class ManageConnection {
         String serverHost = connection.getVirtualHost().get().getHostName();
         String localHost = connection.getRemoteAddress().getHostString();
 
-        // Lokale IPs erlauben
         if (localHost.startsWith("192.168.178.")) {
             return;
         }
 
-        // Domain-Whitelist
         for (String allowed : Config.getAllowedDomains()) {
             if (allowed.equalsIgnoreCase(serverHost)
-                    || (allowed.startsWith("*." ) && serverHost.toLowerCase().endsWith(allowed.substring(2).toLowerCase()))) {
+                    || (allowed.startsWith("*.") && serverHost.toLowerCase().endsWith(allowed.substring(2).toLowerCase()))) {
                 return;
             }
         }
@@ -104,26 +102,24 @@ public class ManageConnection {
         ServerPing.Builder builder = ServerPing.builder();
 
         builder
-            .version(version)
-            .samplePlayers(original.asBuilder().getSamplePlayers())
-            .onlinePlayers(original.getPlayers().orElseThrow().getOnline())
-            .maximumPlayers(original.getPlayers().get().getMax());
+                .version(version)
+                .samplePlayers(original.asBuilder().getSamplePlayers())
+                .onlinePlayers(original.getPlayers().orElseThrow().getOnline())
+                .maximumPlayers(original.getPlayers().get().getMax());
 
         if (original.getFavicon().isPresent()) {
             builder.favicon(original.getFavicon().get());
         }
 
-        if(Config.isManageConnectionEnabled()) {
+        if (Config.isManageConnectionEnabled()) {
             String address = connection.getRemoteAddress().getHostString();
             RedisConnector jedis = Core.getRedisConnector();
             String playerName = jedis.get(address);
 
-            // Server-Icon als Spieler-Head
             if (Config.isPlayerHeadAsServerIcon() && images.containsKey(playerName)) {
                 builder.favicon(images.get(playerName));
             }
 
-            // Special-MOTD für Builder-Host
             if (connection.getVirtualHost().isPresent()
                     && connection.getVirtualHost().get().getHostName().toLowerCase().startsWith("builder.")) {
                 line2 = "          §6Chaya aka Beda scheißt auf unsere Builder :)";

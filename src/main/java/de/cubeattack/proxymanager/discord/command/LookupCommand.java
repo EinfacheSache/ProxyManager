@@ -13,8 +13,8 @@ import java.util.Objects;
 
 public class LookupCommand extends ListenerAdapter {
 
-    private static final String namemc = "https://de.namemc.com/profile/";
-    private static final String minotar = "https://minotar.net/helm/";
+    private static final String NAMEMC_URl = "https://de.namemc.com/profile/";
+    private static final String MINOTAR_URL = "https://minotar.net/helm/";
 
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
@@ -26,33 +26,31 @@ public class LookupCommand extends ListenerAdapter {
         String name = Objects.requireNonNull(event.getOption("name")).getAsString();
         User user = new User(MinecraftAPI.loadUUID(name), name);
 
-        if (user.getUUID() == null) {
-            embedBuilder
-                    .setTitle("🔍 Nutzer nicht gefunden")
-                    .setColor(Color.RED)
-                    .setDescription("Der Nutzername **" + name + "** konnte nicht gefunden werden.")
-                    .addField("Mögliche Ursachen:",
-                             """
-                                    • Tippfehler im Namen
-                                    • Der Nutzer existiert nicht oder ist nicht registriert
-                                    """,
-                            false);
-            event.replyEmbeds(embedBuilder.build()).queue();
-            return;
-        }
-
         embedBuilder.setDescription("Loading Data from " + user.getName());
         embedBuilder.setColor(Color.YELLOW);
 
-        event.replyEmbeds(embedBuilder.build()).flatMap(it -> {
+        event.replyEmbeds(embedBuilder.build()).setEphemeral(true).flatMap(it -> {
+
+                    if (user.getUUID() == null) {
+                         return event.getHook().editOriginalEmbeds(embedBuilder
+                                .setTitle("🔍 Nutzer nicht gefunden")
+                                .setColor(Color.RED)
+                                .setDescription("Der Nutzername **" + name + "** konnte nicht gefunden werden.")
+                                .addField("Mögliche Ursachen:",
+                                        """
+                                               • Tippfehler im Namen
+                                               • Der Nutzer existiert nicht oder ist nicht registriert
+                                               """, false).build());
+                    }
+
                     if (Core.getDatasource().isClosed()) {
-                        embedBuilder.setColor(Color.RED);
                         return event.getHook().editOriginalEmbeds(embedBuilder
                                 .setTitle("❌ Verbindungsfehler")
                                 .setColor(Color.RED)
                                 .setDescription("Die Verbindung zur MySQL-Datenbank konnte nicht hergestellt werden.")
                                 .build());
                     }
+
                     return event.getHook().editOriginalEmbeds(getEmbedBuilder(user, embedBuilder).build());
                 })
                 .queue();
@@ -64,8 +62,8 @@ public class LookupCommand extends ListenerAdapter {
 
         embedBuilder.setDescription("");
         embedBuilder.setColor(Color.GREEN);
-        embedBuilder.setTitle("Infos zu " + user.getName(), namemc + user.getName());
-        embedBuilder.setThumbnail(minotar + user.getName());
+        embedBuilder.setTitle("Infos zu " + user.getName(), NAMEMC_URl + user.getName());
+        embedBuilder.setThumbnail(MINOTAR_URL + user.getName());
         embedBuilder.addField("UUID", user.getUUID().toString(), false);
         embedBuilder.addField("Rang", user.getRang(), false);
         embedBuilder.addField("Weight", user.getWeight(), false);

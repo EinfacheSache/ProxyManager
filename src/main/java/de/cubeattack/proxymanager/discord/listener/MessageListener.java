@@ -27,7 +27,7 @@ public class MessageListener extends ListenerAdapter {
 
         if(event.isFromType(ChannelType.PRIVATE) && !event.getAuthor().isBot()) {
             String logLine = "DM from " + event.getAuthor().getName() + ": " + event.getMessage().getContentDisplay();
-            Logs.write(Path.of("logs/DM/" + event.getAuthor().getName() + ".log"), LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")) + " " + logLine);
+            Logs.write(Path.of((Core.isMinecraftServer() ? "plugins/ProxyManager/" : "./" )  + "logs/DM/" + event.getAuthor().getName() + ".log"), LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")) + " " + logLine);
             Core.warn(logLine);
             return;
         }

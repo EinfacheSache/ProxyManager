@@ -18,7 +18,7 @@ import net.md_5.bungee.api.plugin.Command;
 public class ProxyCMD extends Command {
 
     public ProxyCMD() {
-        super("proxy", "*", "pr");
+        super("proxy", "proxymanager.*", "pr");
     }
 
     @Override
@@ -49,7 +49,7 @@ public class ProxyCMD extends Command {
 
                 RedisConnector jedis = Core.getRedisConnector();
 
-                Inventory inventory = new Inventory(InventoryType.GENERIC_9X3).title(ChatElement.ofLegacyText("§c§lAdminSettings"));
+                Inventory inventory = new Inventory(InventoryType.GENERIC_9X3).title(ChatElement.ofLegacyText("§c§lAdmin Settings"));
                 ItemStack disableChatButton = new ItemStack(new ItemStack(ItemType.COMMAND_BLOCK).displayName(ChatElement.ofLegacyText("§4Chat Status")));
                 ItemStack disableCommandsButton = new ItemStack(new ItemStack(ItemType.COMMAND_BLOCK).displayName(ChatElement.ofLegacyText("§4Commands Status")));
 

@@ -14,9 +14,7 @@ import dev.simplix.protocolize.data.ItemType;
 import dev.simplix.protocolize.data.inventory.InventoryType;
 import net.kyori.adventure.text.Component;
 
-import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 public class ProxyCMD implements SimpleCommand {
 
@@ -25,14 +23,27 @@ public class ProxyCMD implements SimpleCommand {
         CommandSource source = invocation.source();
         String[] args = invocation.arguments();
 
+
+        if (invocation.alias().equalsIgnoreCase("proxygui")) {
+            openAdminGUI(source);
+            return;
+        }
+
+
         if (args.length == 1) {
+
+            if (args[0].equalsIgnoreCase("gui")) {
+                openAdminGUI(source);
+                return;
+            }
+
             if (args[0].equalsIgnoreCase("reload") || args[0].equalsIgnoreCase("rl")) {
                 if (!(source instanceof ConsoleCommandSource)) {
                     source.sendMessage(Component.text("§cThis command can only be executed via console"));
                     return;
                 }
 
-                if(Core.getDiscordAPI().getJDA() == null){
+                if (Core.getDiscordAPI().getJDA() == null) {
                     source.sendMessage(Component.text("Can't reload cause Discord JDA is null"));
                     return;
                 }
@@ -41,26 +52,24 @@ public class ProxyCMD implements SimpleCommand {
                 source.sendMessage(Component.text("§aCommands successfully reloaded"));
                 return;
 
-            } else if (args[0].equalsIgnoreCase("gui")) {
-                if (!(source instanceof Player player)) {
-                    source.sendMessage(Component.text("§cThis command can only be executed as a Player"));
-                    return;
-                }
-
-                openAdminGUI(player);
-                return;
             }
         }
 
         source.sendMessage(Component.text("§cInvalid arguments -> /proxy [args]"));
     }
 
-    private void openAdminGUI(Player player) {
+    private void openAdminGUI(CommandSource source) {
+
+        if (!(source instanceof Player player)) {
+            source.sendMessage(Component.text("§cThis command can only be executed as a Player"));
+            return;
+        }
+
         RedisConnector jedis = Core.getRedisConnector();
         UUID uuid = player.getUniqueId();
 
         Inventory inventory = new Inventory(InventoryType.GENERIC_9X3)
-                .title(ChatElement.ofLegacyText("§c§lAdminSettings"));
+                .title(ChatElement.ofLegacyText("§c§lAdmin Settings"));
 
         // Items erstellen
         ItemStack disableChatButton = new ItemStack(ItemType.COMMAND_BLOCK);
@@ -93,16 +102,8 @@ public class ProxyCMD implements SimpleCommand {
         boolean newState = !Boolean.parseBoolean(jedis.get(type));
         jedis.set(type, String.valueOf(newState));
 
-        String statusText = (type.contains("Chat") ? "§7The Chat is" : "§7Commands are") +
-                " currently " + (newState ? "§cinaktive" : "§aactive");
-
-        item.lore(0, ChatElement.ofLegacyText(statusText));
-        player.sendMessage(Component.text(statusText));
-    }
-
-    @Override
-    public CompletableFuture<List<String>> suggestAsync(Invocation invocation) {
-        return SimpleCommand.super.suggestAsync(invocation);
+        item.lore(0, ChatElement.ofLegacyText((type.contains("Chat") ? "§7The Chat is" : "§7Commands are") + " currently " + (newState ? "§cinaktive" : "§aactive")));
+        player.sendMessage(Component.text((type.contains("Chat") ? "§7The Chat is" : "§7Commands are") + " now " + (newState ? "§cinaktive" : "§aactive")));
     }
 
     @Override
