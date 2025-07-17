@@ -63,7 +63,7 @@ public class VelocityProxyManager implements ProxyInstance, StatsProvider {
 
         Core.UPTIME = System.currentTimeMillis();
 
-        Core.info("[ProxyManager] Plugin erfolgreich aktiviert");
+        Core.info("Proxy-Manager was successfully enabled");
     }
 
 
@@ -91,7 +91,7 @@ public class VelocityProxyManager implements ProxyInstance, StatsProvider {
     @Subscribe
     public void onShutdown(ProxyShutdownEvent event) {
         Core.shutdown();
-        Core.info("[ProxyManager] Plugin erfolgreich deaktiviert");
+        Core.info("Proxy-Manager was successfully disabled");
     }
 
 

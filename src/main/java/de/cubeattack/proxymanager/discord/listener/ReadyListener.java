@@ -16,6 +16,9 @@ public class ReadyListener implements EventListener {
     @Override
     public void onEvent(@NotNull GenericEvent event) {
         if (event instanceof ReadyEvent) {
+
+            Thread.currentThread().setName("DISCORD");
+
             JDA jda = event.getJDA();
             List<Guild> guilds = jda.getGuilds();
             Core.info("DiscordAPI is ready!");

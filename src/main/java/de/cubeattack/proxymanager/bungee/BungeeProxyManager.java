@@ -53,7 +53,7 @@ public final class BungeeProxyManager extends Plugin implements ProxyInstance, S
 
 
         Core.UPTIME = System.currentTimeMillis();
-        Core.info("Plugin was Enabled successful");
+        Core.info("Plugin was successfully enabled");
     }
 
     public void onDisable() {
@@ -63,7 +63,7 @@ public final class BungeeProxyManager extends Plugin implements ProxyInstance, S
             }
         }
         Core.shutdown();
-        Core.info("Plugin was Disabled successful");
+        Core.info("Plugin was successfully disabled");
     }
 
     public static void sendMessage(@NotNull CommandSender sender, String msg) {

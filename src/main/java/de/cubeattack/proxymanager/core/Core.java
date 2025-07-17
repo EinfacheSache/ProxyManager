@@ -40,7 +40,7 @@ public class Core {
     }
 
     public static void run() {
-        Thread.currentThread().setName("PROXY MANAGER");
+        Thread.currentThread().setName("PROXY-MANAGER");
 
         ShutdownHook.register(Core::shutdown);
 
@@ -61,11 +61,11 @@ public class Core {
     }
 
     public static void shutdown() {
-        info("Bots stopping ...");
+        info("Stopping running services...");
         RedisConnector.close();
         discordAPI.shutdown();
         TcpServer.stop();
-        info("Bots successfully stopped");
+        info("Services successfully stopped");
     }
 
     public static void debug(String output) {
