@@ -14,6 +14,8 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
+import java.awt.image.ConvolveOp;
+import java.awt.image.Kernel;
 import java.io.ByteArrayOutputStream;
 import java.net.URL;
 import java.nio.file.Path;
@@ -49,14 +51,14 @@ public class MemberGuildJoinListener extends ListenerAdapter {
                 .reason("Automatische Zuweisung nach Beitritt") // optional
                 .queue(
                         success -> Core.info("✅ Rollen Spieler & BetaTester zugewiesen. User: " + event.getMember().getUser().getName()),
-                        error   -> Core.info("⚠️ Fehler beim Rollenzuweisen. User: " + event.getMember().getUser().getName() + " Error: " + error.getMessage())
+                        error -> Core.info("⚠️ Fehler beim Rollenzuweisen. User: " + event.getMember().getUser().getName() + " Error: " + error.getMessage())
                 );
     }
 
     public void trackInvite(GuildMemberJoinEvent event) {
         Guild guild = event.getGuild();
         TextChannel inviteLogChannel = guild.getChannelById(TextChannel.class, "1389721957318000825");
-        Path logFilePath = Path.of((Core.isMinecraftServer() ? "plugins/ProxyManager/" : "./" ) + "logs/Invites.log");
+        Path logFilePath = Path.of((Core.isMinecraftServer() ? "plugins/ProxyManager/" : "./") + "logs/Invites.log");
 
         guild.retrieveInvites().queue(invites -> {
 
@@ -68,7 +70,7 @@ public class MemberGuildJoinListener extends ListenerAdapter {
                     inviteUses.put(invite.getCode(), invite.getUses());
                     User inviter = invite.getInviter();
 
-                    if(inviter == null) {
+                    if (inviter == null) {
                         Core.severe("Member joined, but inviter is null. Possibly the inviter has left the server. User: " + event.getUser().getName());
                         return;
                     }
@@ -77,8 +79,10 @@ public class MemberGuildJoinListener extends ListenerAdapter {
 
                     if (inviteLogChannel != null)
                         inviteLogChannel.sendMessage("📥 " + event.getMember().getAsMention() + " wurde eingeladen von " + inviter.getAsMention()).queue();
-
                     Logs.write(logFilePath, LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")) + " " + event.getUser().getName() + " wurde eingeladen von " + inviter.getName());
+
+                    Config.addEligibleUsersForGiveaway(inviter.getId());
+
                     break;
                 }
             }
@@ -110,18 +114,16 @@ public class MemberGuildJoinListener extends ListenerAdapter {
             Guild guild = event.getGuild();
             TextChannel channel = Objects.requireNonNull(guild.getDefaultChannel()).asTextChannel();
 
-            // Hintergrund laden
-            BufferedImage background = ImageIO.read(Objects.requireNonNull(getClass().getResource("/background.png")));
+            // Hintergrundbild laden
+            BufferedImage background = ImageIO.read(Objects.requireNonNull(getClass().getResource("/flareon_dragon.png")));
             int width = background.getWidth();
             int height = background.getHeight();
 
             Graphics2D g = background.createGraphics();
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-            // Skalierungsfaktor (bezogen auf Breite 1600)
+            // Skalierung
             double scaleFactor = width / 1600.0;
-
-            // Basisgrößen
             int avatarSize = (int) (450 * scaleFactor);
             int baseFontSize = (int) (100 * scaleFactor);
             int verticalGap = (int) (75 * scaleFactor);
@@ -130,16 +132,16 @@ public class MemberGuildJoinListener extends ListenerAdapter {
             BufferedImage avatar = ImageIO.read(new URL(member.getEffectiveAvatarUrl() + "?size=512"));
             int avatarX = (width - avatarSize) / 2;
 
-            // Zeilen
+            // Willkommen-Text
             String line1 = "Willkommen " + member.getEffectiveName() + " bei";
             String line2 = guild.getName().toUpperCase() + "!";
 
-            // Dynamische Schriftgröße finden
+            // Dynamische Schriftgröße
             int fontSize = baseFontSize;
             Font font = new Font("SansSerif", Font.BOLD, fontSize);
             g.setFont(font);
             FontMetrics fm = g.getFontMetrics();
-            int maxTextWidth = (int) (width * 0.9);  // max. 90% der Breite
+            int maxTextWidth = (int) (width * 0.9);
 
             while ((fm.stringWidth(line1) > maxTextWidth || fm.stringWidth(line2) > maxTextWidth)
                     && fontSize > 20) {
@@ -150,31 +152,76 @@ public class MemberGuildJoinListener extends ListenerAdapter {
             }
             int lineHeight = fm.getHeight();
 
-            // Gesamt-Block mittig vertikal ausrichten
+            // Gesamtblock vertikal ausrichten
             int totalTextHeight = lineHeight * 2;
             int totalBlockHeight = avatarSize + verticalGap + totalTextHeight;
-
-            // Avatar zeichnen
             int avatarY = (height - totalBlockHeight) / 2;
+
+            // Avatar rund zeichnen
             g.setClip(new Ellipse2D.Float(avatarX, avatarY, avatarSize, avatarSize));
             g.drawImage(avatar, avatarX, avatarY, avatarSize, avatarSize, null);
             g.setClip(null);
 
-            // Text mittig zeichnen
-            g.setFont(font);
-            g.setColor(Color.WHITE);
-
+            // Textposition
             int textY1 = avatarY + avatarSize + verticalGap + fm.getAscent();
             int textY2 = textY1 + lineHeight;
             int textX1 = (width - fm.stringWidth(line1)) / 2;
             int textX2 = (width - fm.stringWidth(line2)) / 2;
 
+            // --- Blur + Liquid Glass Hintergrund für Text ---
+            int paddingX = (int) (40 * scaleFactor);
+            int paddingY = (int) (20 * scaleFactor);
+
+            int blockX = Math.max(0, Math.min(textX1, textX2) - paddingX);
+            int blockY = Math.max(0, textY1 - fm.getAscent() - paddingY);
+            int blockWidth = Math.min(width - blockX, Math.max(fm.stringWidth(line1), fm.stringWidth(line2)) + 2 * paddingX);
+            int blockHeight = Math.min(height - blockY, (textY2 - textY1) + lineHeight + 2 * paddingY);
+
+            // Bereich für Blur ausschneiden
+            BufferedImage blurSrc = background.getSubimage(blockX, blockY, blockWidth, blockHeight);
+
+            // Blur-Filter (15x15, weicher Blur)
+            float[] kernelData = new float[15 * 15];
+            Arrays.fill(kernelData, 1.0f / kernelData.length);
+            Kernel kernel = new Kernel(10, 10, kernelData);
+            ConvolveOp blur = new ConvolveOp(kernel, ConvolveOp.EDGE_NO_OP, null);
+            BufferedImage blurred = blur.filter(blurSrc, null);
+
+            // Geblurrten Bereich zurückzeichnen
+            g.setComposite(AlphaComposite.SrcOver);
+            g.drawImage(blurred, blockX, blockY, null);
+
+            // Halbtransparentes, abgerundetes Overlay ("Liquid Glass")
+            Color glassGray = new Color(50, 50, 50, 110); // noch etwas durchsichtiger
+            g.setColor(glassGray);
+            g.fillRoundRect(blockX, blockY, blockWidth, blockHeight, (int) (60 * scaleFactor), (int) (60 * scaleFactor));
+
+            // Optional: weißer Glow-Rand
+            g.setColor(new Color(255, 255, 255, 60));
+            g.setStroke(new BasicStroke((float) (6 * scaleFactor)));
+            g.drawRoundRect(blockX, blockY, blockWidth, blockHeight, (int) (60 * scaleFactor), (int) (60 * scaleFactor));
+
+            g.setComposite(AlphaComposite.SrcOver);
+
+            // --- Farbverlauf-Text wie gehabt ---
+            GradientPaint textGradient1 = new GradientPaint(
+                    textX1, textY1 - fm.getAscent(), new Color(183, 52, 234),
+                    textX1 + fm.stringWidth(line1), textY1 - fm.getAscent(), new Color(93, 93, 246)
+            );
+            g.setFont(font);
+            g.setPaint(textGradient1);
             g.drawString(line1, textX1, textY1);
+
+            GradientPaint textGradient2 = new GradientPaint(
+                    textX2, textY2 - fm.getAscent(), new Color(183, 52, 234),
+                    textX2 + fm.stringWidth(line2), textY2 - fm.getAscent(), new Color(93, 93, 246)
+            );
+            g.setPaint(textGradient2);
             g.drawString(line2, textX2, textY2);
 
             g.dispose();
 
-            // Als PNG an Discord schicken
+            // Bild in PNG-Bytearray umwandeln
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ImageIO.write(background, "png", baos);
             byte[] imageData = baos.toByteArray();
@@ -183,15 +230,16 @@ public class MemberGuildJoinListener extends ListenerAdapter {
                     .setTitle("🎉 Willkommen bei " + guild.getName())
                     .setDescription("Hi " + member.getAsMention() + ", schön dass du da bist!")
                     .setImage("attachment://welcome.png")
-                    .setColor(Color.CYAN);
+                    .setColor(new Color(93, 93, 246)); // Passend zum Verlauf
 
             channel.sendFiles(FileUpload.fromData(imageData, "welcome.png"))
                     .setEmbeds(embed.build())
                     .queue();
 
         } catch (Exception e) {
-            Core.severe("Error: " + e.getMessage(), e);
+            Core.severe("Error in sendWelcomeImage: " + e.getMessage(), e);
         }
+
     }
 
     public static Map<String, Integer> getInviteUses() {

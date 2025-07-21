@@ -25,9 +25,9 @@ public class MessageListener extends ListenerAdapter {
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
 
-        if(event.isFromType(ChannelType.PRIVATE) && !event.getAuthor().isBot()) {
+        if (event.isFromType(ChannelType.PRIVATE) && !event.getAuthor().isBot()) {
             String logLine = "DM from " + event.getAuthor().getName() + ": " + event.getMessage().getContentDisplay();
-            Logs.write(Path.of((Core.isMinecraftServer() ? "plugins/ProxyManager/" : "./" )  + "logs/DM/" + event.getAuthor().getName() + ".log"), LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")) + " " + logLine);
+            Logs.write(Path.of((Core.isMinecraftServer() ? "plugins/ProxyManager/" : "./") + "logs/DM/" + event.getAuthor().getName() + ".log"), LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")) + " " + logLine);
             Core.warn(logLine);
             return;
         }
@@ -57,11 +57,13 @@ public class MessageListener extends ListenerAdapter {
             return;
         }
 
-        if (number != Config.getCountingNumber() + 1) {
+        int correctNumber = Config.getCountingNumber() + 1;
+
+        if (number != correctNumber) {
             lastByUser.clear();
             Config.setCountingNumber(0);
             event.getMessage().addReaction(Emoji.fromFormatted("❌")).queue();
-            event.getMessage().reply(event.getAuthor().getAsMention() + " ❌ Streak failed! Wir starten wieder bei **1**.").queue();
+            event.getMessage().reply(event.getAuthor().getAsMention() + " ❌ Streak failed! Wir starten wieder bei **1**. Wäre die Zahl **" + correctNumber + "** gewesen.").queue();
             return;
         }
 

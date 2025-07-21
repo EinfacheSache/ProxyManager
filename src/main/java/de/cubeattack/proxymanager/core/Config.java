@@ -4,8 +4,10 @@ import de.cubeattack.api.util.FileUtils;
 import de.cubeattack.proxymanager.discord.DiscordAPI;
 
 import java.io.InputStream;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 @SuppressWarnings("unused")
 public class Config {
@@ -13,6 +15,9 @@ public class Config {
     private static String serverName;
 
     private static Integer countingNumber;
+    private static Long giveawayEndtime;
+    private static Set<String> giveawayParticipantSet;
+    private static Set<String> eligibleUsersForGiveawaySet;
 
     private static int portRedis;
     private static boolean connectRedis;
@@ -28,6 +33,7 @@ public class Config {
     private static String teamRoleID;
     private static String logChannelID;
     private static String countingChannelID;
+    private static String giveawayChannelID;
     private static String betaTesterRoleID;
     private static String userRoleID;
     private static int portTCPServer;
@@ -60,7 +66,10 @@ public class Config {
     private static final FileUtils data = Core.data;
 
     private static void loadData() {
-        countingNumber = data.getInt("counting.current-number");
+        countingNumber = data.getInt("discord.counting.current-number");
+        giveawayEndtime = data.getLong("discord.giveaway.endTime", -1);
+        giveawayParticipantSet = new HashSet<>(data.getStringList("discord.giveaway.participants"));
+        eligibleUsersForGiveawaySet = new HashSet<>(data.getStringList("discord.giveaway.eligible-users"));
     }
 
     private static final FileUtils config = Core.config;
@@ -117,6 +126,7 @@ public class Config {
         teamRoleID = discordModule.get("discord.tickets.team-role-id", "");
         logChannelID = discordModule.get("discord.tickets.log-channel-id", "");
         countingChannelID = discordModule.get("discord.counting-channel-id", "");
+        giveawayChannelID = discordModule.get("discord.giveaway-channel-id", "");
         connectTCPServer = discordModule.getBoolean("discord.tcp-server.connect", false);
         portTCPServer = discordModule.getInt("discord.tcp-server.port", 6666);
     }
@@ -124,6 +134,19 @@ public class Config {
     public static Integer getCountingNumber() {
         return countingNumber;
     }
+
+    public static long getGiveawayEndtimeInMilli() {
+        return giveawayEndtime;
+    }
+
+    public static Set<String> getGiveawayParticipantSet() {
+        return giveawayParticipantSet;
+    }
+
+    public static Set<String> getEligibleUsersForGiveawaySet() {
+        return eligibleUsersForGiveawaySet;
+    }
+
 
     public static String getServerName() {
         return serverName;
@@ -160,7 +183,7 @@ public class Config {
             InputStream in = DiscordAPI.class.getResourceAsStream("/application.properties");
             prop.load(in);
             return prop.getProperty("TOKEN");
-        }catch (Exception ex){
+        } catch (Exception ex) {
             Core.severe("./application.properties file can't be found", ex);
             return "NOT_FOUND";
         }
@@ -200,6 +223,10 @@ public class Config {
 
     public static String getCountingChannelID() {
         return countingChannelID;
+    }
+
+    public static String getGiveawayChannelID() {
+        return giveawayChannelID;
     }
 
     public static int getPortTCPServer() {
@@ -264,10 +291,36 @@ public class Config {
         return allowedDomains;
     }
 
+
     public static void setCountingNumber(Integer countingNumber) {
         Config.countingNumber = countingNumber;
-        save(data, "counting.current-number", countingNumber);
+        save(data, "discord.counting.current-number", countingNumber);
     }
+
+
+    public static void setGiveawayEndtime(long entTime) {
+        Config.giveawayEndtime = entTime;
+        save(data, "discord.giveaway.endTime", entTime);
+    }
+
+    public static boolean addGiveawayParticipant(String participant) {
+        boolean added = Config.giveawayParticipantSet.add(participant);
+        save(data, "discord.giveaway.participants", Config.giveawayParticipantSet.stream().toList());
+        return added;
+    }
+
+    public static void addEligibleUsersForGiveaway(String eligibleUsers) {
+        Config.eligibleUsersForGiveawaySet.add(eligibleUsers);
+        save(data, "discord.giveaway.eligible-users", Config.eligibleUsersForGiveawaySet.stream().toList());
+    }
+
+    public static void resetLastGiveaway() {
+        setGiveawayEndtime(-1L);
+        Config.giveawayParticipantSet.clear();
+        Config.eligibleUsersForGiveawaySet.clear();
+        save(data, "discord.giveaway", null);
+    }
+
 
     public static void setCategoryID(String categoryID) {
         Config.categoryID = categoryID;
@@ -288,6 +341,7 @@ public class Config {
         Config.maintenanceMode = maintenanceMode;
         save(minecraftModule, "maintenance-mode", maintenanceMode);
     }
+
 
     public static void save(FileUtils file, String key, Object value) {
         file.set(key, value);

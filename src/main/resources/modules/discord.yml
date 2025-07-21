@@ -10,6 +10,7 @@ discord:
     team-role-id: '1371586526470869013'
     log-channel-id: '1387774747030458508'
   counting-channel-id: '1371576765843247106'
+  giveaway-channel-id: '1378096888888299550'
   tcp-server:
     connect: true # require discord module enabled
     port: 6666

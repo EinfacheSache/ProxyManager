@@ -106,7 +106,7 @@
         <dependency>
             <groupId>com.github.EinfacheSache</groupId>
             <artifactId>easyapi</artifactId>
-            <version>9abe0b7889</version>
+            <version>4d61223a14</version>
         </dependency>
 
         <dependency>

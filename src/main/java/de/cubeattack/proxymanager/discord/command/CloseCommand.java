@@ -3,7 +3,6 @@ package de.cubeattack.proxymanager.discord.command;
 import de.cubeattack.proxymanager.core.Config;
 import de.cubeattack.proxymanager.core.Core;
 import de.cubeattack.proxymanager.discord.MessageUtils;
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -21,8 +20,6 @@ public class CloseCommand extends ListenerAdapter {
         if (!event.getName().equalsIgnoreCase("close")) return;
         if (!(event.getChannel() instanceof TextChannel channel)) return;
 
-        Guild guild = event.getGuild();
-
         if (channel.getParentCategory() == null || !channel.getParentCategory().getId().equals(Config.getCategoryID())) {
             event.replyEmbeds(MessageUtils.getDefaultEmbed().setTitle("Fehler").setDescription("Das ist kein Ticket").build()).setEphemeral(true).queue();
             return;
@@ -33,7 +30,7 @@ public class CloseCommand extends ListenerAdapter {
             reason = event.getOptionsByName("reason").get(0).getAsString();
         }
 
-        ticketClosed(guild, channel, event.getMember(), reason);
+        ticketClosed(channel, Objects.requireNonNull(event.getMember()), reason);
     }
 
     @Override
@@ -41,10 +38,10 @@ public class CloseCommand extends ListenerAdapter {
         if (!event.getComponentId().equals("delete_ticket")) {
             return;
         }
-        ticketClosed(event.getGuild(), (TextChannel) event.getChannel(), event.getMember(), null);
+        ticketClosed((TextChannel) event.getChannel(), Objects.requireNonNull(event.getMember()), null);
     }
 
-    private void ticketClosed(Guild guild, TextChannel channel, Member member, String reason) {
+    private void ticketClosed(TextChannel channel, Member member, String reason) {
         channel.getMemberPermissionOverrides().stream().filter(mpOverride ->
                 !Objects.requireNonNull(mpOverride.getMember()).getUser().isBot()).forEach(mpOverride ->
                 Objects.requireNonNull(mpOverride.getMember()).getUser().openPrivateChannel().flatMap(privateChannel ->
@@ -55,12 +52,7 @@ public class CloseCommand extends ListenerAdapter {
                                 .setDescription("Ihr Fall wurde aufgrund " + (reason == null ? "einer Lösung" : reason) + " geschlossen. \nWenn Sie ein anderes Problem haben, können Sie möglicherweise ein weiteres Ticket eröffnen.")
                                 .build())).queue());
 
-        if (guild != null && (Config.getLogChannelID().isEmpty() || guild.getTextChannelById(Config.getLogChannelID()) == null)) {
-            TextChannel textChannel = guild.createTextChannel("\uD83D\uDCBE│server-logs").complete();
-            Config.setLogChannelID(textChannel.getId());
-        }
-
-        Objects.requireNonNull(Core.getDiscordAPI().getJDA().getTextChannelById(Config.getLogChannelID())).sendMessageEmbeds(MessageUtils
+        Core.getDiscordAPI().getLogChannel().sendMessageEmbeds(MessageUtils
                 .getDefaultEmbed()
                 .setAuthor(Config.getServerName())
                 .setColor(Color.GREEN)

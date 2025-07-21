@@ -1,2 +1,4 @@
-counting:
-  current-number: 0
+discord:
+  counting:
+    current-number: 0
+  giveaway:

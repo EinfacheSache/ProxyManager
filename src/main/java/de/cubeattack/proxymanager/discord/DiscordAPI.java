@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -25,39 +26,36 @@ import net.dv8tion.jda.api.utils.cache.CacheFlag;
 
 import java.util.EnumSet;
 
-public class DiscordAPI extends ListenerAdapter
-{
+public class DiscordAPI extends ListenerAdapter {
 
     private JDA JDA;
     private Guild guild;
 
-    public DiscordAPI(ProxyInstance proxyInstance)
-    {
-        try
-        {
-            if(Config.isDiscordDisabled())return;
+    public DiscordAPI(ProxyInstance proxyInstance) {
+        try {
+            if (Config.isDiscordDisabled()) return;
 
-            JDABuilder jdaBuilder = createDefault(Config.getToken(), Config.getActivityType(), Config.getActivity());
-            jdaBuilder.addEventListeners(new InfoCommand(proxyInstance));
-            jdaBuilder.addEventListeners(new PingCommand());
-            jdaBuilder.addEventListeners(new CloseCommand());
-            jdaBuilder.addEventListeners(new LookupCommand());
-            jdaBuilder.addEventListeners(new ReadyListener());
-            jdaBuilder.addEventListeners(new TicketListener());
-            jdaBuilder.addEventListeners(new ManagerCommand());
-            jdaBuilder.addEventListeners(new MessageListener());
-            jdaBuilder.addEventListeners(new CommandListener());
-            jdaBuilder.addEventListeners(new ContextMenuListener());
-            jdaBuilder.addEventListeners(new BotGuildJoinListener());
-            jdaBuilder.addEventListeners(new MemberGuildJoinListener());
+            JDA = createDefault(Config.getToken(), Config.getActivityType(), Config.getActivity()).build();
+            JDA.addEventListener(
+                    new InfoCommand(proxyInstance),
+                    new PingCommand(),
+                    new CloseCommand(),
+                    new LookupCommand(),
+                    new ReadyListener(),
+                    new TicketListener(),
+                    new ManagerCommand(),
+                    new GiveawayCommand(this),
+                    new MessageListener(),
+                    new CommandListener(),
+                    new ContextMenuListener(),
+                    new BotGuildJoinListener(),
+                    new MemberGuildJoinListener()
+            );
 
-            this.JDA = jdaBuilder.build();
-            this.guild = JDA.awaitReady().getGuildById(Config.getGuildID());
+            guild = JDA.awaitReady().getGuildById(Config.getGuildID());
 
             TcpServer.run(Config.getPortTCPServer());
-        }
-        catch (InterruptedException exception)
-        {
+        } catch (InterruptedException exception) {
             Core.severe("Error initializing Discord API", exception);
         }
     }
@@ -72,7 +70,7 @@ public class DiscordAPI extends ListenerAdapter
         JDA.upsertCommand((Commands.message("Count words"))).queue();
         JDA.upsertCommand(Commands.user("Get user avatar")).queue();
 
-        if(guild != null){
+        if (guild != null) {
             guild
                     .upsertCommand("info", "Zeige Informationen über das GiantNetwork an")
                     .queue();
@@ -87,12 +85,22 @@ public class DiscordAPI extends ListenerAdapter
                     .addOptions(new OptionData(OptionType.STRING, "name", "Name des Minecraft Spielers", true, false))
                     .queue();
             guild
+                    .upsertCommand("giveaway", "Giveaway steuern")
+                    .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR))
+                    .addSubcommands(
+                            new SubcommandData("start", "Starte ein neues Giveaway")
+                                    .addOption(OptionType.INTEGER, "dauer", "Dauer in Stunden", true)
+                                    .addOption(OptionType.INTEGER, "delay", "Verzögerung in Stunden"),
+                            new SubcommandData("cancel", "Giveaway abbrechen")
+                    )
+                    .queue();
+            guild
                     .upsertCommand("manager", "Befehle für Admins / Developer")
                     .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR))
-                    .addSubcommands(new SubcommandData( "restart", "Restart"))
-                    .addSubcommands(new SubcommandData( "reloadcommands", "Reload Discord Commands"))
-                    .addSubcommands(new SubcommandData( "ticketsetup", "Setup TicketBot"))
-                    .addSubcommands(new SubcommandData( "closetickets", "Lösche alle Tickets"))
+                    .addSubcommands(new SubcommandData("restart", "Restart"))
+                    .addSubcommands(new SubcommandData("reloadcommands", "Reload Discord Commands"))
+                    .addSubcommands(new SubcommandData("ticketsetup", "Setup TicketBot"))
+                    .addSubcommands(new SubcommandData("closetickets", "Lösche alle Tickets"))
                     .queue();
         }
     }
@@ -103,7 +111,7 @@ public class DiscordAPI extends ListenerAdapter
         jdaBuilder.setStatus(OnlineStatus.ONLINE);
         try {
             jdaBuilder.setActivity(Activity.of(Activity.ActivityType.valueOf(activityType), activity));
-        }catch (Exception ex){
+        } catch (Exception ex) {
             Core.warn("Error whiles loading ActivityType from Config : " + ex.getLocalizedMessage());
         }
 
@@ -115,8 +123,8 @@ public class DiscordAPI extends ListenerAdapter
         return jdaBuilder;
     }
 
-    public void shutdown(){
-        if(Config.isDiscordDisabled())return;
+    public void shutdown() {
+        if (Config.isDiscordDisabled()) return;
         getJDA().shutdown();
     }
 
@@ -126,5 +134,15 @@ public class DiscordAPI extends ListenerAdapter
 
     public Guild getGuild() {
         return guild;
+    }
+
+    public TextChannel getLogChannel() {
+
+        if (guild != null && (Config.getLogChannelID().isEmpty() || guild.getTextChannelById(Config.getLogChannelID()) == null)) {
+            TextChannel textChannel = guild.createTextChannel("\uD83D\uDCBE│server-logs").complete();
+            Config.setLogChannelID(textChannel.getId());
+        }
+
+        return JDA.getTextChannelById(Config.getLogChannelID());
     }
 }

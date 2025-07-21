@@ -1,2 +1,5 @@
-counting:
-  current-number: 3
+discord:
+  counting:
+    current-number: 1
+  giveaway:
+    endTime: 1753097659372

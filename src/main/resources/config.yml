@@ -1,6 +1,1 @@
 server-name: 'YourServerName'
-#modules-enabled:
-#  minecraft: true
-#  discord: true
-#  redis: true
-#  mysql: true

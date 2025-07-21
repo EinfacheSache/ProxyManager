@@ -32,13 +32,13 @@ public class ProxyCMD extends Command {
                     return;
                 }
 
-                if(Core.getDiscordAPI().getJDA() == null){
-                    sender.sendMessage(new TextComponent("§cCan't reload cause Discord JDA is null"));
+                if (Core.getDiscordAPI().getJDA() == null) {
+                    Core.warn("Can't reload cause Discord JDA is null");
                     return;
                 }
 
                 Core.getDiscordAPI().loadDiscordCommands();
-                sender.sendMessage(new TextComponent("§aCommands successfully reloaded"));
+                Core.info("Commands successfully reloaded");
                 return;
             } else if (args[0].equalsIgnoreCase("gui")) {
 
