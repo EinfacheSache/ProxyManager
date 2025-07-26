@@ -1,2 +1,2 @@
 # ProxyManager
-ProxyManager for BungeeCord with Discord Bot
+ProxyManager Plugin for Velocity/BungeeCord with Discord Bot integration.
