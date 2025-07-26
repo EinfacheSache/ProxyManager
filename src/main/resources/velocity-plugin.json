@@ -6,7 +6,7 @@
     "EinfacheSache"
   ],
   "url": "https://einfachesache.de/discord/",
-  "main": "de.cubeattack.proxymanager.velocity.VelocityProxyManager",
+  "main": "de.einfachesache.proxymanager.velocity.VelocityProxyManager",
   "description": "A Plugin for interact with the intern NeoProtect system",
   "depends": [
     "protocolize"
