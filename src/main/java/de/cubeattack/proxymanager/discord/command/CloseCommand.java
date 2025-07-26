@@ -62,9 +62,9 @@ public class CloseCommand extends ListenerAdapter {
         if (event.getGuild() == null) return;
         if (!Objects.equals(event.getGuild(), Core.getDiscordAPI().getGuild())) return;
         if (event.getModalId().startsWith("ticket:delete")) {
+            event.deferReply().queue();
             String body = Objects.requireNonNull(event.getValue("body")).getAsString();
             closeTicket((TextChannel) event.getChannel(), Objects.requireNonNull(event.getMember()), body);
-            event.deferReply().queue();
         }
     }
 
