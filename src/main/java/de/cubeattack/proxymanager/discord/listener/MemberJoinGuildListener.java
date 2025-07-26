@@ -23,10 +23,12 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
-public class MemberGuildJoinListener extends ListenerAdapter {
+public class MemberJoinGuildListener extends ListenerAdapter {
 
     private static final Map<String, Integer> inviteUses = new HashMap<>();
+    private static final int maxBetaTesterCount = 100;
 
     @Override
     public void onGuildMemberJoin(GuildMemberJoinEvent event) {
@@ -35,23 +37,46 @@ public class MemberGuildJoinListener extends ListenerAdapter {
         trackInvite(event);
         sendWelcomeImage(event);
 
-        Role playerRole = event.getGuild().getRoleById(Config.getUserRoleID());
-        Role betaTesterRole = event.getGuild().getRoleById(Config.getBetaTesterRoleID());
+        Guild guild = event.getGuild();
+        Role playerRole = guild.getRoleById(Config.getUserRoleID());
+        Role betaTesterRole = guild.getRoleById(Config.getBetaTesterRoleID());
 
         if (playerRole == null || betaTesterRole == null) {
             Core.info("❌Join Rollen wurden nicht gefunden: " + Config.getUserRoleID() + " | " + Config.getBetaTesterRoleID());
             return;
         }
 
-        event.getGuild()
+        int currentBetaTesterCount = (int) guild.getMembers().stream()
+                .filter(m -> m.getRoles().contains(betaTesterRole))
+                .count();
+
+        List<Role> rolesToAdd = new ArrayList<>(Collections.singletonList(playerRole));
+        if (currentBetaTesterCount + 1 <= maxBetaTesterCount) {
+            rolesToAdd.add(betaTesterRole);
+        }
+
+        guild
                 .modifyMemberRoles(
                         event.getMember(),
-                        List.of(playerRole, betaTesterRole),
+                        rolesToAdd,
                         Collections.emptyList())
-                .reason("Automatische Zuweisung nach Beitritt") // optional
-                .queue(
-                        success -> Core.info("✅ Rollen Spieler & BetaTester zugewiesen. User: " + event.getMember().getUser().getName()),
-                        error -> Core.info("⚠️ Fehler beim Rollenzuweisen. User: " + event.getMember().getUser().getName() + " Error: " + error.getMessage())
+                .reason("Automatische Zuweisung nach Beitritt")
+                .queue(success -> {
+                            String rollen = rolesToAdd.stream()
+                                    .map(Role::getName)
+                                    .collect(Collectors.joining(", "));
+
+                            String userName = event.getMember().getUser().getName();
+
+                            String info = "✅ Zugewiesene Rollen: " + rollen + " | User: " + userName;
+
+                            if (rolesToAdd.contains(betaTesterRole)) {
+                                info += "(BetaTester #" + (currentBetaTesterCount + 1) + "/" + maxBetaTesterCount + ")";
+                            }
+
+                            Core.info(info);
+                        },
+                        error -> Core.info("⚠️ Fehler beim Rollenzuweisen | User: " + event.getMember().getUser().getName() + " Error: " + error.getMessage())
                 );
     }
 
@@ -180,10 +205,10 @@ public class MemberGuildJoinListener extends ListenerAdapter {
             // Bereich für Blur ausschneiden
             BufferedImage blurSrc = background.getSubimage(blockX, blockY, blockWidth, blockHeight);
 
-            // Blur-Filter (15x15, weicher Blur)
+            // Blur-Filter (12x12, weicher Blur)
             float[] kernelData = new float[15 * 15];
             Arrays.fill(kernelData, 1.0f / kernelData.length);
-            Kernel kernel = new Kernel(10, 10, kernelData);
+            Kernel kernel = new Kernel(12, 12, kernelData);
             ConvolveOp blur = new ConvolveOp(kernel, ConvolveOp.EDGE_NO_OP, null);
             BufferedImage blurred = blur.filter(blurSrc, null);
 

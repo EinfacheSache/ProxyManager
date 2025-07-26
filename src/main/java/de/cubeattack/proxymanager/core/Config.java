@@ -20,7 +20,6 @@ public class Config {
     private static Set<String> eligibleUsersForGiveawaySet;
 
     private static int portRedis;
-    private static boolean connectRedis;
     private static String hostRedis;
     private static String userRedis;
     private static String passwordRedis;
@@ -81,7 +80,6 @@ public class Config {
     private static final FileUtils redis = Core.redisModule;
 
     private static void loadRedisModule() {
-        connectRedis = redis.getBoolean("redis.connect", true);
         portRedis = redis.getInt("redis.port", 1337);
         hostRedis = redis.get("redis.host", "127.0.0.1").replace("localhost", "127.0.0.1");
         userRedis = redis.get("redis.user", "default");
@@ -156,10 +154,6 @@ public class Config {
         return portRedis;
     }
 
-    public static boolean connectRedis() {
-        return connectRedis;
-    }
-
     public static String getHostRedis() {
         return hostRedis;
     }
@@ -209,11 +203,11 @@ public class Config {
         return betaTesterRoleID;
     }
 
-    public static String getCategoryID() {
+    public static String getTicketsCategoryID() {
         return categoryID;
     }
 
-    public static String getTeamRoleID() {
+    public static String getStaffRoleID() {
         return teamRoleID;
     }
 

@@ -1,10 +1,10 @@
 package de.cubeattack.proxymanager.discord.listener;
 
-import de.cubeattack.proxymanager.core.Config;
 import de.cubeattack.proxymanager.core.Core;
+import de.cubeattack.proxymanager.discord.DiscordAPI;
 import de.cubeattack.proxymanager.discord.MessageUtils;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
@@ -21,6 +21,12 @@ import java.util.EnumSet;
 import java.util.Objects;
 
 public class TicketListener extends ListenerAdapter {
+
+    private final DiscordAPI discordAPI;
+
+    public TicketListener(DiscordAPI discordAPI) {
+        this.discordAPI = discordAPI;
+    }
 
     @Override
     public void onStringSelectInteraction(StringSelectInteractionEvent event) {
@@ -47,41 +53,27 @@ public class TicketListener extends ListenerAdapter {
         if (event.getGuild() == null) return;
         if (!Objects.equals(event.getGuild(), Core.getDiscordAPI().getGuild())) return;
         if (event.getModalId().startsWith("ticket:describe")) {
-            event.reply("Danke für ihre Anfrage").setEphemeral(true).queue();
+            event.reply("Danke für Ihre Anfrage").setEphemeral(true).queue();
 
-            Guild guild = event.getGuild();
             String body = Objects.requireNonNull(event.getValue("body")).getAsString();
 
-            String teamID = Config.getTeamRoleID();
-            if (teamID.isEmpty() || guild.getRoleById(teamID) == null) {
-                teamID = guild.createRole().setName("✦Team✦").setColor(Color.GREEN).complete().getId();
-                Config.setTeamRoleID(teamID);
-            }
-
-            if (Config.getCategoryID().isEmpty() || guild.getCategoryById(Config.getCategoryID()) == null) {
-                Category category = guild.createCategory("[Tickets]").complete();
-                category.getManager()
-                        .putRolePermissionOverride(Long.parseLong(teamID), EnumSet.of(Permission.VIEW_CHANNEL), null)
-                        .putRolePermissionOverride(guild.getPublicRole().getIdLong(), null, EnumSet.of(Permission.VIEW_CHANNEL)).queue();
-                Config.setCategoryID(category.getId());
-            }
-
-            TextChannel channel = Objects.requireNonNull(guild.getCategoryById(Config.getCategoryID())).createTextChannel(event.getModalId().split(":")[2] + "-" + event.getUser().getName()).complete();
+            Role staffRoleID = discordAPI.getStaffRole();
+            Category ticketCategory = discordAPI.getTicketCategory();
+            TextChannel channel = ticketCategory.createTextChannel(event.getModalId().split(":")[2] + "-" + event.getUser().getName()).complete();
 
             channel.getManager().putMemberPermissionOverride(event.getUser().getIdLong(), EnumSet.of(Permission.VIEW_CHANNEL), null).queue();
 
             channel.sendMessageEmbeds(MessageUtils.getDefaultEmbed()
-                    .setDescription("# Willkommen bei deinem Ticket " + "<@" + event.getUser().getId() + ">\n" +
-                            "Es wird Ihnen schnellstmöglich ein Helfer zur Seite stehen.\n" +
-                            "Bitte pingen Sie unsere Team nicht selbst an, sondern nur in Notsituationen.\n" +
-                            "(Die Nichtbeachtung dieser Regel führt zu einem Timeout/Ban)"
-                    ).setColor(Color.GREEN).build())
+                            .setDescription("# Willkommen bei deinem Ticket " + "<@" + event.getUser().getId() + ">\n" +
+                                    "Es wird Ihnen schnellstmöglich ein Helfer zur Seite stehen.\n" +
+                                    "Bitte pingen Sie unsere Team nicht selbst an, sondern nur in Notsituationen.\n" +
+                                    "(Die Nichtbeachtung dieser Regel führt zu einem Timeout/Ban)"
+                            ).setColor(Color.GREEN).build())
                     .addActionRow(Button.danger("delete_ticket", "\uD83D\uDDD1️ Ticket schließen"))
                     .queue();
 
-            channel.sendMessage("<@&" + teamID + ">").queue();
-            channel.sendMessageEmbeds(MessageUtils.getDefaultEmbed()
-                    .setDescription("### Erste Anfrage/Problem:\n" + body).setColor(Color.GREEN).build()).queue();
+            channel.sendMessage("<@&" + staffRoleID.getId() + ">")
+                    .setEmbeds(MessageUtils.getDefaultEmbed().setDescription("### Erste Anfrage/Problem:\n" + body).setColor(Color.GREEN).build()).queue();
         }
     }
 }

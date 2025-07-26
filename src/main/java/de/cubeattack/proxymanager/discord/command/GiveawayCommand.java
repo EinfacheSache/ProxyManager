@@ -5,9 +5,10 @@ import de.cubeattack.proxymanager.core.Config;
 import de.cubeattack.proxymanager.core.Core;
 import de.cubeattack.proxymanager.discord.DiscordAPI;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
@@ -23,8 +24,10 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class GiveawayCommand extends ListenerAdapter {
 
@@ -44,7 +47,7 @@ public class GiveawayCommand extends ListenerAdapter {
 
         String formattedEnd = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")
                 .withZone(ZoneId.systemDefault())
-                .format(Instant.now().plus(timeLeft, TimeUnit.MILLISECONDS.toChronoUnit()));
+                .format(Instant.ofEpochMilli(Config.getGiveawayEndtimeInMilli()));
 
         Core.info("Active giveaway detected, ends on " + formattedEnd + ".");
 
@@ -58,17 +61,52 @@ public class GiveawayCommand extends ListenerAdapter {
 
         String subCmd = event.getSubcommandName();
 
-        if ("cancel".equals(subCmd)) {
-            if (delayedGiveawayFuture != null) delayedGiveawayFuture.cancel(true);
-            if (rollGiveawayFuture != null) rollGiveawayFuture.cancel(true);
-            Config.resetLastGiveaway();
-            event.reply("Giveaway wurde gecancelt!").setEphemeral(true).queue();
-            discordAPI.getLogChannel().sendMessage("Giveaway wurde gecancelt!").queue();
+
+        if ("info".equals(subCmd)) {
+            if (rollGiveawayFuture == null || rollGiveawayFuture.isCancelled() || rollGiveawayFuture.isDone()) {
+                event.reply("Kein Giveaway gestartet!").setEphemeral(true).queue();
+                return;
+            }
+
+            Set<String> participants = Config.getGiveawayParticipantSet();
+            Set<String> eligibleUsers = Config.getEligibleUsersForGiveawaySet();
+            long endMillis = Config.getGiveawayEndtimeInMilli();
+
+
+            String endTimeFormatted = "<t:" + (endMillis / 1000L) + ":f>";
+            String participantsList = participants.isEmpty() ? "Keine Teilnehmer" :
+                    participants.stream()
+                            .map(id -> "<@" + id + ">")
+                            .collect(Collectors.joining(", "));
+            String eligibleList = eligibleUsers.isEmpty() ? "Keine berechtigten User" :
+                    eligibleUsers.stream()
+                            .map(id -> "<@" + id + ">")
+                            .collect(Collectors.joining(", "));
+
+            EmbedBuilder embed = new EmbedBuilder()
+                    .setTitle("Giveaway-Info")
+                    .addField("Teilnehmer (" + participants.size() + ")", participantsList, false)
+                    .addField("Berechtigte User (" + eligibleUsers.size() + ")",
+                            eligibleList + "\n\n*Nutzer, die jemanden eingeladen haben, dürfen teilnehmen*", false)
+                    .addField("Endzeit", endTimeFormatted, false)
+                    .setColor(Color.ORANGE);
+
+            event.replyEmbeds(embed.build()).setEphemeral(true).queue();
             return;
         }
 
-        if (!"start".equals(subCmd)) return;
 
+        if ("cancel".equals(subCmd)) {
+            if (delayedGiveawayFuture != null) delayedGiveawayFuture.cancel(true);
+            if (rollGiveawayFuture != null) rollGiveawayFuture.cancel(true);
+            Config.setGiveawayEndtime(-1);
+            event.reply("Giveaway wurde gecancelt!").setEphemeral(true).queue();
+            discordAPI.getDiscordLogChannel().sendMessage("Giveaway wurde gecancelt!").queue();
+            return;
+        }
+
+
+        if (!"start".equals(subCmd)) return;
 
         int duration = getIntOption(event, "dauer", "Bitte gib die Dauer des Giveaways in Stunden an!", "Ungültige Dauer! Bitte gib eine Zahl zwischen 1 und 336 an.");
         if (duration == -1) return;
@@ -94,7 +132,7 @@ public class GiveawayCommand extends ListenerAdapter {
             startGiveaway(event.getChannel(), duration);
         }
 
-        discordAPI.getLogChannel().sendMessage(startMessage).queue();
+        discordAPI.getDiscordLogChannel().sendMessage(startMessage).queue();
         event.reply(startMessage).setEphemeral(true).queue();
     }
 
@@ -137,6 +175,12 @@ public class GiveawayCommand extends ListenerAdapter {
     public void onButtonInteraction(ButtonInteractionEvent event) {
         if (!Objects.equals(event.getGuild(), Core.getDiscordAPI().getGuild())) return;
         if (!"giveaway_join".equals(event.getButton().getId())) return;
+        if (event.getMember() == null) return;
+
+        if (event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+            event.reply("Als Admin kannst du nicht an diesem Giveaway teilnehmen.").setEphemeral(true).queue();
+            return;
+        }
 
         if (Config.getGiveawayEndtimeInMilli() == -1 || Instant.now().isAfter(Instant.ofEpochMilli(Config.getGiveawayEndtimeInMilli()))) {
             event.reply("Dieses Giveaway ist bereits abgelaufen oder ungültig.").setEphemeral(true).queue();
@@ -159,26 +203,31 @@ public class GiveawayCommand extends ListenerAdapter {
 
     private void rollGiveaway() {
         try {
-            TextChannel channel = discordAPI.getJDA().awaitReady().getTextChannelById(Config.getGiveawayChannelID());
+            GuildMessageChannel channel = discordAPI.getJDA().awaitReady().getChannelById(GuildMessageChannel.class, Config.getGiveawayChannelID());
 
             if (channel == null) {
-                Core.warn("Giveaway channel could not be found!");
+                Core.severe("Giveaway channel(" + Config.getGiveawayChannelID() + ") could not be found!");
                 return;
             }
 
             if (Config.getGiveawayParticipantSet().isEmpty()) {
                 channel.sendMessage("Das Giveaway ist beendet, aber es gab leider keine Teilnehmer. 😢").queue();
             } else {
-                List<String> userList = Config.getGiveawayParticipantSet().stream().toList();
+                List<String> userList = Config.getGiveawayParticipantSet().stream().filter(userId -> discordAPI.getGuild().getMemberById(userId) != null).toList();
+
+                Core.info("RollGiveaway with user(" + userList.size() + ") -> " + userList);
                 String winnerId = userList.get(new Random().nextInt(userList.size()));
+                Core.info("Winner -> " + discordAPI.getGuild().getMemberById(winnerId));
+
                 channel.sendMessage("🎉 **Das Giveaway ist beendet!** 🎉\n" +
                         "Glückwunsch an <@" + winnerId + ">! Du hast gewonnen!\n" +
-                        "Bitte melde dich bei der Orga für deinen Gewinn!").queue();
+                        "Bitte melde dich bei der Orga für deinen Gewinn!\n" +
+                        "@everyone").queue();
             }
 
             Config.setGiveawayEndtime(-1);
 
-        } catch (InterruptedException e) {
+        } catch (Exception e) {
             Core.severe(e.getMessage(), e);
         }
     }

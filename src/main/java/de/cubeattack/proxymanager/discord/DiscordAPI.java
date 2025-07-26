@@ -12,11 +12,12 @@ import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.requests.GatewayIntent;
@@ -24,6 +25,7 @@ import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 
+import java.awt.*;
 import java.util.EnumSet;
 
 public class DiscordAPI extends ListenerAdapter {
@@ -42,19 +44,22 @@ public class DiscordAPI extends ListenerAdapter {
                     new CloseCommand(),
                     new LookupCommand(),
                     new ReadyListener(),
-                    new TicketListener(),
-                    new ManagerCommand(),
+                    new TicketListener(this),
+                    new ManagerCommand(this),
                     new GiveawayCommand(this),
                     new MessageListener(),
                     new CommandListener(),
                     new ContextMenuListener(),
                     new BotGuildJoinListener(),
-                    new MemberGuildJoinListener()
+                    new MemberJoinGuildListener()
             );
 
-            guild = JDA.awaitReady().getGuildById(Config.getGuildID());
+            JDA.awaitReady();
+
+            guild = JDA.getGuildById(Config.getGuildID());
 
             TcpServer.run(Config.getPortTCPServer());
+
         } catch (InterruptedException exception) {
             Core.severe("Error initializing Discord API", exception);
         }
@@ -67,12 +72,12 @@ public class DiscordAPI extends ListenerAdapter {
         JDA.updateCommands().complete().forEach(cmd -> JDA.deleteCommandById(cmd.getApplicationIdLong()).queue());
         JDA.updateCommands().queue();
         JDA.upsertCommand("ping", "Berechne den Ping des Bots").queue();
-        JDA.upsertCommand((Commands.message("Count words"))).queue();
-        JDA.upsertCommand(Commands.user("Get user avatar")).queue();
+        // JDA.upsertCommand((Commands.message("Count words"))).queue();
+        // JDA.upsertCommand(Commands.user("Get user avatar")).queue();
 
         if (guild != null) {
             guild
-                    .upsertCommand("info", "Zeige Informationen über das GiantNetwork an")
+                    .upsertCommand("info", "Zeige Informationen über das Server an")
                     .queue();
             guild
                     .upsertCommand("close", "Schließe ein Ticket")
@@ -91,16 +96,17 @@ public class DiscordAPI extends ListenerAdapter {
                             new SubcommandData("start", "Starte ein neues Giveaway")
                                     .addOption(OptionType.INTEGER, "dauer", "Dauer in Stunden", true)
                                     .addOption(OptionType.INTEGER, "delay", "Verzögerung in Stunden"),
+                            new SubcommandData("info", "Giveaway infos anzeigen"),
                             new SubcommandData("cancel", "Giveaway abbrechen")
                     )
                     .queue();
             guild
                     .upsertCommand("manager", "Befehle für Admins / Developer")
                     .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR))
-                    .addSubcommands(new SubcommandData("restart", "Restart"))
-                    .addSubcommands(new SubcommandData("reloadcommands", "Reload Discord Commands"))
-                    .addSubcommands(new SubcommandData("ticketsetup", "Setup TicketBot"))
-                    .addSubcommands(new SubcommandData("closetickets", "Lösche alle Tickets"))
+                    .addSubcommands(new SubcommandData("restart", "Restart alle Services"))
+                    .addSubcommands(new SubcommandData("reload-commands", "Reloade alle Discord Commands"))
+                    .addSubcommands(new SubcommandData("ticket-setup", "Starte das Setup des Ticket-Bots"))
+                    .addSubcommands(new SubcommandData("close-all-tickets", "Lösche alle offenen Tickets"))
                     .queue();
         }
     }
@@ -128,6 +134,7 @@ public class DiscordAPI extends ListenerAdapter {
         getJDA().shutdown();
     }
 
+
     public JDA getJDA() {
         return JDA;
     }
@@ -136,7 +143,28 @@ public class DiscordAPI extends ListenerAdapter {
         return guild;
     }
 
-    public TextChannel getLogChannel() {
+    public Role getStaffRole() {
+        String staffRoleID = Config.getStaffRoleID();
+        if (staffRoleID.isEmpty() || guild.getRoleById(staffRoleID) == null) {
+            staffRoleID = guild.createRole().setName("Staff").setColor(Color.GREEN).complete().getId();
+            Config.setTeamRoleID(staffRoleID);
+        }
+
+        return guild.getRoleById(staffRoleID);
+    }
+
+    public Category getTicketCategory() {
+        if (Config.getTicketsCategoryID().isEmpty() || guild.getCategoryById(Config.getTicketsCategoryID()) == null) {
+            Category category = guild.createCategory("[Tickets]").complete();
+            category.getManager()
+                    .putRolePermissionOverride(Long.parseLong(getStaffRole().getId()), EnumSet.of(Permission.VIEW_CHANNEL), null)
+                    .putRolePermissionOverride(guild.getPublicRole().getIdLong(), null, EnumSet.of(Permission.VIEW_CHANNEL)).queue();
+            Config.setCategoryID(category.getId());
+        }
+        return guild.getCategoryById(Config.getTicketsCategoryID());
+    }
+
+    public TextChannel getDiscordLogChannel() {
 
         if (guild != null && (Config.getLogChannelID().isEmpty() || guild.getTextChannelById(Config.getLogChannelID()) == null)) {
             TextChannel textChannel = guild.createTextChannel("\uD83D\uDCBE│server-logs").complete();

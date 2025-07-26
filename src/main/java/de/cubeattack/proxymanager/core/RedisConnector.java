@@ -13,17 +13,12 @@ import java.util.concurrent.ConcurrentHashMap;
 public class RedisConnector {
 
     private JedisPool jedisPool = null;
-    private final Map<String,String> localCache = new ConcurrentHashMap<>();
+    private final Map<String, String> localCache = new ConcurrentHashMap<>();
 
 
     public RedisConnector() {
 
-        if(!Core.isMinecraftServer()){
-            return;
-        }
-
-        if (!Config.connectRedis()) {
-            Core.info("Redis - no connection established (Redis disabled or not a Minecraft server)");
+        if (!Core.isMinecraftServer()) {
             return;
         }
 

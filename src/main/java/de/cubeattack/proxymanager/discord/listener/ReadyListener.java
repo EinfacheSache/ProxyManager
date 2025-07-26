@@ -1,5 +1,6 @@
 package de.cubeattack.proxymanager.discord.listener;
 
+import de.cubeattack.proxymanager.core.Config;
 import de.cubeattack.proxymanager.core.Core;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
@@ -20,17 +21,22 @@ public class ReadyListener implements EventListener {
             Thread.currentThread().setName("DISCORD");
 
             JDA jda = event.getJDA();
-            List<Guild> guilds = jda.getGuilds();
+            List<Guild> joinedGuilds = jda.getGuilds();
+            Guild guild = jda.getGuildById(Config.getGuildID());
+
             Core.info("DiscordAPI is ready!");
             Core.info("Logged in as " + jda.getSelfUser().getName() + "#" + jda.getSelfUser().getDiscriminator());
-            Core.info("Connected to " + guilds.size() + " Guilds : " + Arrays.toString(guilds.toArray()));
+            Core.info("Connected to " + joinedGuilds.size() + " Guilds : " + Arrays.toString(joinedGuilds.toArray()));
 
-            guilds.forEach(guild -> {
-                    Core.info("Load retrieve invites from " + guild.getName());
-                    guild.retrieveInvites().queue(invites -> invites.forEach(invite -> MemberGuildJoinListener.getInviteUses().put(invite.getCode(), invite.getUses()))
-                    );
-                }
-            );
+            if (guild == null) {
+                Core.severe("Running for Guild : NULL");
+                return;
+            }
+
+            Core.info("Running for Guild : " + guild.getName() + "(MemberCount=" + guild.getMembers().size() + ")");
+            Core.info("Load retrieve invites from " + guild.getName());
+
+            guild.retrieveInvites().queue(invites -> invites.forEach(invite -> MemberJoinGuildListener.getInviteUses().put(invite.getCode(), invite.getUses())));
         }
     }
 }

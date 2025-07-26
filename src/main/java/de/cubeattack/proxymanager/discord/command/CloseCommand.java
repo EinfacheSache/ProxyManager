@@ -5,9 +5,14 @@ import de.cubeattack.proxymanager.core.Core;
 import de.cubeattack.proxymanager.discord.MessageUtils;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.text.TextInput;
+import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
+import net.dv8tion.jda.api.interactions.modals.Modal;
 
 import java.awt.*;
 import java.util.Objects;
@@ -20,28 +25,51 @@ public class CloseCommand extends ListenerAdapter {
         if (!event.getName().equalsIgnoreCase("close")) return;
         if (!(event.getChannel() instanceof TextChannel channel)) return;
 
-        if (channel.getParentCategory() == null || !channel.getParentCategory().getId().equals(Config.getCategoryID())) {
+        if (channel.getParentCategory() == null || !channel.getParentCategory().getId().equals(Config.getTicketsCategoryID())) {
             event.replyEmbeds(MessageUtils.getDefaultEmbed().setTitle("Fehler").setDescription("Das ist kein Ticket").build()).setEphemeral(true).queue();
             return;
         }
 
-        String reason = null;
+        String reason = "einer Lösung";
         if (!event.getOptionsByName("reason").isEmpty()) {
             reason = event.getOptionsByName("reason").get(0).getAsString();
         }
 
-        ticketClosed(channel, Objects.requireNonNull(event.getMember()), reason);
+        closeTicket(channel, Objects.requireNonNull(event.getMember()), reason);
     }
 
     @Override
     public void onButtonInteraction(ButtonInteractionEvent event) {
-        if (!event.getComponentId().equals("delete_ticket")) {
-            return;
-        }
-        ticketClosed((TextChannel) event.getChannel(), Objects.requireNonNull(event.getMember()), null);
+        if (event.getGuild() == null) return;
+        if (!Objects.equals(event.getGuild(), Core.getDiscordAPI().getGuild())) return;
+        if (!event.getComponentId().equals("delete_ticket")) return;
+
+        TextInput body = TextInput.create("body", "Begründung für das schließen", TextInputStyle.PARAGRAPH)
+                .setPlaceholder("Nenne denn Grund für das schließen des Tickets")
+                .setMinLength(12)
+                .setMaxLength(256)
+                .build();
+
+        Modal modal = Modal.create("ticket:delete:" + event.getChannelId(), "Ticket schließen")
+                .addComponents(ActionRow.of(body))
+                .build();
+
+        event.replyModal(modal).queue();
     }
 
-    private void ticketClosed(TextChannel channel, Member member, String reason) {
+    @Override
+    public void onModalInteraction(ModalInteractionEvent event) {
+        if (event.getGuild() == null) return;
+        if (!Objects.equals(event.getGuild(), Core.getDiscordAPI().getGuild())) return;
+        if (event.getModalId().startsWith("ticket:delete")) {
+            String body = Objects.requireNonNull(event.getValue("body")).getAsString();
+            closeTicket((TextChannel) event.getChannel(), Objects.requireNonNull(event.getMember()), body);
+            event.deferReply().queue();
+        }
+    }
+
+
+    private void closeTicket(TextChannel channel, Member member, String reason) {
         channel.getMemberPermissionOverrides().stream().filter(mpOverride ->
                 !Objects.requireNonNull(mpOverride.getMember()).getUser().isBot()).forEach(mpOverride ->
                 Objects.requireNonNull(mpOverride.getMember()).getUser().openPrivateChannel().flatMap(privateChannel ->
@@ -49,10 +77,10 @@ public class CloseCommand extends ListenerAdapter {
                                 .setAuthor(Config.getServerName())
                                 .setColor(Color.GREEN)
                                 .setTitle("Vielen Dank, dass Sie den Support kontaktiert haben!")
-                                .setDescription("Ihr Fall wurde aufgrund " + (reason == null ? "einer Lösung" : reason) + " geschlossen. \nWenn Sie ein anderes Problem haben, können Sie möglicherweise ein weiteres Ticket eröffnen.")
+                                .setDescription("Ihr Fall wurde aufgrund " + reason + " geschlossen. \nWenn Sie ein anderes Problem haben, können Sie möglicherweise ein weiteres Ticket eröffnen.")
                                 .build())).queue());
 
-        Core.getDiscordAPI().getLogChannel().sendMessageEmbeds(MessageUtils
+        Core.getDiscordAPI().getDiscordLogChannel().sendMessageEmbeds(MessageUtils
                 .getDefaultEmbed()
                 .setAuthor(Config.getServerName())
                 .setColor(Color.GREEN)

@@ -1,7 +1,7 @@
 discord:
   enabled: true
-  activity-type: 'PLAYING'
-  activity: 'FlareonEvents.de'
+  activity-type: PLAYING
+  activity: 'Flareon Events 🔥'
   guild-id: '1371518487234871408'
   user-role-id: '1371583572368031915'
   beta-tester-role-id: '1371594399003443200'
