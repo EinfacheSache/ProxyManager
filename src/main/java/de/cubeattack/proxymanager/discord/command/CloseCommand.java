@@ -32,7 +32,7 @@ public class CloseCommand extends ListenerAdapter {
 
         String reason = "einer Lösung";
         if (!event.getOptionsByName("reason").isEmpty()) {
-            reason = event.getOptionsByName("reason").get(0).getAsString();
+            reason = event.getOptionsByName("reason").getFirst().getAsString();
         }
 
         closeTicket(channel, Objects.requireNonNull(event.getMember()), reason);
