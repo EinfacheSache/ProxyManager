@@ -1,6 +1,8 @@
 #ProxyManger
 config.yml
 /modules/
+/logs/
+/data.yml
 /src/main/resources/application.properties
 
 # User-specific stuff
