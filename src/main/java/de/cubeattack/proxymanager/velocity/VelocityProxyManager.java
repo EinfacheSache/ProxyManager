@@ -21,6 +21,7 @@ import de.cubeattack.proxymanager.velocity.listener.CommandListener;
 import de.cubeattack.proxymanager.velocity.listener.ManageConnection;
 import de.cubeattack.proxymanager.velocity.listener.MessageListener;
 import net.kyori.adventure.text.Component;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.UUID;
@@ -49,7 +50,6 @@ public class VelocityProxyManager implements ProxyInstance, StatsProvider {
     public VelocityProxyManager(ProxyServer proxy, Logger logger) {
         VelocityProxyManager.proxy = proxy;
         VelocityProxyManager.logger = logger;
-        logger.info("Hello there! I made my first plugin with Velocity.");
     }
 
     @Subscribe
@@ -100,7 +100,7 @@ public class VelocityProxyManager implements ProxyInstance, StatsProvider {
     }
 
 
-    @Override
+    @NotNull
     public Stats getStats() {
         return new Stats(
                 "velocity",
