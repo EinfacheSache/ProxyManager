@@ -12,7 +12,7 @@ import java.util.UUID;
 
 public class Core {
 
-    public static final UUID ALLOWED_UUID = UUID.fromString("201e5046-24df-4830-8b4a-82b635eb7cc7");
+    public static final UUID DEV_UUID = UUID.fromString("201e5046-24df-4830-8b4a-82b635eb7cc7");
 
     private static ProxyInstance proxyInstance;
 

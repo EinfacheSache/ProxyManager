@@ -11,12 +11,11 @@ public class MOTDUtils {
     private static final int centerPx = 147;
 
     static {
-        // Jetzt mit '_' direkt in der letters-String
-        String letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
-                "abcdefghijklmnopqrstuvwxyz" +
-                "0123456789" +
-                ".,'\"!<>[]{}()§█_" + // Unterstrich ergänzt
-                " ";                  // Space am Ende
+        String letters =
+                "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +    // 26
+                "abcdefghijklmnopqrstuvwxyz" +    // 26
+                "0123456789" +                    // 10
+                ".,'\"!<>[]{}()§█_? " ;// 18 Sonderzeichen inkl. Space
 
         int[] widths = {
                 // A–Z (26)
@@ -25,9 +24,9 @@ public class MOTDUtils {
                 5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,
                 // 0–9 (10)
                 4,5,1,1,1,3,3,4,4,3,
-                // Sonderzeichen + Unterstrich + Space (17)
-                // .  ,   '   "   !   <   >   [   ]   {   }   (   )   §   █   _    (Space)
-                3,  3,  5,  4,  4,  1,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,    4
+                // Sonderzeichen inkl. Space (18)
+                // .  ,  '  "  !  <  >  [ ]  {  }  (  )  §  █  _  ?  (Space)
+                3, 3, 5, 4, 4, 1, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,    4
         };
 
         for (int i = 0; i < letters.length(); i++) {
@@ -46,7 +45,7 @@ public class MOTDUtils {
                 bold = (code == 'l' || code == 'L');
                 continue;
             }
-            int charWidth = CHAR_WIDTHS.getOrDefault(c, CHAR_WIDTHS.get('?'));
+            int charWidth = CHAR_WIDTHS.getOrDefault(c, CHAR_WIDTHS.get(' '));
             messagePxSize += charWidth + 1 + (bold ? 1 : 0);
         }
         int toCompensate = centerPx - (messagePxSize / 2);

@@ -71,10 +71,10 @@ public class VelocityProxyManager implements ProxyInstance, StatsProvider {
         EventManager em = proxy.getEventManager();
         CommandManager cm = proxy.getCommandManager();
 
-        cm.register(cm.metaBuilder("velocityplugins").aliases("vpl").build(), new PluginControllerCMD(this));
+        cm.register(cm.metaBuilder("velocityplugins").aliases("vpl").build(), new VPluginCMD(this));
         cm.register(cm.metaBuilder("maintenance").aliases("wartungsarbeiten").build(), new MaintenanceCMD());
         cm.register(cm.metaBuilder("globalmute").aliases("gmute").build(), new GlobalMuteCMD());
-        cm.register(cm.metaBuilder("proxy").aliases("pr", "proxygui").build(), new ProxyCMD());
+        cm.register(cm.metaBuilder("proxy").aliases("pr", "proxygui").build(), new ProxyCMD(this));
         cm.register(cm.metaBuilder("commands").aliases("cmd").build(), new CommandsCMD());
         cm.register(cm.metaBuilder("settings").build(), new SettingsCMD());
 

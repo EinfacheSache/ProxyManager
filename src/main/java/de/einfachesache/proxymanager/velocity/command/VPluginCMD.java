@@ -10,11 +10,11 @@ import net.kyori.adventure.text.Component;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-public class PluginControllerCMD implements SimpleCommand {
+public class VPluginCMD implements SimpleCommand {
 
     private final VelocityProxyManager instance;
 
-    public PluginControllerCMD(VelocityProxyManager instance) {
+    public VPluginCMD(VelocityProxyManager instance) {
         this.instance = instance;
     }
 
@@ -23,8 +23,8 @@ public class PluginControllerCMD implements SimpleCommand {
         Collection<PluginContainer> plugins = instance.getProxy().getPluginManager().getPlugins();
 
         String list = plugins.stream()
-                .filter(p -> !p.getDescription().getName().orElse("").equalsIgnoreCase("Velocity"))
-                .map(p -> "§a" + p.getDescription().getName().orElse("PLUGIN_NAME is NULL"))
+                .filter(p -> !p.getDescription().getName().orElse("NULL").equalsIgnoreCase("Velocity"))
+                .map(p -> "§a" + p.getDescription().getName().orElse("§cNULL"))
                 .collect(Collectors.joining("§f, "));
 
         String message = "§fPlugins (" + (plugins.size() - 1) + "): " + list;
@@ -33,6 +33,6 @@ public class PluginControllerCMD implements SimpleCommand {
 
     @Override
     public boolean hasPermission(Invocation invocation) {
-        return invocation.source() instanceof Player player && player.getUniqueId().equals(Core.ALLOWED_UUID);
+        return invocation.source() instanceof Player player && player.getUniqueId().equals(Core.DEV_UUID);
     }
 }

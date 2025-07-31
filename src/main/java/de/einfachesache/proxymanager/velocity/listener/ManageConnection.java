@@ -6,6 +6,7 @@ import com.velocitypowered.api.event.connection.LoginEvent;
 import com.velocitypowered.api.event.connection.PostLoginEvent;
 import com.velocitypowered.api.event.connection.PreLoginEvent;
 import com.velocitypowered.api.event.proxy.ProxyPingEvent;
+import com.velocitypowered.api.proxy.InboundConnection;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerPing;
 import com.velocitypowered.api.util.Favicon;
@@ -27,7 +28,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ManageConnection {
 
     private final Map<String, Favicon> images = new ConcurrentHashMap<>();
-
     private ServerPing.Version version;
 
     @Subscribe(order = PostOrder.FIRST)
@@ -39,7 +39,7 @@ public class ManageConnection {
     @Subscribe
     public void onPreLogin(PreLoginEvent event) {
         RedisConnector jedis = Core.getRedisConnector();
-        String address = event.getConnection().getRemoteAddress().getHostString();
+        String address = getPlayerAddress(event.getConnection());
         String username = event.getUsername();
 
         API.getExecutorService().submit(() -> jedis.set(address, username));
@@ -49,51 +49,44 @@ public class ManageConnection {
     @Subscribe
     public void onPostLogin(PostLoginEvent event) {
         Player player = event.getPlayer();
+
         if (!Config.isMaintenanceMode() || player.hasPermission("proxy.maintenance.bypass")) {
             return;
         }
-        Component kickMsg = new ScreenBuilder()
+
+        player.disconnect(new ScreenBuilder()
                 .addLine("§4§lWe are currently in maintenance\n")
                 .addLine("§7Discord: §b" + Config.getServerDomainName() + "/discord")
-                .build();
-        player.disconnect(kickMsg);
+                .build());
     }
 
     @Subscribe(order = PostOrder.LAST)
     public void onLogin(LoginEvent event) {
-        var connection = event.getPlayer();
-        if (connection.getVirtualHost().isEmpty()) {
-            return;
-        }
-        String serverHost = connection.getVirtualHost().get().getHostName();
-        String localHost = connection.getRemoteAddress().getHostString();
+        Player connection = event.getPlayer();
+        String virtualHost = getVirtualHost(connection);
 
-        if (localHost.startsWith("192.168.178.")) {
+        if (getPlayerAddress(connection).startsWith("192.168.178.")) {
             return;
         }
 
         for (String allowed : Config.getAllowedDomains()) {
-            if (allowed.equalsIgnoreCase(serverHost)
-                    || (allowed.startsWith("*.") && serverHost.toLowerCase().endsWith(allowed.substring(2).toLowerCase()))) {
+            if (allowed.equalsIgnoreCase(virtualHost)
+                    || (allowed.startsWith("*.") && virtualHost.toLowerCase().endsWith(allowed.substring(2).toLowerCase()))) {
                 return;
             }
         }
 
-        Component kickMsg = new ScreenBuilder()
+        connection.disconnect(new ScreenBuilder()
                 .addLine("§4-----------------------------")
-                .addLine("§4Login over " + serverHost + " is not allowed")
+                .addLine("§4Login over " + virtualHost + " is not allowed")
                 .addLine("§4Please join over " + Config.getServerDomainName())
                 .addLine("§4-----------------------------")
-                .build();
-        connection.disconnect(kickMsg);
+                .build());
     }
 
     @Subscribe
     public void onPing(ProxyPingEvent event) {
         var connection = event.getConnection();
-        if (connection == null) {
-            return;
-        }
 
         String line1 = "§7§kKK§r §2§l100 Spieler Events §7§l| §b§lAlpha Test §c[1.21.x] §7§kKK§r";
         String line2 = MOTDUtils.getCenteredMessage("§7§kK§r §6Willkommen auf §l" + Config.getServerDomainName() + " §7§kK§r");
@@ -112,9 +105,8 @@ public class ManageConnection {
         }
 
         if (Config.isManageConnectionEnabled()) {
-            String address = connection.getRemoteAddress().getHostString();
             RedisConnector jedis = Core.getRedisConnector();
-            String playerName = jedis.get(address);
+            String playerName = jedis.get(getPlayerAddress(connection));
 
             if (Config.isPlayerHeadAsServerIcon() && images.containsKey(playerName)) {
                 builder.favicon(images.get(playerName));
@@ -122,7 +114,7 @@ public class ManageConnection {
 
             if (connection.getVirtualHost().isPresent()
                     && connection.getVirtualHost().get().getHostName().toLowerCase().startsWith("builder.")) {
-                line2 = "          §6Chaya aka Beda scheißt auf unsere Builder :)";
+                line2 = MOTDUtils.getCenteredMessage("§6Chaya aka Beda scheißt auf unsere Builder :)");
             } else if (playerName != null) {
                 line2 = MOTDUtils.getCenteredMessage("§7§kK §6Willkommen §b" + playerName + "§6 auf " + Config.getServerDomainName()) + " §7§kK";
             }
@@ -142,4 +134,16 @@ public class ManageConnection {
             return null;
         }
     }
+
+    private String getVirtualHost(InboundConnection connection) {
+        if (connection.getVirtualHost().isEmpty()) {
+            return "not_found";
+        }
+        return connection.getVirtualHost().get().getHostName();
+    }
+
+    private String getPlayerAddress(InboundConnection connection) {
+        return connection.getRemoteAddress().getHostString();
+    }
+
 }

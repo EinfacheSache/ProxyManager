@@ -31,14 +31,14 @@ public class MessageListener {
 
         RedisConnector jedis = Core.getRedisConnector();
         if (Boolean.parseBoolean(jedis.get("Chat-Disabled"))) {
-            if (!player.hasPermission("proxy.chat.disabled.bypass")) {
+            if (!player.hasPermission("proxy.chat.disabled.bypass") && !player.getUniqueId().equals(Core.DEV_UUID)) {
                 event.setResult(PlayerChatEvent.ChatResult.denied());
                 player.sendMessage(Component.text(VelocityProxyManager.PREFIX + "§cDer Chat ist deaktiviert"));
                 return;
             }
         }
 
-        if (player.hasPermission("proxy.cooldown.bypass")) {
+        if (player.hasPermission("proxy.cooldown.bypass") || player.getUniqueId().equals(Core.DEV_UUID)) {
             return;
         }
 
