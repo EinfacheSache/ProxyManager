@@ -39,10 +39,13 @@ public class CommandListener {
             }
         }
 
+        if (event.getCommand().toLowerCase().startsWith("server") && !Core.DEV_UUID.equals(player.getUniqueId())) {
+            event.setResult(CommandExecuteEvent.CommandResult.denied());
+        }
+
         if (player.hasPermission("proxy.cooldown.bypass") || player.getUniqueId().equals(Core.DEV_UUID)) {
             return;
         }
-
 
         long now = System.currentTimeMillis();
         if (inCooldown.containsKey(player) && (now - inCooldown.get(player)) / 1000 <= 5) {
