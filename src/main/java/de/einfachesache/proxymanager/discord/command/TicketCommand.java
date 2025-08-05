@@ -18,11 +18,11 @@ import java.awt.*;
 import java.util.EnumSet;
 import java.util.Objects;
 
-public class ManagerCommand extends ListenerAdapter {
+public class TicketCommand extends ListenerAdapter {
 
     private final DiscordAPI discordAPI;
 
-    public ManagerCommand(DiscordAPI discordAPI) {
+    public TicketCommand(DiscordAPI discordAPI) {
         this.discordAPI = discordAPI;
     }
 
@@ -31,32 +31,20 @@ public class ManagerCommand extends ListenerAdapter {
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
 
         if (!Objects.equals(event.getGuild(), Core.getDiscordAPI().getGuild())) return;
-        if (!event.getName().equalsIgnoreCase("manager")) return;
+        if (!event.getName().equalsIgnoreCase("ticket")) return;
 
         EmbedBuilder embedBuilder = MessageUtils.getDefaultEmbed();
         Guild guild = event.getGuild();
 
         switch (Objects.requireNonNull(event.getSubcommandName())) {
 
-            case "restart" -> {
-                embedBuilder.setDescription("Restart wird ausgeführt!");
-                Core.shutdown();
-                Core.run();
-            }
-
-            case "reload-commands" -> {
-                Core.getDiscordAPI().loadDiscordCommands();
-                embedBuilder.setDescription("Commands wurden reloaded!");
-                Core.info("Updating Discord slash commands");
-            }
-
-            case "close-all-tickets" -> {
+            case "close-all" -> {
                 discordAPI.getTicketCategory().getChannels().forEach(c -> c.delete().queue());
                 embedBuilder.setDescription("Alle Tickets gelöscht");
                 Core.info("All tickets deleted");
             }
 
-            case "ticket-setup" -> {
+            case "setup" -> {
                 embedBuilder.setDescription("Ticket message wurde erstellt!");
                 EmbedBuilder ticket = MessageUtils.getDefaultEmbed()
                         .setColor(Color.BLUE)

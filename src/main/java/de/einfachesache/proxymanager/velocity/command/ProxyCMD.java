@@ -55,7 +55,7 @@ public class ProxyCMD implements SimpleCommand {
                     return;
                 }
 
-                Core.getDiscordAPI().loadDiscordCommands();
+                Core.getDiscordAPI().loadGuildDiscordCommands(Core.getDiscordAPI().getGuild());
                 Core.info("Commands successfully reloaded");
                 return;
 

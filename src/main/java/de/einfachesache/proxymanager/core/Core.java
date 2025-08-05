@@ -62,9 +62,9 @@ public class Core {
 
     public static void shutdown() {
         info("Stopping running services...");
-        RedisConnector.close();
-        discordAPI.shutdown();
         TcpServer.stop();
+        discordAPI.shutdown();
+        RedisConnector.close();
         info("Services successfully stopped");
     }
 

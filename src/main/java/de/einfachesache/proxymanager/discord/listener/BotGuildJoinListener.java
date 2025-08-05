@@ -11,6 +11,6 @@ public class BotGuildJoinListener extends ListenerAdapter {
     @Override
     public void onGuildJoin(GuildJoinEvent event) {
         if (!Objects.equals(event.getGuild(), Core.getDiscordAPI().getGuild())) return;
-        Core.getDiscordAPI().loadDiscordCommands();
+        Core.getDiscordAPI().loadGuildDiscordCommands(event.getGuild());
     }
 }

@@ -33,12 +33,14 @@ public class InfoCommand extends ListenerAdapter {
         if (!Objects.equals(event.getGuild(), Core.getDiscordAPI().getGuild())) return;
         if (!event.getName().equalsIgnoreCase("info")) return;
 
+        event.deferReply().queue();
+
         EmbedBuilder embedBuilder = MessageUtils.getDefaultEmbed();
         embedBuilder.setTitle(Config.getServerName() + " Informationen");
         embedBuilder.setColor(Color.GREEN);
 
         long currentTime = System.currentTimeMillis();
-        boolean isPinged = isReachable("mc." + "einfachesache.de" /*Config.getServerDomainName().toLowerCase()*/, 25565, 2000);
+        boolean isPinged = isReachable(Config.getServerDomainName().toLowerCase(), 25565, 2000);
         currentTime = System.currentTimeMillis() - currentTime;
 
         String strBasic = "IP: " + Config.getServerDomainName() + "\n" +
@@ -59,7 +61,7 @@ public class InfoCommand extends ListenerAdapter {
 
         embedBuilder.addField("Servers:", strServer.toString(), false);
 
-        event.replyEmbeds(embedBuilder.build()).queue();
+        event.getHook().sendMessageEmbeds(embedBuilder.build()).queue();
 
     }
 
