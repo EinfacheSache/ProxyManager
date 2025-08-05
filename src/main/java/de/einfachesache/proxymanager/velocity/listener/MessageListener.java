@@ -17,9 +17,9 @@ import java.util.concurrent.ConcurrentHashMap;
 public class MessageListener {
 
     private final VelocityProxyManager proxy;
-    private static final Map<Player, Integer> cooldownCounter = new ConcurrentHashMap<>();
-    private static final Map<Player, Long> inCooldown = new ConcurrentHashMap<>();
-    private static final Map<Player, ScheduledTask> taskIDForCooldown = new ConcurrentHashMap<>();
+    private final Map<Player, Integer> cooldownCounter = new ConcurrentHashMap<>();
+    private final Map<Player, Long> inCooldown = new ConcurrentHashMap<>();
+    private final Map<Player, ScheduledTask> taskIDForCooldown = new ConcurrentHashMap<>();
 
     public MessageListener(VelocityProxyManager proxy) {
         this.proxy = proxy;
