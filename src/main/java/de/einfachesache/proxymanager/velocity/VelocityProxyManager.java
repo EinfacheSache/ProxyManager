@@ -72,22 +72,20 @@ public class VelocityProxyManager implements ProxyInstance, StatsProvider {
         EventManager em = proxy.getEventManager();
         CommandManager cm = proxy.getCommandManager();
 
-        cm.register(cm.metaBuilder("velocityplugins").aliases("vpl").build(), new VPluginCMD(this));
-        cm.register(cm.metaBuilder("maintenance").aliases("wartungsarbeiten").build(), new MaintenanceCMD());
-        cm.register(cm.metaBuilder("globalmute").aliases("gmute").build(), new GlobalMuteCMD());
         cm.register(cm.metaBuilder("proxy").aliases("pr", "proxygui").build(), new ProxyCMD(this));
+        cm.register(cm.metaBuilder("velocityplugins").aliases("vpl").build(), new VPluginCMD(this));
         cm.register(cm.metaBuilder("commands").aliases("cmd").build(), new CommandsCMD());
-        cm.register(cm.metaBuilder("settings").build(), new SettingsCMD());
-
-
-        if (Config.isManageConnectionEnabled()) {
-            em.register(this, new ConnectionListener());
-        }
+        cm.register(cm.metaBuilder("settings").build(), new SettingsCMD(this));
+        cm.register(cm.metaBuilder("maintenance").build(), new MaintenanceCMD());
+        cm.register(cm.metaBuilder("gmute").build(), new GlobalMuteCMD());
 
         em.register(this, new MessageListener(this));
         em.register(this, new CommandListener(this));
         em.register(this, new TabCompleteListener());
 
+        if (Config.isManageConnectionEnabled()) {
+            em.register(this, new ConnectionListener());
+        }
     }
 
     @Subscribe

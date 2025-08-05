@@ -23,12 +23,12 @@ import java.util.stream.Collectors;
 
 public class ProxyCMD implements SimpleCommand {
 
-    private static final List<String> SUB_COMMANDS = Arrays.asList("reload", "send");
+    private final List<String> SUB_COMMANDS = Arrays.asList("reload", "send");
 
-    private final VelocityProxyManager velocityProxyManager;
+    private final VelocityProxyManager instance;
 
-    public ProxyCMD(VelocityProxyManager velocityProxyManager) {
-        this.velocityProxyManager = velocityProxyManager;
+    public ProxyCMD(VelocityProxyManager instance) {
+        this.instance = instance;
     }
 
     @Override
@@ -67,8 +67,8 @@ public class ProxyCMD implements SimpleCommand {
             String targetName = invocation.arguments()[1];
             String serverName = invocation.arguments()[2];
 
-            Optional<Player> target = velocityProxyManager.getProxy().getPlayer(targetName);
-            Optional<RegisteredServer> server = velocityProxyManager.getProxy().getServer(serverName);
+            Optional<Player> target = instance.getProxy().getPlayer(targetName);
+            Optional<RegisteredServer> server = instance.getProxy().getServer(serverName);
 
 
             if (target.isEmpty()) {
@@ -101,7 +101,7 @@ public class ProxyCMD implements SimpleCommand {
             return;
         }
 
-        if (!velocityProxyManager.getProxy().getPluginManager().isLoaded("protocolize")) {
+        if (!instance.getProxy().getPluginManager().isLoaded("protocolize")) {
             source.sendMessage(Component.text("§cProtocolize need to be installed to run this command"));
             return;
         }
@@ -162,7 +162,7 @@ public class ProxyCMD implements SimpleCommand {
 
         else if (args.length == 2) {
             String prefix = args[1].toLowerCase();
-            return velocityProxyManager.getProxy().getAllPlayers().stream()
+            return instance.getProxy().getAllPlayers().stream()
                     .map(Player::getUsername)
                     .filter(name -> name.toLowerCase().startsWith(prefix))
                     .collect(Collectors.toList());
@@ -170,7 +170,7 @@ public class ProxyCMD implements SimpleCommand {
 
         else if (args.length == 3) {
             String prefix = args[2].toLowerCase();
-            return velocityProxyManager.getProxy().getAllServers().stream()
+            return instance.getProxy().getAllServers().stream()
                     .map(RegisteredServer::getServerInfo)
                     .map(ServerInfo::getName)
                     .filter(name -> name.toLowerCase().startsWith(prefix))
