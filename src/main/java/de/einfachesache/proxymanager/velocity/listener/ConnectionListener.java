@@ -25,7 +25,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @SuppressWarnings("deprecation")
-public class ManageConnection {
+public class ConnectionListener {
 
     private final Map<String, Favicon> images = new ConcurrentHashMap<>();
     private ServerPing.Version version;
