@@ -18,8 +18,9 @@ import de.einfachesache.proxymanager.core.Config;
 import de.einfachesache.proxymanager.core.Core;
 import de.einfachesache.proxymanager.velocity.command.*;
 import de.einfachesache.proxymanager.velocity.listener.CommandListener;
-import de.einfachesache.proxymanager.velocity.listener.ManageConnection;
+import de.einfachesache.proxymanager.velocity.listener.ConnectionListener;
 import de.einfachesache.proxymanager.velocity.listener.MessageListener;
+import de.einfachesache.proxymanager.velocity.listener.TabCompleteListener;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
@@ -80,11 +81,12 @@ public class VelocityProxyManager implements ProxyInstance, StatsProvider {
 
 
         if (Config.isManageConnectionEnabled()) {
-            em.register(this, new ManageConnection());
+            em.register(this, new ConnectionListener());
         }
 
         em.register(this, new MessageListener(this));
         em.register(this, new CommandListener(this));
+        em.register(this, new TabCompleteListener());
 
     }
 
