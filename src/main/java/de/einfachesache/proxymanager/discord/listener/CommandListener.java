@@ -22,7 +22,7 @@ public class CommandListener extends ListenerAdapter {
                 .append(":")
                 .append(optionMapping.getAsString()));
 
-        Core.info("User '" + event.getUser().getName() + "' run command '" + event.getName() + builder + "'");
+        Core.info("User '" + event.getUser().getName() + "' run command '" + event.getName() + builder + "'" + (event.getGuild() == null ? " via private message" : " on " + event.getGuild().getName()));
     }
 
     @Override
