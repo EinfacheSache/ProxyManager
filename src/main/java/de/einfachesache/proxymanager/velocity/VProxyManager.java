@@ -58,9 +58,9 @@ public class VProxyManager implements ProxyInstance, StatsProvider {
         CommandManager cm = proxy.getCommandManager();
 
         cm.register(cm.metaBuilder("proxy").aliases("pr", "proxygui").build(), new ProxyCMD(this));
-        cm.register(cm.metaBuilder("commands").aliases("cmd").build(), new CommandsCMD());
         cm.register(cm.metaBuilder("settings").build(), new SettingsCMD(this));
         cm.register(cm.metaBuilder("maintenance").build(), new MaintenanceCMD());
+        cm.register(cm.metaBuilder("commands").build(), new CommandsCMD());
         cm.register(cm.metaBuilder("gmute").build(), new GlobalMuteCMD());
 
         em.register(this, new MessageListener(this));
