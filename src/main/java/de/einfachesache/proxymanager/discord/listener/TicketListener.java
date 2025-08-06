@@ -1,6 +1,6 @@
 package de.einfachesache.proxymanager.discord.listener;
 
-import de.einfachesache.proxymanager.core.Core;
+import de.einfachesache.proxymanager.core.Config;
 import de.einfachesache.proxymanager.discord.DiscordAPI;
 import de.einfachesache.proxymanager.discord.MessageUtils;
 import net.dv8tion.jda.api.Permission;
@@ -30,7 +30,7 @@ public class TicketListener extends ListenerAdapter {
 
     @Override
     public void onStringSelectInteraction(StringSelectInteractionEvent event) {
-        if (!Objects.equals(event.getGuild(), Core.getDiscordAPI().getGuild())) return;
+        if (event.getGuild() == null || !Config.getGuildIDs().contains(event.getGuild().getId())) return;
         if (event.getComponentId().equals("ticket:select")) {
 
             TextInput body = TextInput.create("body", "Bitte beschreibe dein Problem", TextInputStyle.PARAGRAPH)
@@ -50,15 +50,14 @@ public class TicketListener extends ListenerAdapter {
 
     @Override
     public void onModalInteraction(ModalInteractionEvent event) {
-        if (event.getGuild() == null) return;
-        if (!Objects.equals(event.getGuild(), Core.getDiscordAPI().getGuild())) return;
+        if (event.getGuild() == null || !Config.getGuildIDs().contains(event.getGuild().getId())) return;
         if (event.getModalId().startsWith("ticket:describe")) {
             event.reply("Danke für Ihre Anfrage").setEphemeral(true).queue();
 
             String body = Objects.requireNonNull(event.getValue("body")).getAsString();
 
-            Role staffRoleID = discordAPI.getStaffRole();
-            Category ticketCategory = discordAPI.getTicketCategory();
+            Role staffRoleID = discordAPI.getStaffRole(event.getGuild().getId());
+            Category ticketCategory = discordAPI.getTicketCategory(event.getGuild().getId());
             TextChannel channel = ticketCategory.createTextChannel(event.getModalId().split(":")[2] + "-" + event.getUser().getName()).complete();
 
             channel.getManager().putMemberPermissionOverride(event.getUser().getIdLong(), EnumSet.of(Permission.VIEW_CHANNEL), null).queue();

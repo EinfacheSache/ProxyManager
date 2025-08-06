@@ -2,6 +2,7 @@ package de.einfachesache.proxymanager.discord.listener;
 
 import de.einfachesache.proxymanager.core.Config;
 import de.einfachesache.proxymanager.core.Core;
+import de.einfachesache.proxymanager.discord.DiscordAPI;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.GenericEvent;
@@ -11,32 +12,44 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ReadyListener implements EventListener {
+
+    private final DiscordAPI discordAPI;
+
+    public ReadyListener(DiscordAPI discordAPI) {
+        this.discordAPI = discordAPI;
+    }
 
     @Override
     public void onEvent(@NotNull GenericEvent event) {
         if (event instanceof ReadyEvent) {
 
-            Thread.currentThread().setName("DISCORD");
-
             JDA jda = event.getJDA();
+            Thread.currentThread().setName("DISCORD");
+            Config.getGuildIDs().forEach(id -> discordAPI.getGuilds().put(id, jda.getGuildById(id)));
+
             List<Guild> joinedGuilds = jda.getGuilds();
-            Guild guild = jda.getGuildById(Config.getGuildID());
+            List<Guild> guilds = discordAPI.getGuilds().values().stream().toList();
 
             Core.info("DiscordAPI is ready!");
             Core.info("Logged in as " + jda.getSelfUser().getName() + "#" + jda.getSelfUser().getDiscriminator());
             Core.info("Connected to " + joinedGuilds.size() + " Guilds : " + Arrays.toString(joinedGuilds.toArray()));
 
-            if (guild == null) {
+            if (guilds.isEmpty()) {
                 Core.severe("Running for Guild : NULL");
                 return;
             }
 
-            Core.info("Running for Guild : " + guild.getName() + "(MemberCount=" + guild.getMembers().size() + ")");
-            Core.info("Load retrieve invites from " + guild.getName());
+            Core.info("Running for Guilds: " + guilds.stream()
+                    .map(g -> g.getName() + "(MemberCount=" + g.getMembers().size() + ")")
+                    .collect(Collectors.joining(", ")));
 
-            guild.retrieveInvites().queue(invites -> invites.forEach(invite -> MemberJoinGuildListener.getInviteUses().put(invite.getCode(), invite.getUses())));
+            guilds.forEach(guild -> {
+                Core.info("Load retrieve invites from " + guild.getName());
+                guild.retrieveInvites().queue(invites -> invites.forEach(invite -> MemberJoinGuildListener.getInviteUses().put(invite.getCode(), invite.getUses())));
+            });
         }
     }
 }

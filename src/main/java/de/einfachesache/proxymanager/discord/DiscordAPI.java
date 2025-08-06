@@ -28,11 +28,13 @@ import net.dv8tion.jda.api.utils.cache.CacheFlag;
 
 import java.awt.*;
 import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Map;
 
 public class DiscordAPI extends ListenerAdapter {
 
     private JDA JDA;
-    private Guild guild;
+    private final Map<String, Guild> guilds = new HashMap<>();
 
     public static final long DEV_USER_ID = 571736032165232651L;
 
@@ -48,7 +50,7 @@ public class DiscordAPI extends ListenerAdapter {
                     new PingCommand(),
                     new CloseCommand(),
                     new LookupCommand(),
-                    new ReadyListener(),
+                    new ReadyListener(this),
                     new TicketCommand(this),
                     new TicketListener(this),
                     new GiveawayCommand(this),
@@ -59,8 +61,6 @@ public class DiscordAPI extends ListenerAdapter {
             );
 
             JDA.awaitReady();
-
-            guild = JDA.getGuildById(Config.getGuildID());
 
             TcpServer.run(Config.getPortTCPServer());
 
@@ -94,7 +94,7 @@ public class DiscordAPI extends ListenerAdapter {
             return;
         }
 
-        Core.info("Commands on " + guild.getName() + " are reloading yet");
+        Core.info(guild.getName() + " | Commands are reloading yet");
 
         guild.updateCommands()
                 .addCommands(
@@ -160,38 +160,44 @@ public class DiscordAPI extends ListenerAdapter {
         return JDA;
     }
 
-    public Guild getGuild() {
-        return guild;
+    public Guild getGuild(String guildID) {
+        return guilds.get(guildID);
     }
 
-    public Role getStaffRole() {
-        String staffRoleID = Config.getStaffRoleID();
+    public Map<String, Guild> getGuilds() {
+        return guilds;
+    }
+
+    public Role getStaffRole(String guildID) {
+        Guild guild = getGuild(guildID);
+        String staffRoleID = Config.getStaffRoleID(guildID);
         if (staffRoleID.isEmpty() || guild.getRoleById(staffRoleID) == null) {
             staffRoleID = guild.createRole().setName("Staff").setColor(Color.GREEN).complete().getId();
-            Config.setTeamRoleID(staffRoleID);
+            Config.setStaffRoleID(guildID, staffRoleID);
         }
 
         return guild.getRoleById(staffRoleID);
     }
 
-    public Category getTicketCategory() {
-        if (Config.getTicketsCategoryID().isEmpty() || guild.getCategoryById(Config.getTicketsCategoryID()) == null) {
+    public Category getTicketCategory(String guildID) {
+        Guild guild = guilds.get(guildID);
+        if (Config.getTicketsCategoryID(guildID).isEmpty() || guild.getCategoryById(Config.getTicketsCategoryID(guildID)) == null) {
             Category category = guild.createCategory("[Tickets]").complete();
             category.getManager()
-                    .putRolePermissionOverride(Long.parseLong(getStaffRole().getId()), EnumSet.of(Permission.VIEW_CHANNEL), null)
+                    .putRolePermissionOverride(Long.parseLong(getStaffRole(guildID).getId()), EnumSet.of(Permission.VIEW_CHANNEL), null)
                     .putRolePermissionOverride(guild.getPublicRole().getIdLong(), null, EnumSet.of(Permission.VIEW_CHANNEL)).queue();
-            Config.setCategoryID(category.getId());
+            Config.setTicketsCategoryID(guildID, category.getId());
         }
-        return guild.getCategoryById(Config.getTicketsCategoryID());
+        return guild.getCategoryById(Config.getTicketsCategoryID(guildID));
     }
 
-    public TextChannel getDiscordLogChannel() {
-
-        if (guild != null && (Config.getLogChannelID().isEmpty() || guild.getTextChannelById(Config.getLogChannelID()) == null)) {
+    public TextChannel getDiscordLogChannel(String guildID) {
+        Guild guild = guilds.get(guildID);
+        if (guild != null && (Config.getLogChannelID(guildID).isEmpty() || guild.getTextChannelById(Config.getLogChannelID(guildID)) == null)) {
             TextChannel textChannel = guild.createTextChannel("\uD83D\uDCBE│server-logs").complete();
-            Config.setLogChannelID(textChannel.getId());
+            Config.setLogChannelID(guildID, textChannel.getId());
         }
 
-        return JDA.getTextChannelById(Config.getLogChannelID());
+        return JDA.getTextChannelById(Config.getLogChannelID(guildID));
     }
 }

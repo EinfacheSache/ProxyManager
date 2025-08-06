@@ -2,22 +2,20 @@ package de.einfachesache.proxymanager.core;
 
 import de.cubeattack.api.util.FileUtils;
 import de.einfachesache.proxymanager.discord.DiscordAPI;
+import de.einfachesache.proxymanager.discord.DiscordServerProfile;
 
 import java.io.InputStream;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 @SuppressWarnings("unused")
 public class Config {
 
     private static String serverName;
 
-    private static Integer countingNumber;
-    private static Long giveawayEndtime;
-    private static Set<String> giveawayParticipantSet;
-    private static Set<String> eligibleUsersForGiveawaySet;
+    private static Map<String, Integer> countingNumbers;
+    private static Map<String, Long> giveawayEndtimes;
+    private static Map<String, Set<String>> giveawayParticipantSets;
+    private static Map<String, Set<String>> eligibleUsersForGiveawaySets;
 
     private static int portRedis;
     private static String hostRedis;
@@ -27,14 +25,8 @@ public class Config {
     private static boolean discordEnable;
     private static String activity;
     private static String activityType;
-    private static String guildID;
-    private static String categoryID;
-    private static String teamRoleID;
-    private static String logChannelID;
-    private static String countingChannelID;
-    private static String giveawayChannelID;
-    private static String betaTesterRoleID;
-    private static String userRoleID;
+    private static Set<String> guildIDs;
+    private static HashMap<String, DiscordServerProfile> discordServerProfiles;
     private static int portTCPServer;
     private static boolean connectTCPServer;
 
@@ -65,10 +57,17 @@ public class Config {
     private static final FileUtils data = Core.data;
 
     private static void loadData() {
-        countingNumber = data.getInt("discord.counting.current-number");
-        giveawayEndtime = data.getLong("discord.giveaway.endTime", -1);
-        giveawayParticipantSet = new HashSet<>(data.getStringList("discord.giveaway.participants"));
-        eligibleUsersForGiveawaySet = new HashSet<>(data.getStringList("discord.giveaway.eligible-users"));
+        countingNumbers = new HashMap<>();
+        giveawayEndtimes = new HashMap<>();
+        giveawayParticipantSets = new HashMap<>();
+        eligibleUsersForGiveawaySets = new HashMap<>();
+
+        guildIDs.forEach(guildID -> {
+            countingNumbers.put(guildID, data.getInt("servers." + guildID + ".counting.current-number"));
+            giveawayEndtimes.put(guildID, data.getLong("servers." + guildID + ".giveaway.endTime", -1));
+            giveawayParticipantSets.put(guildID, new HashSet<>(data.getStringList("servers." + guildID + ".giveaway.participants")));
+            eligibleUsersForGiveawaySets.put(guildID, new HashSet<>(data.getStringList("servers." + guildID + ".giveaway.eligible-users")));
+        });
     }
 
     private static final FileUtils config = Core.config;
@@ -114,35 +113,55 @@ public class Config {
     private static final FileUtils discordModule = Core.discordModule;
 
     private static void loadDiscordModule() {
+        guildIDs = new HashSet<>();
+        discordServerProfiles = new HashMap<>();
+
         discordEnable = discordModule.getBoolean("discord.enabled", false);
-        guildID = discordModule.get("discord.guild-id", "");
         activityType = discordModule.get("discord.activity-type", "");
         activity = discordModule.get("discord.activity", "");
-        userRoleID = discordModule.get("discord.user-role-id", "");
-        betaTesterRoleID = discordModule.get("discord.beta-tester-role-id", "");
-        categoryID = discordModule.get("discord.tickets.category-id", "");
-        teamRoleID = discordModule.get("discord.tickets.team-role-id", "");
-        logChannelID = discordModule.get("discord.tickets.log-channel-id", "");
-        countingChannelID = discordModule.get("discord.counting-channel-id", "");
-        giveawayChannelID = discordModule.get("discord.giveaway-channel-id", "");
         connectTCPServer = discordModule.getBoolean("discord.tcp-server.connect", false);
         portTCPServer = discordModule.getInt("discord.tcp-server.port", 6666);
+
+        guildIDs = discordModule.getConfigurationSection("servers").getKeys(false);
+        guildIDs.forEach(guildId -> discordServerProfiles.put(guildId, new DiscordServerProfile(
+                // guildId
+                guildId,
+                // name
+                discordModule.get("servers." + guildId + ".name", "NULL"),
+                // joinRoleId (user-role-id im YAML)
+                String.valueOf(discordModule.getLong("servers." + guildId + ".join-role-id", -1)),
+                // staffRoleId
+                String.valueOf(discordModule.getLong("servers." + guildId + ".staff-role-id", -1)),
+                // betaTesterRoleId
+                String.valueOf(discordModule.getLong("servers." + guildId + ".beta-tester-role-id", -1)),
+
+                // logChannelId
+                String.valueOf(discordModule.getLong("servers." + guildId + ".log-channel-id", -1)),
+                // ticketCategoryId
+                String.valueOf(discordModule.getLong("servers." + guildId + ".tickets-category-id", -1)),
+                // countingChannelId
+                String.valueOf(discordModule.getLong("servers." + guildId + ".counting-channel-id", -1)),
+                // giveawayChannelId
+                String.valueOf(discordModule.getLong("servers." + guildId + ".giveaway-channel-id", -1)),
+                // inviteLogChannelId
+                String.valueOf(discordModule.getLong("servers." + guildId + ".invite-log-channel-id", -1))
+        )));
     }
 
-    public static Integer getCountingNumber() {
-        return countingNumber;
+    public static Integer getCountingNumber(String guildID) {
+        return countingNumbers.get(guildID);
     }
 
-    public static long getGiveawayEndtimeInMilli() {
-        return giveawayEndtime;
+    public static long getGiveawayEndtimeInMilli(String guildID) {
+        return giveawayEndtimes.get(guildID);
     }
 
-    public static Set<String> getGiveawayParticipantSet() {
-        return giveawayParticipantSet;
+    public static Set<String> getGiveawayParticipantSet(String guildID) {
+        return giveawayParticipantSets.get(guildID);
     }
 
-    public static Set<String> getEligibleUsersForGiveawaySet() {
-        return eligibleUsersForGiveawaySet;
+    public static Set<String> getEligibleUsersForGiveawaySet(String guildID) {
+        return eligibleUsersForGiveawaySets.get(guildID);
     }
 
 
@@ -191,36 +210,44 @@ public class Config {
         return activityType;
     }
 
-    public static String getGuildID() {
-        return guildID;
+    public static Set<String> getGuildIDs() {
+        return guildIDs;
     }
 
-    public static String getUserRoleID() {
-        return userRoleID;
+    public static DiscordServerProfile getDiscordServerProfile(String guildID) {
+        return discordServerProfiles.getOrDefault(guildID, new DiscordServerProfile());
     }
 
-    public static String getBetaTesterRoleID() {
-        return betaTesterRoleID;
+    public static String getJoinRoleID(String guildID) {
+        return discordServerProfiles.get(guildID).getJoinRoleId();
     }
 
-    public static String getTicketsCategoryID() {
-        return categoryID;
+    public static String getBetaTesterRoleID(String guildID) {
+        return discordServerProfiles.get(guildID).getBetaTesterRoleId();
     }
 
-    public static String getStaffRoleID() {
-        return teamRoleID;
+    public static String getTicketsCategoryID(String guildID) {
+        return discordServerProfiles.get(guildID).getTicketCategoryId();
     }
 
-    public static String getLogChannelID() {
-        return logChannelID;
+    public static String getStaffRoleID(String guildID) {
+        return discordServerProfiles.get(guildID).getStaffRoleId();
     }
 
-    public static String getCountingChannelID() {
-        return countingChannelID;
+    public static String getLogChannelID(String guildID) {
+        return discordServerProfiles.get(guildID).getLogChannelId();
     }
 
-    public static String getGiveawayChannelID() {
-        return giveawayChannelID;
+    public static String getCountingChannelID(String guildID) {
+        return discordServerProfiles.get(guildID).getCountingChannelId();
+    }
+
+    public static String getGiveawayChannelID(String guildID) {
+        return discordServerProfiles.get(guildID).getGiveawayChannelId();
+    }
+
+    public static String getInviteLogChannelID(String guildID) {
+        return discordServerProfiles.get(guildID).getInviteLogChannelId();
     }
 
     public static int getPortTCPServer() {
@@ -286,49 +313,59 @@ public class Config {
     }
 
 
-    public static void setCountingNumber(Integer countingNumber) {
-        Config.countingNumber = countingNumber;
-        save(data, "discord.counting.current-number", countingNumber);
+    public static void setCountingNumber(String guildId, Integer countingNumber) {
+        countingNumbers.put(guildId, countingNumber);
+        save(data, "servers." + guildId + ".counting.current-number", countingNumber);
     }
 
-
-    public static void setGiveawayEndtime(long entTime) {
-        Config.giveawayEndtime = entTime;
-        save(data, "discord.giveaway.endTime", entTime);
+    public static void setGiveawayEndtime(String guildId, long endTime) {
+        giveawayEndtimes.put(guildId, endTime);
+        save(data, "servers." + guildId + ".giveaway.endTime", endTime);
     }
 
-    public static boolean addGiveawayParticipant(String participant) {
-        boolean added = Config.giveawayParticipantSet.add(participant);
-        save(data, "discord.giveaway.participants", Config.giveawayParticipantSet.stream().toList());
+    public static boolean addGiveawayParticipant(String guildId, String participant) {
+        Set<String> set = giveawayParticipantSets.computeIfAbsent(guildId, id -> new HashSet<>());
+        boolean added = set.add(participant);
+        save(data, "servers." + guildId + ".giveaway.participants", new ArrayList<>(set));
         return added;
     }
 
-    public static void addEligibleUsersForGiveaway(String eligibleUsers) {
-        Config.eligibleUsersForGiveawaySet.add(eligibleUsers);
-        save(data, "discord.giveaway.eligible-users", Config.eligibleUsersForGiveawaySet.stream().toList());
+    public static void addEligibleUserForGiveaway(String guildId, String userId) {
+        var set = eligibleUsersForGiveawaySets.computeIfAbsent(guildId, id -> new HashSet<>());
+        set.add(userId);
+        save(data, "servers." + guildId + ".giveaway.eligible-users", new ArrayList<>(set));
     }
 
-    public static void resetLastGiveaway() {
-        setGiveawayEndtime(-1L);
-        Config.giveawayParticipantSet.clear();
-        Config.eligibleUsersForGiveawaySet.clear();
-        save(data, "discord.giveaway", null);
+    public static void resetLastGiveaway(String guildId) {
+        // Ende-Zeit zurücksetzen
+        setGiveawayEndtime(guildId, -1L);
+
+        // Teilnehmer- und Eligibility-Sets für diese Guild leeren
+        giveawayParticipantSets
+                .computeIfAbsent(guildId, id -> new HashSet<>())
+                .clear();
+        eligibleUsersForGiveawaySets
+                .computeIfAbsent(guildId, id -> new HashSet<>())
+                .clear();
+
+        // kompletten Giveaway-Abschnitt in der Config für diese Guild löschen
+        save(data, "servers." + guildId + ".giveaway", null);
     }
 
 
-    public static void setCategoryID(String categoryID) {
-        Config.categoryID = categoryID;
-        save(discordModule, "discord.tickets.category-id", categoryID);
+    public static void setTicketsCategoryID(String guildID, String ticketCategoryID) {
+        discordServerProfiles.get(guildID).setTicketCategoryId(ticketCategoryID);
+        save(discordModule, "servers." + guildID + ".tickets-category-id", ticketCategoryID);
     }
 
-    public static void setTeamRoleID(String teamRoleID) {
-        Config.teamRoleID = teamRoleID;
-        save(discordModule, "discord.tickets.team-role-id", teamRoleID);
+    public static void setStaffRoleID(String guildID, String staffRoleID) {
+        discordServerProfiles.get(guildID).setStaffRoleId(staffRoleID);
+        save(discordModule, "servers." + guildID + ".staff-role-id", staffRoleID);
     }
 
-    public static void setLogChannelID(String logChannelID) {
-        Config.logChannelID = logChannelID;
-        save(discordModule, "discord.tickets.log-channel-id", logChannelID);
+    public static void setLogChannelID(String guildID, String logChannelID) {
+        discordServerProfiles.get(guildID).setLogChannelId(logChannelID);
+        save(discordModule, "servers." + guildID + ".log-channel-id", logChannelID);
     }
 
     public static void setMaintenanceMode(boolean maintenanceMode) {

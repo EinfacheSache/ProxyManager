@@ -1,4 +1,4 @@
-discord:
-  counting:
-    current-number: 0
-  giveaway:
+servers:
+  '1006339615550091284':
+    counting:
+      current-number: 0

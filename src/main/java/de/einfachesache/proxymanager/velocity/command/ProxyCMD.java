@@ -8,6 +8,7 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import de.einfachesache.proxymanager.core.Core;
 import de.einfachesache.proxymanager.core.RedisConnector;
+import de.einfachesache.proxymanager.discord.DiscordAPI;
 import de.einfachesache.proxymanager.velocity.VProxyManager;
 import dev.simplix.protocolize.api.Protocolize;
 import dev.simplix.protocolize.api.chat.ChatElement;
@@ -57,7 +58,8 @@ public class ProxyCMD implements SimpleCommand {
                     return;
                 }
 
-                Core.getDiscordAPI().loadGuildDiscordCommands(Core.getDiscordAPI().getGuild());
+                DiscordAPI discordAPI = Core.getDiscordAPI();
+                discordAPI.getGuilds().forEach((s, guild) -> discordAPI.loadGuildDiscordCommands(guild));
                 Core.info("Commands successfully reloaded");
                 return;
 

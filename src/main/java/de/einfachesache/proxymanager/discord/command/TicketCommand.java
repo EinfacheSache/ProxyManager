@@ -30,7 +30,7 @@ public class TicketCommand extends ListenerAdapter {
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
 
-        if (!Objects.equals(event.getGuild(), Core.getDiscordAPI().getGuild())) return;
+        if (event.getGuild() == null || !Config.getGuildIDs().contains(event.getGuild().getId())) return;
         if (!event.getName().equalsIgnoreCase("ticket")) return;
 
         EmbedBuilder embedBuilder = MessageUtils.getDefaultEmbed();
@@ -39,9 +39,9 @@ public class TicketCommand extends ListenerAdapter {
         switch (Objects.requireNonNull(event.getSubcommandName())) {
 
             case "close-all" -> {
-                discordAPI.getTicketCategory().getChannels().forEach(c -> c.delete().queue());
+                discordAPI.getTicketCategory(guild.getId()).getChannels().forEach(c -> c.delete().queue());
                 embedBuilder.setDescription("Alle Tickets gelöscht");
-                Core.info("All tickets deleted");
+                Core.info(guild.getName() + " | All tickets deleted");
             }
 
             case "setup" -> {
@@ -62,20 +62,14 @@ public class TicketCommand extends ListenerAdapter {
 
                 event.getChannel().sendMessageEmbeds(ticket.build()).addActionRow(menu).queue();
 
-                if (guild == null) {
-                    Core.severe("Guild was null! ID(" + Config.getGuildID() + ")");
-                    return;
-                }
-
-
-                Role staffRole = discordAPI.getStaffRole();
-                Category ticketCategory = discordAPI.getTicketCategory();
+                Role staffRole = discordAPI.getStaffRole(guild.getId());
+                Category ticketCategory = discordAPI.getTicketCategory(guild.getId());
 
                 ticketCategory.getManager()
                         .putRolePermissionOverride(staffRole.getIdLong(), EnumSet.of(Permission.VIEW_CHANNEL), null)
                         .putRolePermissionOverride(guild.getPublicRole().getIdLong(), null, EnumSet.of(Permission.VIEW_CHANNEL)).queue();
 
-                Core.info("Ticketbot has been successfully setup");
+                Core.info(guild.getName() + " | Ticketbot has been successfully setup");
             }
         }
         event.replyEmbeds(embedBuilder.build()).setEphemeral(true).queue();

@@ -15,7 +15,6 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -34,10 +33,11 @@ public class MessageListener extends ListenerAdapter {
             return;
         }
 
-        if (!Objects.equals(event.getGuild(), Core.getDiscordAPI().getGuild()) || event.getAuthor().isBot()) return;
+        if (!Config.getGuildIDs().contains(event.getGuild().getId())) return;
 
+        String guildID = event.getGuild().getId();
         GuildMessageChannel channel = event.getChannel().asGuildMessageChannel();
-        if (!channel.getId().equals(Config.getCountingChannelID())) {
+        if (!channel.getId().equals(Config.getCountingChannelID(guildID))) {
             return;
         }
 
@@ -60,17 +60,17 @@ public class MessageListener extends ListenerAdapter {
             return;
         }
 
-        int correctNumber = Config.getCountingNumber() + 1;
+        int correctNumber = Config.getCountingNumber(guildID) + 1;
 
         if (number != correctNumber) {
             lastByUser.clear();
-            Config.setCountingNumber(0);
+            Config.setCountingNumber(guildID, 0);
             event.getMessage().addReaction(Emoji.fromFormatted("❌")).queue();
             event.getMessage().reply(event.getAuthor().getAsMention() + " ❌ Streak failed! Wir starten wieder bei **1**. Die korrekte Zahl wäre **" + correctNumber + "** gewesen.").queue();
             return;
         }
 
-        Config.setCountingNumber(number);
+        Config.setCountingNumber(guildID, number);
         lastByUser.put(userId, now);
         event.getMessage().addReaction(Emoji.fromFormatted("✅")).queue();
     }

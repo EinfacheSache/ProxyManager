@@ -1,6 +1,7 @@
 package de.einfachesache.proxymanager.discord.command;
 
 import de.cubeattack.api.minecraft.MinecraftAPI;
+import de.einfachesache.proxymanager.core.Config;
 import de.einfachesache.proxymanager.core.Core;
 import de.einfachesache.proxymanager.discord.MessageUtils;
 import de.einfachesache.proxymanager.discord.User;
@@ -19,7 +20,7 @@ public class LookupCommand extends ListenerAdapter {
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
 
-        if (!Objects.equals(event.getGuild(), Core.getDiscordAPI().getGuild())) return;
+        if (event.getGuild() == null || !Config.getGuildIDs().contains(event.getGuild().getId())) return;
         if (!event.getName().equalsIgnoreCase("lookup")) return;
 
         EmbedBuilder embedBuilder = MessageUtils.getDefaultEmbed();
@@ -32,15 +33,15 @@ public class LookupCommand extends ListenerAdapter {
         event.replyEmbeds(embedBuilder.build()).setEphemeral(true).flatMap(it -> {
 
                     if (user.getUUID() == null) {
-                         return event.getHook().editOriginalEmbeds(embedBuilder
+                        return event.getHook().editOriginalEmbeds(embedBuilder
                                 .setTitle("🔍 Nutzer nicht gefunden")
                                 .setColor(Color.RED)
                                 .setDescription("Der Nutzername **" + name + "** konnte nicht gefunden werden.")
                                 .addField("Mögliche Ursachen:",
                                         """
-                                               • Tippfehler im Namen
-                                               • Der Nutzer existiert nicht oder ist nicht registriert
-                                               """, false).build());
+                                                • Tippfehler im Namen
+                                                • Der Nutzer existiert nicht oder ist nicht registriert
+                                                """, false).build());
                     }
 
                     if (Core.getDatasource().isClosed()) {

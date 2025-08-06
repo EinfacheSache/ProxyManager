@@ -21,11 +21,12 @@ public class CloseCommand extends ListenerAdapter {
 
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
-        if (!Objects.equals(event.getGuild(), Core.getDiscordAPI().getGuild())) return;
+        if (event.getGuild() == null || !Config.getGuildIDs().contains(event.getGuild().getId())) return;
         if (!event.getName().equalsIgnoreCase("close")) return;
         if (!(event.getChannel() instanceof TextChannel channel)) return;
+        String guildID = event.getGuild().getId();
 
-        if (channel.getParentCategory() == null || !channel.getParentCategory().getId().equals(Config.getTicketsCategoryID())) {
+        if (channel.getParentCategory() == null || !channel.getParentCategory().getId().equals(Config.getTicketsCategoryID(guildID))) {
             event.replyEmbeds(MessageUtils.getDefaultEmbed().setTitle("Fehler").setDescription("Das ist kein Ticket").build()).setEphemeral(true).queue();
             return;
         }
@@ -35,13 +36,12 @@ public class CloseCommand extends ListenerAdapter {
             reason = event.getOptionsByName("reason").getFirst().getAsString();
         }
 
-        closeTicket(channel, Objects.requireNonNull(event.getMember()), reason);
+        closeTicket(guildID, channel, Objects.requireNonNull(event.getMember()), reason);
     }
 
     @Override
     public void onButtonInteraction(ButtonInteractionEvent event) {
-        if (event.getGuild() == null) return;
-        if (!Objects.equals(event.getGuild(), Core.getDiscordAPI().getGuild())) return;
+        if (event.getGuild() == null || !Config.getGuildIDs().contains(event.getGuild().getId())) return;
         if (!event.getComponentId().equals("delete_ticket")) return;
 
         TextInput body = TextInput.create("body", "Begründung für das schließen", TextInputStyle.PARAGRAPH)
@@ -59,17 +59,16 @@ public class CloseCommand extends ListenerAdapter {
 
     @Override
     public void onModalInteraction(ModalInteractionEvent event) {
-        if (event.getGuild() == null) return;
-        if (!Objects.equals(event.getGuild(), Core.getDiscordAPI().getGuild())) return;
+        if (event.getGuild() == null || !Config.getGuildIDs().contains(event.getGuild().getId())) return;
         if (event.getModalId().startsWith("ticket:delete")) {
-            event.deferReply().queue();
+            event.deferReply().complete();
             String body = Objects.requireNonNull(event.getValue("body")).getAsString();
-            closeTicket((TextChannel) event.getChannel(), Objects.requireNonNull(event.getMember()), body);
+            closeTicket(event.getGuild().getId(), (TextChannel) event.getChannel(), Objects.requireNonNull(event.getMember()), body);
         }
     }
 
 
-    private void closeTicket(TextChannel channel, Member member, String reason) {
+    private void closeTicket(String guildID, TextChannel channel, Member member, String reason) {
         channel.getMemberPermissionOverrides().stream().filter(mpOverride ->
                 !Objects.requireNonNull(mpOverride.getMember()).getUser().isBot()).forEach(mpOverride ->
                 Objects.requireNonNull(mpOverride.getMember()).getUser().openPrivateChannel().flatMap(privateChannel ->
@@ -80,7 +79,7 @@ public class CloseCommand extends ListenerAdapter {
                                 .setDescription("Ihr Fall wurde aufgrund " + reason + " geschlossen. \nWenn Sie ein anderes Problem haben, können Sie möglicherweise ein weiteres Ticket eröffnen.")
                                 .build())).queue());
 
-        Core.getDiscordAPI().getDiscordLogChannel().sendMessageEmbeds(MessageUtils
+        Core.getDiscordAPI().getDiscordLogChannel(guildID).sendMessageEmbeds(MessageUtils
                 .getDefaultEmbed()
                 .setAuthor(Config.getServerName())
                 .setColor(Color.GREEN)

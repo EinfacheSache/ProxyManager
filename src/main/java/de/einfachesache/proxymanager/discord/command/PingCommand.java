@@ -1,5 +1,6 @@
 package de.einfachesache.proxymanager.discord.command;
 
+import de.einfachesache.proxymanager.core.Config;
 import de.einfachesache.proxymanager.core.Core;
 import de.einfachesache.proxymanager.discord.MessageUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -7,14 +8,13 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 import java.awt.*;
-import java.util.Objects;
 
 public class PingCommand extends ListenerAdapter {
 
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
 
-        if (event.isFromGuild() & !Objects.equals(event.getGuild(), Core.getDiscordAPI().getGuild())) return;
+        if (event.getGuild() != null && !Config.getGuildIDs().contains(event.getGuild().getId())) return;
         if (!event.getName().equalsIgnoreCase("ping")) return;
         EmbedBuilder embedBuilder = MessageUtils.getDefaultEmbed();
         embedBuilder.setTitle("Der Ping des Bots beträgt ..." +
@@ -28,7 +28,7 @@ public class PingCommand extends ListenerAdapter {
                         event.getHook().editOriginalEmbeds(embedBuilder.
                                 setTitle(
                                         "Der Ping des Bots beträgt ⇒ " + (System.currentTimeMillis() - time) + " ms\n" +
-                                        "Der Ping zum Discord Websocket beträgt ⇒ " + Core.getDiscordAPI().getJDA().getGatewayPing() + "ms")
+                                                "Der Ping zum Discord Websocket beträgt ⇒ " + Core.getDiscordAPI().getJDA().getGatewayPing() + "ms")
                                 .setColor(Color.GREEN).build()))
                 .queue();
     }

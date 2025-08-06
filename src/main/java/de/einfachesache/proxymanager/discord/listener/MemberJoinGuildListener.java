@@ -27,22 +27,22 @@ import java.util.stream.Collectors;
 
 public class MemberJoinGuildListener extends ListenerAdapter {
 
-    private static final Map<String, Integer> inviteUses = new HashMap<>();
-    private static final int maxBetaTesterCount = 100;
+    private final static Map<String, Integer> INVITE_USES = new HashMap<>();
+    private final int maxBetaTesterCount = 100;
 
     @Override
     public void onGuildMemberJoin(GuildMemberJoinEvent event) {
-        if (!Objects.equals(event.getGuild(), Core.getDiscordAPI().getGuild())) return;
+        if (!Config.getGuildIDs().contains(event.getGuild().getId())) return;
 
-        trackInvite(event);
         sendWelcomeImage(event);
+        trackInvite(event);
 
         Guild guild = event.getGuild();
-        Role playerRole = guild.getRoleById(Config.getUserRoleID());
-        Role betaTesterRole = guild.getRoleById(Config.getBetaTesterRoleID());
+        Role playerRole = guild.getRoleById(Config.getJoinRoleID(guild.getId()));
+        Role betaTesterRole = guild.getRoleById(Config.getBetaTesterRoleID(guild.getId()));
 
-        if (playerRole == null || betaTesterRole == null) {
-            Core.info("❌Join Rollen wurden nicht gefunden: " + Config.getUserRoleID() + " | " + Config.getBetaTesterRoleID());
+        if (playerRole == null) {
+            Core.info(guild.getName() + " | ❌Join Rollen wurden für (" + event.getUser().getName() + ") nicht gefunden: " + Config.getJoinRoleID(guild.getId()));
             return;
         }
 
@@ -51,7 +51,7 @@ public class MemberJoinGuildListener extends ListenerAdapter {
                 .count();
 
         List<Role> rolesToAdd = new ArrayList<>(Collections.singletonList(playerRole));
-        if (currentBetaTesterCount + 1 <= maxBetaTesterCount) {
+        if (!Config.getBetaTesterRoleID(guild.getId()).equals("-1") && currentBetaTesterCount + 1 <= maxBetaTesterCount) {
             rolesToAdd.add(betaTesterRole);
         }
 
@@ -68,7 +68,7 @@ public class MemberJoinGuildListener extends ListenerAdapter {
 
                             String userName = event.getMember().getUser().getName();
 
-                            String info = "✅ Zugewiesene Rollen: " + rollen + " | User: " + userName;
+                            String info = guild.getName() + " | ✅ Zugewiesene Rollen: " + rollen + " | User: " + userName;
 
                             if (rolesToAdd.contains(betaTesterRole)) {
                                 info += "(BetaTester #" + (currentBetaTesterCount + 1) + "/" + maxBetaTesterCount + ")";
@@ -76,13 +76,13 @@ public class MemberJoinGuildListener extends ListenerAdapter {
 
                             Core.info(info);
                         },
-                        error -> Core.info("⚠️ Fehler beim Rollenzuweisen | User: " + event.getMember().getUser().getName() + " Error: " + error.getMessage())
+                        error -> Core.info(guild.getName() + " | ⚠️ Fehler beim Rollenzuweisen | User: " + event.getMember().getUser().getName() + " Error: " + error.getMessage())
                 );
     }
 
     public void trackInvite(GuildMemberJoinEvent event) {
         Guild guild = event.getGuild();
-        TextChannel inviteLogChannel = guild.getChannelById(TextChannel.class, "1389721957318000825");
+        TextChannel inviteLogChannel = guild.getChannelById(TextChannel.class, Config.getInviteLogChannelID(guild.getId()));
         Path logFilePath = Path.of((Core.isMinecraftServer() ? "plugins/ProxyManager/" : "./") + "logs/Invites.log");
 
         guild.retrieveInvites().queue(invites -> {
@@ -90,13 +90,13 @@ public class MemberJoinGuildListener extends ListenerAdapter {
             boolean foundInviter = false;
 
             for (Invite invite : invites) {
-                int oldUses = inviteUses.getOrDefault(invite.getCode(), 0);
+                int oldUses = INVITE_USES.getOrDefault(invite.getCode(), 0);
                 if (invite.getUses() > oldUses) {
-                    inviteUses.put(invite.getCode(), invite.getUses());
+                    INVITE_USES.put(invite.getCode(), invite.getUses());
                     User inviter = invite.getInviter();
 
                     if (inviter == null) {
-                        Core.severe("Member joined, but inviter is null. Possibly the inviter has left the server. User: " + event.getUser().getName());
+                        Core.severe(guild.getName() + " | Member joined, but inviter is null. Possibly the inviter has left the server. User: " + event.getUser().getName());
                         return;
                     }
 
@@ -106,7 +106,7 @@ public class MemberJoinGuildListener extends ListenerAdapter {
                         inviteLogChannel.sendMessage("📥 " + event.getMember().getAsMention() + " wurde eingeladen von " + inviter.getAsMention()).queue();
                     Logs.write(logFilePath, LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")) + " " + event.getUser().getName() + " wurde eingeladen von " + inviter.getName());
 
-                    Config.addEligibleUsersForGiveaway(inviter.getId());
+                    Config.addEligibleUserForGiveaway(guild.getId(), inviter.getId());
 
                     break;
                 }
@@ -127,7 +127,7 @@ public class MemberJoinGuildListener extends ListenerAdapter {
                     Logs.write(logFilePath,
                             LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")) + " " +
                                     event.getUser().getName() + " ist über Vanity-URL discord.gg/" + code + " beigetreten. (Total: " + uses + ")");
-                }, error -> Core.severe("Error while retrieving the vanity URL: " + error.getMessage()));
+                }, error -> Core.severe(guild.getName() + " | Error while retrieving the vanity URL: " + error.getMessage()));
             }
         });
     }
@@ -137,7 +137,7 @@ public class MemberJoinGuildListener extends ListenerAdapter {
         try {
             Member member = event.getMember();
             Guild guild = event.getGuild();
-            TextChannel channel = Objects.requireNonNull(guild.getDefaultChannel()).asTextChannel();
+            TextChannel channel = Objects.requireNonNull(guild.getSystemChannel());
 
             // Hintergrundbild laden
             BufferedImage background = ImageIO.read(Objects.requireNonNull(getClass().getResource("/flareon_dragon.png")));
@@ -268,6 +268,6 @@ public class MemberJoinGuildListener extends ListenerAdapter {
     }
 
     public static Map<String, Integer> getInviteUses() {
-        return inviteUses;
+        return INVITE_USES;
     }
 }
