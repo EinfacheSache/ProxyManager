@@ -6,7 +6,7 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.scheduler.ScheduledTask;
 import de.einfachesache.proxymanager.core.Core;
 import de.einfachesache.proxymanager.core.RedisConnector;
-import de.einfachesache.proxymanager.velocity.VelocityProxyManager;
+import de.einfachesache.proxymanager.velocity.VProxyManager;
 import net.kyori.adventure.text.Component;
 
 import java.time.Duration;
@@ -15,12 +15,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class CommandListener {
 
-    private final VelocityProxyManager proxy;
+    private final VProxyManager proxy;
     private final Map<Player, Integer> cooldownCounter = new ConcurrentHashMap<>();
     private final Map<Player, Long> inCooldown = new ConcurrentHashMap<>();
     private final Map<Player, ScheduledTask> taskIDForCooldown = new ConcurrentHashMap<>();
 
-    public CommandListener(VelocityProxyManager proxy) {
+    public CommandListener(VProxyManager proxy) {
         this.proxy = proxy;
     }
 
@@ -34,7 +34,7 @@ public class CommandListener {
         if (Boolean.parseBoolean(jedis.get("Commands-Disabled"))) {
             if (!player.hasPermission("proxy.command.disabled.bypass") && !player.getUniqueId().equals(Core.DEV_UUID)) {
                 event.setResult(CommandExecuteEvent.CommandResult.denied());
-                player.sendMessage(Component.text(VelocityProxyManager.PREFIX + "§cAlle Commands sind deaktiviert"));
+                player.sendMessage(Component.text(VProxyManager.PREFIX + "§cAlle Commands sind deaktiviert"));
                 return;
             }
         }
@@ -50,7 +50,7 @@ public class CommandListener {
         long now = System.currentTimeMillis();
         if (inCooldown.containsKey(player) && (now - inCooldown.get(player)) / 1000 <= 5) {
             event.setResult(CommandExecuteEvent.CommandResult.denied());
-            player.sendMessage(Component.text(VelocityProxyManager.PREFIX + "§cBitte warte bevor du erneut einen Command sendest"));
+            player.sendMessage(Component.text(VProxyManager.PREFIX + "§cBitte warte bevor du erneut einen Command sendest"));
             return;
         }
 

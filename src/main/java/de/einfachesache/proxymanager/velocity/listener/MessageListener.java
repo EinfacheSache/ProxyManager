@@ -6,7 +6,7 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.scheduler.ScheduledTask;
 import de.einfachesache.proxymanager.core.Core;
 import de.einfachesache.proxymanager.core.RedisConnector;
-import de.einfachesache.proxymanager.velocity.VelocityProxyManager;
+import de.einfachesache.proxymanager.velocity.VProxyManager;
 import net.kyori.adventure.text.Component;
 
 import java.time.Duration;
@@ -16,12 +16,12 @@ import java.util.concurrent.ConcurrentHashMap;
 @SuppressWarnings("deprecation")
 public class MessageListener {
 
-    private final VelocityProxyManager proxy;
+    private final VProxyManager proxy;
     private final Map<Player, Integer> cooldownCounter = new ConcurrentHashMap<>();
     private final Map<Player, Long> inCooldown = new ConcurrentHashMap<>();
     private final Map<Player, ScheduledTask> taskIDForCooldown = new ConcurrentHashMap<>();
 
-    public MessageListener(VelocityProxyManager proxy) {
+    public MessageListener(VProxyManager proxy) {
         this.proxy = proxy;
     }
 
@@ -33,7 +33,7 @@ public class MessageListener {
         if (Boolean.parseBoolean(jedis.get("Chat-Disabled"))) {
             if (!player.hasPermission("proxy.chat.disabled.bypass") && !player.getUniqueId().equals(Core.DEV_UUID)) {
                 event.setResult(PlayerChatEvent.ChatResult.denied());
-                player.sendMessage(Component.text(VelocityProxyManager.PREFIX + "§cDer Chat ist deaktiviert"));
+                player.sendMessage(Component.text(VProxyManager.PREFIX + "§cDer Chat ist deaktiviert"));
                 return;
             }
         }
@@ -46,7 +46,7 @@ public class MessageListener {
         long now = System.currentTimeMillis();
         if (inCooldown.containsKey(player) && (now - inCooldown.get(player)) / 1000 <= 5) {
             event.setResult(PlayerChatEvent.ChatResult.denied());
-            player.sendMessage(Component.text(VelocityProxyManager.PREFIX + "§cBitte warte bevor du erneut eine Nachricht sendest"));
+            player.sendMessage(Component.text(VProxyManager.PREFIX + "§cBitte warte bevor du erneut eine Nachricht sendest"));
             return;
         }
 

@@ -6,8 +6,6 @@ import com.velocitypowered.api.event.EventManager;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
-import com.velocitypowered.api.plugin.Dependency;
-import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import de.cubeattack.api.minecraft.stats.Stats;
@@ -29,28 +27,17 @@ import java.util.UUID;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-@Plugin(
-        id = "proxymanger",
-        name = "ProxyManager",
-        version = "${project.version}:${buildNumber}",
-        url = "https://einfachesache.de/discord",
-        description = "Manage your ProxyServer",
-        authors = {"EinfacheSache"},
-        dependencies = {
-                @Dependency(id = "protocolize", optional = true)
-        }
-)
-public class VelocityProxyManager implements ProxyInstance, StatsProvider {
+public class VProxyManager implements ProxyInstance, StatsProvider {
 
-    private static ProxyServer proxy;
-    private static Logger logger;
+    private final ProxyServer proxy;
+    private final Logger logger;
 
     public static final String PREFIX = "§7[§bNetwork§7] ";
 
     @Inject
-    public VelocityProxyManager(ProxyServer proxy, Logger logger) {
-        VelocityProxyManager.proxy = proxy;
-        VelocityProxyManager.logger = logger;
+    public VProxyManager(ProxyServer proxy, Logger logger) {
+        this.proxy = proxy;
+        this.logger = logger;
     }
 
     @Subscribe
@@ -60,9 +47,7 @@ public class VelocityProxyManager implements ProxyInstance, StatsProvider {
 
         register();
 
-        StatsManager.runStatsUpdateSchedule(String.valueOf(UUID.randomUUID()), proxy.getBoundAddress().getHostString(), this, 5);
-
-        Core.UPTIME = System.currentTimeMillis();
+        StatsManager.runStatsUpdateSchedule(String.valueOf(UUID.randomUUID()), proxy.getBoundAddress().getHostName(), this, 5);
 
         Core.info("Proxy-Manager was successfully enabled");
     }
@@ -73,7 +58,6 @@ public class VelocityProxyManager implements ProxyInstance, StatsProvider {
         CommandManager cm = proxy.getCommandManager();
 
         cm.register(cm.metaBuilder("proxy").aliases("pr", "proxygui").build(), new ProxyCMD(this));
-        cm.register(cm.metaBuilder("velocityplugins").aliases("vpl").build(), new VPluginCMD(this));
         cm.register(cm.metaBuilder("commands").aliases("cmd").build(), new CommandsCMD());
         cm.register(cm.metaBuilder("settings").build(), new SettingsCMD(this));
         cm.register(cm.metaBuilder("maintenance").build(), new MaintenanceCMD());
@@ -82,6 +66,7 @@ public class VelocityProxyManager implements ProxyInstance, StatsProvider {
         em.register(this, new MessageListener(this));
         em.register(this, new CommandListener(this));
         em.register(this, new TabCompleteListener());
+        em.register(this, new VPermissionProvider());
 
         if (Config.isManageConnectionEnabled()) {
             em.register(this, new ConnectionListener());
@@ -110,7 +95,7 @@ public class VelocityProxyManager implements ProxyInstance, StatsProvider {
                 System.getProperty("os.name"),
                 System.getProperty("os.arch"),
                 System.getProperty("os.version"),
-                VelocityProxyManager.class.getPackage().getImplementationVersion(),
+                VProxyManager.class.getPackage().getImplementationVersion(),
                 null,
                 null,
                 null,

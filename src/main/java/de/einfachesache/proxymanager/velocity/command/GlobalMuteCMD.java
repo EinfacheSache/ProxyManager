@@ -2,7 +2,6 @@ package de.einfachesache.proxymanager.velocity.command;
 
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.command.SimpleCommand;
-import com.velocitypowered.api.proxy.Player;
 import de.einfachesache.proxymanager.core.Core;
 import de.einfachesache.proxymanager.core.RedisConnector;
 import net.kyori.adventure.text.Component;
@@ -62,6 +61,6 @@ public class GlobalMuteCMD implements SimpleCommand {
 
     @Override
     public boolean hasPermission(Invocation invocation) {
-        return invocation.source().hasPermission("proxy.*") || (invocation.source() instanceof Player player && player.getUniqueId().equals(Core.DEV_UUID));
+        return invocation.source().hasPermission("proxy.*");
     }
 }

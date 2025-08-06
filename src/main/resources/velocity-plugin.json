@@ -6,10 +6,13 @@
     "EinfacheSache"
   ],
   "url": "https://einfachesache.de/discord/",
-  "main": "de.einfachesache.proxymanager.velocity.VelocityProxyManager",
-  "description": "A Plugin for interact with the intern NeoProtect system",
-  "depends": [
-    "protocolize"
+  "main": "de.einfachesache.proxymanager.velocity.VProxyManager",
+  "description": "A Plugin for manage your ProxyServer",
+  "dependencies": [
+    {
+      "id": "protocolize",
+      "optional": true
+    }
   ]
 }
 

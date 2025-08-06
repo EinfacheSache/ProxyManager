@@ -35,6 +35,7 @@ public class Core {
 
     public static void run(ProxyInstance proxyInstance, Object logger) {
         Core.proxyInstance = proxyInstance;
+        Core.UPTIME = System.currentTimeMillis();
         LogManager.getLogger().setLogger(logger);
         run();
     }

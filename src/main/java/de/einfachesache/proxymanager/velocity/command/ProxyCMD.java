@@ -8,7 +8,7 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import de.einfachesache.proxymanager.core.Core;
 import de.einfachesache.proxymanager.core.RedisConnector;
-import de.einfachesache.proxymanager.velocity.VelocityProxyManager;
+import de.einfachesache.proxymanager.velocity.VProxyManager;
 import dev.simplix.protocolize.api.Protocolize;
 import dev.simplix.protocolize.api.chat.ChatElement;
 import dev.simplix.protocolize.api.inventory.Inventory;
@@ -16,18 +16,20 @@ import dev.simplix.protocolize.api.item.ItemStack;
 import dev.simplix.protocolize.data.ItemType;
 import dev.simplix.protocolize.data.inventory.InventoryType;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class ProxyCMD implements SimpleCommand {
 
     private final List<String> SUB_COMMANDS = Arrays.asList("reload", "send");
 
-    private final VelocityProxyManager instance;
+    private final VProxyManager instance;
 
-    public ProxyCMD(VelocityProxyManager instance) {
+    public ProxyCMD(VProxyManager instance) {
         this.instance = instance;
     }
 
@@ -60,35 +62,6 @@ public class ProxyCMD implements SimpleCommand {
                 return;
 
             }
-        }
-
-        if(args.length == 3) {
-
-            String targetName = invocation.arguments()[1];
-            String serverName = invocation.arguments()[2];
-
-            Optional<Player> target = instance.getProxy().getPlayer(targetName);
-            Optional<RegisteredServer> server = instance.getProxy().getServer(serverName);
-
-
-            if (target.isEmpty()) {
-                invocation.source().sendMessage(Component.text("Spieler '" + targetName + "' wurde nicht gefunden.",  NamedTextColor.RED));
-                return;
-            }
-
-            if(server.isEmpty()){
-                invocation.source().sendMessage(Component.text("Server '" + serverName + "' wurde nicht gefunden.",  NamedTextColor.RED));
-                return;
-            }
-
-            if(target.get().getCurrentServer().isPresent() && target.get().getCurrentServer().get().getServer().equals(server.get())) {
-                invocation.source().sendMessage(Component.text(targetName + " ist bereits auf dem " + serverName + ".", NamedTextColor.YELLOW));
-                return;
-            }
-
-            target.get().createConnectionRequest(server.get()).connect();
-            invocation.source().sendMessage(Component.text(targetName + " wurde zu " + serverName + " gesendet.", NamedTextColor.GREEN));
-            return;
         }
 
         source.sendMessage(Component.text("§cInvalid arguments -> /proxy [args]"));
@@ -181,6 +154,6 @@ public class ProxyCMD implements SimpleCommand {
 
     @Override
     public boolean hasPermission(Invocation invocation) {
-        return invocation.source().hasPermission("proxy.*") || (invocation.source() instanceof Player player && player.getUniqueId().equals(Core.DEV_UUID));
+        return invocation.source().hasPermission("proxy.*");
     }
 }

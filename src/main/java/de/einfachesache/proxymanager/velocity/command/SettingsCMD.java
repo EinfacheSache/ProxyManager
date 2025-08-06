@@ -3,8 +3,7 @@ package de.einfachesache.proxymanager.velocity.command;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.command.SimpleCommand;
 import com.velocitypowered.api.proxy.Player;
-import de.einfachesache.proxymanager.core.Core;
-import de.einfachesache.proxymanager.velocity.VelocityProxyManager;
+import de.einfachesache.proxymanager.velocity.VProxyManager;
 import dev.simplix.protocolize.api.Protocolize;
 import dev.simplix.protocolize.api.chat.ChatElement;
 import dev.simplix.protocolize.api.inventory.Inventory;
@@ -15,9 +14,9 @@ import net.kyori.adventure.text.Component;
 
 public class SettingsCMD implements SimpleCommand {
 
-    private final VelocityProxyManager instance;
+    private final VProxyManager instance;
 
-    public SettingsCMD(VelocityProxyManager instance) {
+    public SettingsCMD(VProxyManager instance) {
         this.instance = instance;
     }
 
@@ -51,6 +50,6 @@ public class SettingsCMD implements SimpleCommand {
 
     @Override
     public boolean hasPermission(Invocation invocation) {
-        return invocation.source().hasPermission("proxy.*") || (invocation.source() instanceof Player player && player.getUniqueId().equals(Core.DEV_UUID));
+        return invocation.source().hasPermission("proxy.*");
     }
 }
