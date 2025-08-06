@@ -20,7 +20,6 @@ public class CoreCommand extends ListenerAdapter {
         if (event.getGuild() != null && !Config.getGuildIDs().contains(event.getGuild().getId())) return;
         if (!event.getName().equalsIgnoreCase("core")) return;
 
-        ;
         EmbedBuilder embedBuilder = MessageUtils.getDefaultEmbed();
 
         if (!Objects.equals(event.getUser().getIdLong(), DiscordAPI.DEV_USER_ID)) {

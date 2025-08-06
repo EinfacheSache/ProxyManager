@@ -23,7 +23,7 @@ public class CommandListener extends ListenerAdapter {
                 .append(":")
                 .append(optionMapping.getAsString()));
 
-        Core.info((event.getGuild() != null ? event.getGuild().getName() + " | " : "") + "User '" + event.getUser().getName() + "' run command '" + event.getName() + builder + "'" + (event.getGuild() == null ? " via private message" : ""));
+        Core.info((guild != null ? guild.getName() + " | " : "") + "User '" + event.getUser().getName() + "' run command '" + event.getName() + builder + "'" + (guild == null ? " via private message" : ""));
     }
 
     @Override
