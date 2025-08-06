@@ -38,10 +38,10 @@ public class MessageListener {
             }
         }
 
+
         if (player.hasPermission("proxy.cooldown.bypass") || player.getUniqueId().equals(Core.DEV_UUID)) {
             return;
         }
-
 
         long now = System.currentTimeMillis();
         if (inCooldown.containsKey(player) && (now - inCooldown.get(player)) / 1000 <= 5) {
