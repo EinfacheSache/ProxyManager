@@ -163,7 +163,7 @@ public class MemberJoinGuildListener extends ListenerAdapter {
 
             // Dynamische Schriftgröße
             int fontSize = baseFontSize;
-            Font font = new Font("SansSerif", Font.BOLD, fontSize);
+            Font font = new Font(Font.SANS_SERIF, Font.BOLD, fontSize);
             g.setFont(font);
             FontMetrics fm = g.getFontMetrics();
             int maxTextWidth = (int) (width * 0.9);
@@ -171,7 +171,7 @@ public class MemberJoinGuildListener extends ListenerAdapter {
             while ((fm.stringWidth(line1) > maxTextWidth || fm.stringWidth(line2) > maxTextWidth)
                     && fontSize > 20) {
                 fontSize--;
-                font = new Font("SansSerif", Font.BOLD, fontSize);
+                font = new Font(Font.SANS_SERIF, Font.BOLD, fontSize);
                 g.setFont(font);
                 fm = g.getFontMetrics();
             }
