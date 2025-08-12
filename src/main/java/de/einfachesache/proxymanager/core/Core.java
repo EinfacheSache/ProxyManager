@@ -6,7 +6,7 @@ import de.einfachesache.api.logger.LogManager;
 import de.einfachesache.api.shutdown.ShutdownHook;
 import de.einfachesache.api.util.FileUtils;
 import de.einfachesache.api.util.version.VersionUtils;
-import de.einfachesache.proxymanager.ProxyInstance;
+import de.einfachesache.proxymanager.velocity.ProxyInstance;
 import de.einfachesache.proxymanager.discord.DiscordAPI;
 import org.slf4j.LoggerFactory;
 

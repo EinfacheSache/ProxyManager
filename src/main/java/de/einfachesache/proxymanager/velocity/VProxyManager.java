@@ -11,7 +11,6 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import de.einfachesache.api.minecraft.metric.StatsContainer;
 import de.einfachesache.api.minecraft.metric.StatsManager;
 import de.einfachesache.api.minecraft.metric.StatsProvider;
-import de.einfachesache.proxymanager.ProxyInstance;
 import de.einfachesache.proxymanager.core.Config;
 import de.einfachesache.proxymanager.core.Core;
 import de.einfachesache.proxymanager.velocity.command.*;

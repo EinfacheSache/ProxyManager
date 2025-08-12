@@ -1,4 +1,4 @@
-package de.einfachesache.proxymanager;
+package de.einfachesache.proxymanager.velocity;
 
 import java.util.List;
 

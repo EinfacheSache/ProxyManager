@@ -1,7 +1,7 @@
 package de.einfachesache.proxymanager.discord.command;
 
 import de.einfachesache.api.util.RuntimeUsageUtils;
-import de.einfachesache.proxymanager.ProxyInstance;
+import de.einfachesache.proxymanager.velocity.ProxyInstance;
 import de.einfachesache.proxymanager.core.Config;
 import de.einfachesache.proxymanager.core.Core;
 import de.einfachesache.proxymanager.discord.MessageUtils;
