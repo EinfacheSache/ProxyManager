@@ -46,10 +46,11 @@ public class ReadyListener implements EventListener {
                     .map(g -> g.getName() + "(MemberCount=" + g.getMembers().size() + ")")
                     .collect(Collectors.joining(", ")));
 
-            guilds.forEach(guild -> {
-                Core.info("Load retrieve invites from " + guild.getName());
-                guild.retrieveInvites().queue(invites -> invites.forEach(invite -> MemberJoinGuildListener.getInviteUses().put(invite.getCode(), invite.getUses())));
-            });
+
+            guilds.forEach(guild ->
+                    guild.retrieveInvites().queue(invites ->
+                            invites.forEach(invite ->
+                                    MemberJoinGuildListener.getInviteUses().put(invite.getCode(), invite.getUses()))));
         }
     }
 }

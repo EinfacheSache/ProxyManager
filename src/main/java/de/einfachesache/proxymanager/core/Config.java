@@ -1,6 +1,6 @@
 package de.einfachesache.proxymanager.core;
 
-import de.cubeattack.api.util.FileUtils;
+import de.einfachesache.api.util.FileUtils;
 import de.einfachesache.proxymanager.discord.DiscordAPI;
 import de.einfachesache.proxymanager.discord.DiscordServerProfile;
 

@@ -1,6 +1,6 @@
 package de.einfachesache.proxymanager.discord.command;
 
-import de.cubeattack.api.API;
+import de.einfachesache.api.AsyncExecutor;
 import de.einfachesache.proxymanager.core.Config;
 import de.einfachesache.proxymanager.core.Core;
 import de.einfachesache.proxymanager.discord.DiscordAPI;
@@ -58,7 +58,7 @@ public class GiveawayCommand extends ListenerAdapter {
 
             Core.info(guild.getName() + " | Active giveaway detected, ends on " + formattedEnd + ".");
 
-            rollGiveawayFuture = API.getExecutorService().schedule(() -> rollGiveaway(guild), timeLeft, TimeUnit.MILLISECONDS);
+            rollGiveawayFuture = AsyncExecutor.getService().schedule(() -> rollGiveaway(guild), timeLeft, TimeUnit.MILLISECONDS);
         });
     }
 
@@ -129,7 +129,7 @@ public class GiveawayCommand extends ListenerAdapter {
             long unixTimestamp = startTime.getEpochSecond();
             String dynamicTime = "<t:" + unixTimestamp + ":F>";
 
-            delayedGiveawayFuture = API.getExecutorService().schedule(
+            delayedGiveawayFuture = AsyncExecutor.getService().schedule(
                     () -> startGiveaway(guild, event.getChannel(), duration),
                     ChronoUnit.MILLIS.between(Instant.now(), startTime),
                     TimeUnit.MILLISECONDS
@@ -178,7 +178,7 @@ public class GiveawayCommand extends ListenerAdapter {
 
         channel.sendMessage("@everyone").setEmbeds(embed.build()).addActionRow(Button.primary("giveaway_join", "Mitmachen!")).queue();
 
-        rollGiveawayFuture = API.getExecutorService().schedule(() -> rollGiveaway(guild), endTime.toEpochMilli() - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
+        rollGiveawayFuture = AsyncExecutor.getService().schedule(() -> rollGiveaway(guild), endTime.toEpochMilli() - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
     }
 
     @Override

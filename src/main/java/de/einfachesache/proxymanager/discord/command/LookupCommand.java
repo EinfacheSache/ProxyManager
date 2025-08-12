@@ -1,6 +1,6 @@
 package de.einfachesache.proxymanager.discord.command;
 
-import de.cubeattack.api.minecraft.MinecraftAPI;
+import de.einfachesache.api.minecraft.MinecraftAPI;
 import de.einfachesache.proxymanager.core.Config;
 import de.einfachesache.proxymanager.core.Core;
 import de.einfachesache.proxymanager.discord.MessageUtils;

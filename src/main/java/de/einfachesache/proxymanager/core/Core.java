@@ -1,9 +1,11 @@
 package de.einfachesache.proxymanager.core;
 
-import de.cubeattack.api.logger.LogManager;
-import de.cubeattack.api.shutdown.ShutdownHook;
-import de.cubeattack.api.util.FileUtils;
-import de.cubeattack.api.util.versioning.VersionUtils;
+
+import de.einfachesache.api.AsyncExecutor;
+import de.einfachesache.api.logger.LogManager;
+import de.einfachesache.api.shutdown.ShutdownHook;
+import de.einfachesache.api.util.FileUtils;
+import de.einfachesache.api.util.version.VersionUtils;
 import de.einfachesache.proxymanager.ProxyInstance;
 import de.einfachesache.proxymanager.discord.DiscordAPI;
 import org.slf4j.LoggerFactory;
@@ -56,10 +58,17 @@ public class Core {
 
         Config.loadModules();
 
-        RedisConnector = new RedisConnector();
-        datasource = new DataSourceProvider();
-        discordAPI = new DiscordAPI(proxyInstance);
+        initAsync(proxyInstance);
     }
+
+    public static void initAsync(ProxyInstance proxyInstance) {
+        AsyncExecutor.getService().submit(() -> {
+            discordAPI = new DiscordAPI(proxyInstance);
+            datasource = new DataSourceProvider();
+            RedisConnector = new RedisConnector();
+        });
+    }
+
 
     public static void shutdown() {
         info("Stopping running services...");
@@ -70,7 +79,7 @@ public class Core {
     }
 
     public static void debug(String output) {
-        LogManager.getLogger().debug(output);
+       LogManager.getLogger().debug(output);
     }
 
     public static void info(String output) {

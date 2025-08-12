@@ -1,6 +1,6 @@
 package de.einfachesache.proxymanager.discord.listener;
 
-import de.cubeattack.api.util.Logs;
+import de.einfachesache.api.util.LogUtils;
 import de.einfachesache.proxymanager.core.Config;
 import de.einfachesache.proxymanager.core.Core;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -104,7 +104,7 @@ public class MemberJoinGuildListener extends ListenerAdapter {
 
                     if (inviteLogChannel != null)
                         inviteLogChannel.sendMessage("📥 " + event.getMember().getAsMention() + " wurde eingeladen von " + inviter.getAsMention()).queue();
-                    Logs.write(logFilePath, LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")) + " " + event.getUser().getName() + " wurde eingeladen von " + inviter.getName());
+                    LogUtils.write(logFilePath, LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")) + " " + event.getUser().getName() + " wurde eingeladen von " + inviter.getName());
 
                     Config.addEligibleUserForGiveaway(guild.getId(), inviter.getId());
 
@@ -124,7 +124,7 @@ public class MemberJoinGuildListener extends ListenerAdapter {
                                 "(**Total: " + uses + "**)").queue();
                     }
 
-                    Logs.write(logFilePath,
+                    LogUtils.write(logFilePath,
                             LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")) + " " +
                                     event.getUser().getName() + " ist über Vanity-URL discord.gg/" + code + " beigetreten. (Total: " + uses + ")");
                 }, error -> Core.severe(guild.getName() + " | Error while retrieving the vanity URL: " + error.getMessage()));

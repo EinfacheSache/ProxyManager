@@ -1,6 +1,6 @@
 package de.einfachesache.proxymanager.discord.command;
 
-import de.cubeattack.api.util.RuntimeUsageUtils;
+import de.einfachesache.api.util.RuntimeUsageUtils;
 import de.einfachesache.proxymanager.ProxyInstance;
 import de.einfachesache.proxymanager.core.Config;
 import de.einfachesache.proxymanager.core.Core;
@@ -10,12 +10,12 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 import java.awt.*;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.net.Inet4Address;
-import java.net.InetSocketAddress;
-import java.net.Socket;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.time.Duration;
 
 public class InfoCommand extends ListenerAdapter {
@@ -39,11 +39,11 @@ public class InfoCommand extends ListenerAdapter {
         embedBuilder.setColor(Color.GREEN);
 
         long currentTime = System.currentTimeMillis();
-        boolean isPinged = isReachable(Config.getServerDomainName().toLowerCase(), 25565, 2000);
+        boolean isPinged = isOnline(Config.getServerDomainName().toLowerCase());
         currentTime = System.currentTimeMillis() - currentTime;
 
         String strBasic = "IP: " + Config.getServerDomainName() + "\n" +
-                "Version: 1.21.4+ \n" +
+                "Version: 1.21.6+ \n" +
                 "Ping: " + (isPinged ? currentTime + "ms" : "No Connection") + "\n" +
                 "Spieler Online: " + proxyInstance.getOnlinePlayerCount() + "/" + proxyInstance.getPlayerLimit() + "\n" +
                 "Up-Time: " + Duration.ofMillis(System.currentTimeMillis() - Core.UPTIME).toString().substring(2).replaceAll("(\\d[HMS])(?!$)", "$1 ").toLowerCase() + "\n";
@@ -64,11 +64,16 @@ public class InfoCommand extends ListenerAdapter {
 
     }
 
-    public static boolean isReachable(String host, int port, int timeoutMillis) {
-        try (Socket socket = new Socket()) {
-            socket.connect(new InetSocketAddress(Inet4Address.getByName(host).getHostAddress(), port), timeoutMillis);
-            return true;
-        } catch (IOException e) {
+    public static boolean isOnline(String host) {
+        String url = "https://api.mcsrvstat.us/simple/" + host;
+        try (HttpClient http = HttpClient.newHttpClient()){
+            HttpRequest req = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .GET()
+                    .build();
+            HttpResponse<Void> res = http.send(req, HttpResponse.BodyHandlers.discarding());
+            return res.statusCode() == 200;
+        } catch (Exception e) {
             return false;
         }
     }

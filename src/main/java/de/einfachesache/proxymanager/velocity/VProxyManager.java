@@ -8,9 +8,9 @@ import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
-import de.cubeattack.api.minecraft.stats.Stats;
-import de.cubeattack.api.minecraft.stats.StatsManager;
-import de.cubeattack.api.minecraft.stats.StatsProvider;
+import de.einfachesache.api.minecraft.metric.StatsContainer;
+import de.einfachesache.api.minecraft.metric.StatsManager;
+import de.einfachesache.api.minecraft.metric.StatsProvider;
 import de.einfachesache.proxymanager.ProxyInstance;
 import de.einfachesache.proxymanager.core.Config;
 import de.einfachesache.proxymanager.core.Core;
@@ -86,8 +86,8 @@ public class VProxyManager implements ProxyInstance, StatsProvider {
 
 
     @NotNull
-    public Stats getStats() {
-        return new Stats(
+    public StatsContainer getStats() {
+        return new StatsContainer(
                 "velocity",
                 proxy.getVersion().getVersion(),
                 proxy.getVersion().getName(),

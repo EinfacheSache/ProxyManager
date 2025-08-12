@@ -60,8 +60,6 @@ public class DiscordAPI extends ListenerAdapter {
                     new MemberJoinGuildListener()
             );
 
-            JDA.awaitReady();
-
             TcpServer.run(Config.getPortTCPServer());
 
         } catch (InterruptedException exception) {

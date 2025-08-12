@@ -10,7 +10,7 @@ import com.velocitypowered.api.proxy.InboundConnection;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.ServerPing;
 import com.velocitypowered.api.util.Favicon;
-import de.cubeattack.api.API;
+import de.einfachesache.api.AsyncExecutor;
 import de.einfachesache.proxymanager.core.Config;
 import de.einfachesache.proxymanager.core.Core;
 import de.einfachesache.proxymanager.core.MOTDUtils;
@@ -42,8 +42,8 @@ public class ConnectionListener {
         String address = getPlayerAddress(event.getConnection());
         String username = event.getUsername();
 
-        API.getExecutorService().submit(() -> jedis.set(address, username));
-        API.getExecutorService().submit(() -> images.put(username, getFavicon(username)));
+        AsyncExecutor.getService().submit(() -> jedis.set(address, username));
+        AsyncExecutor.getService().submit(() -> images.put(username, getFavicon(username)));
     }
 
     @Subscribe
