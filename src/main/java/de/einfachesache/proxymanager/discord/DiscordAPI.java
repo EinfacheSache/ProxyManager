@@ -60,7 +60,7 @@ public class DiscordAPI extends ListenerAdapter {
                     new MemberJoinGuildListener()
             );
 
-            TcpServer.run(Config.getPortTCPServer());
+            TcpServer.run();
 
         } catch (InterruptedException exception) {
             Core.severe("Error initializing Discord API", exception);

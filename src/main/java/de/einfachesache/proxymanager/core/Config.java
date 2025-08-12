@@ -27,7 +27,6 @@ public class Config {
     private static String activityType;
     private static Set<String> guildIDs;
     private static HashMap<String, DiscordServerProfile> discordServerProfiles;
-    private static int portTCPServer;
     private static boolean connectTCPServer;
 
     private static int portMySQL;
@@ -119,8 +118,7 @@ public class Config {
         discordEnable = discordModule.getBoolean("discord.enabled", false);
         activityType = discordModule.get("discord.activity-type", "");
         activity = discordModule.get("discord.activity", "");
-        connectTCPServer = discordModule.getBoolean("discord.tcp-server.connect", false);
-        portTCPServer = discordModule.getInt("discord.tcp-server.port", 6666);
+        connectTCPServer = discordModule.getBoolean("discord.tcp-server", false);
 
         guildIDs = discordModule.getConfigurationSection("servers").getKeys(false);
         guildIDs.forEach(guildId -> discordServerProfiles.put(guildId, new DiscordServerProfile(
@@ -248,10 +246,6 @@ public class Config {
 
     public static String getInviteLogChannelID(String guildID) {
         return discordServerProfiles.get(guildID).getInviteLogChannelId();
-    }
-
-    public static int getPortTCPServer() {
-        return portTCPServer;
     }
 
     public static boolean isConnectTCPServer() {

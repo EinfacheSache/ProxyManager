@@ -7,10 +7,12 @@ import java.net.Socket;
 
 public class TcpServer {
 
+    private static final int port = 6060;
+
     private static Thread thread;
     private static ServerSocket serverSocket;
 
-    public static void run(int port) {
+    public static void run() {
         if (!Config.isConnectTCPServer()) return;
 
         if (thread != null && thread.isAlive()) {

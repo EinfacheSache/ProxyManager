@@ -2,9 +2,7 @@ discord:
   enabled: true
   activity-type: PLAYING
   activity: 'Flareon Events 🔥'
-  tcp-server:
-    connect: true # require discord module enabled
-    port: 6666
+  tcp-server: true # require discord module enabled | port 6060
 
 servers:
   '1006339615550091284':
