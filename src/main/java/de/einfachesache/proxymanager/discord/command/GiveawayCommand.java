@@ -6,6 +6,8 @@ import de.einfachesache.proxymanager.core.Core;
 import de.einfachesache.proxymanager.discord.DiscordAPI;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
+import net.dv8tion.jda.api.components.buttons.Button;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -15,7 +17,6 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
 import java.awt.*;
 import java.time.Instant;
@@ -176,7 +177,7 @@ public class GiveawayCommand extends ListenerAdapter {
                 )
                 .setColor(Color.MAGENTA);
 
-        channel.sendMessage("@everyone").setEmbeds(embed.build()).addActionRow(Button.primary("giveaway_join", "Mitmachen!")).queue();
+        channel.sendMessage("@everyone").setEmbeds(embed.build()).addComponents(ActionRow.of(Button.primary("giveaway_join", "Mitmachen!"))).queue();
 
         rollGiveawayFuture = AsyncExecutor.getService().schedule(() -> rollGiveaway(guild), endTime.toEpochMilli() - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
     }
@@ -184,7 +185,7 @@ public class GiveawayCommand extends ListenerAdapter {
     @Override
     public void onButtonInteraction(ButtonInteractionEvent event) {
         if (event.getGuild() == null || !Config.getGuildIDs().contains(event.getGuild().getId())) return;
-        if (!"giveaway_join".equals(event.getButton().getId())) return;
+        if (!"giveaway_join".equals(event.getButton().getCustomId())) return;
         if (event.getMember() == null) return;
         String guildID = event.getGuild().getId();
 

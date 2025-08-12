@@ -4,16 +4,16 @@ import de.einfachesache.proxymanager.core.Config;
 import de.einfachesache.proxymanager.discord.DiscordAPI;
 import de.einfachesache.proxymanager.discord.MessageUtils;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
+import net.dv8tion.jda.api.components.buttons.Button;
+import net.dv8tion.jda.api.components.textinput.TextInput;
+import net.dv8tion.jda.api.components.textinput.TextInputStyle;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.dv8tion.jda.api.interactions.components.text.TextInput;
-import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.Modal;
 
 import java.awt.*;
@@ -68,7 +68,7 @@ public class TicketListener extends ListenerAdapter {
                                     "Bitte pingen Sie unsere Team nicht selbst an, sondern nur in Notsituationen.\n" +
                                     "(Die Nichtbeachtung dieser Regel führt zu einem Timeout/Ban)"
                             ).setColor(Color.GREEN).build())
-                    .addActionRow(Button.danger("delete_ticket", "\uD83D\uDDD1️ Ticket schließen"))
+                    .addComponents(ActionRow.of(Button.danger("delete_ticket", "\uD83D\uDDD1️ Ticket schließen")))
                     .queue();
 
             channel.sendMessage("<@&" + staffRoleID.getId() + ">")

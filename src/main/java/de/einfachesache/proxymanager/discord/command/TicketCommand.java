@@ -6,13 +6,14 @@ import de.einfachesache.proxymanager.discord.DiscordAPI;
 import de.einfachesache.proxymanager.discord.MessageUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
+import net.dv8tion.jda.api.components.selections.SelectMenu;
+import net.dv8tion.jda.api.components.selections.StringSelectMenu;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
-import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 
 import java.awt.*;
 import java.util.EnumSet;
@@ -60,7 +61,7 @@ public class TicketCommand extends ListenerAdapter {
                         .addOption("Bewerbung", "application", "Bewerbe dich als Builder, Supporter, Developer...")
                         .build();
 
-                event.getChannel().sendMessageEmbeds(ticket.build()).addActionRow(menu).queue();
+                event.getChannel().sendMessageEmbeds(ticket.build()).addComponents(ActionRow.of(menu)).queue();
 
                 Role staffRole = discordAPI.getStaffRole(guild.getId());
                 Category ticketCategory = discordAPI.getTicketCategory(guild.getId());

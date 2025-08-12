@@ -79,7 +79,7 @@ public class Core {
     }
 
     public static void debug(String output) {
-       LogManager.getLogger().debug(output);
+        LogManager.getLogger().debug(output);
     }
 
     public static void info(String output) {
