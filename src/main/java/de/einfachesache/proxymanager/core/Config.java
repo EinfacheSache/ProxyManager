@@ -309,25 +309,25 @@ public class Config {
 
     public static void setCountingNumber(String guildId, Integer countingNumber) {
         countingNumbers.put(guildId, countingNumber);
-        save(data, "servers." + guildId + ".counting.current-number", countingNumber);
+        data.saveAsync("servers." + guildId + ".counting.current-number", countingNumber);
     }
 
     public static void setGiveawayEndtime(String guildId, long endTime) {
         giveawayEndtimes.put(guildId, endTime);
-        save(data, "servers." + guildId + ".giveaway.endTime", endTime);
+        data.saveAsync("servers." + guildId + ".giveaway.endTime", endTime);
     }
 
     public static boolean addGiveawayParticipant(String guildId, String participant) {
         Set<String> set = giveawayParticipantSets.computeIfAbsent(guildId, id -> new HashSet<>());
         boolean added = set.add(participant);
-        save(data, "servers." + guildId + ".giveaway.participants", new ArrayList<>(set));
+        data.saveAsync("servers." + guildId + ".giveaway.participants", new ArrayList<>(set));
         return added;
     }
 
     public static void addEligibleUserForGiveaway(String guildId, String userId) {
         var set = eligibleUsersForGiveawaySets.computeIfAbsent(guildId, id -> new HashSet<>());
         set.add(userId);
-        save(data, "servers." + guildId + ".giveaway.eligible-users", new ArrayList<>(set));
+        data.saveAsync("servers." + guildId + ".giveaway.eligible-users", new ArrayList<>(set));
     }
 
     public static void resetLastGiveaway(String guildId) {
@@ -343,34 +343,32 @@ public class Config {
                 .clear();
 
         // kompletten Giveaway-Abschnitt in der Config für diese Guild löschen
-        save(data, "servers." + guildId + ".giveaway", null);
+        data.saveAsync("servers." + guildId + ".giveaway", null);
     }
 
+    public static void setBetaTesterRoleID(String guildID, String roleID) {
+        discordServerProfiles.get(guildID).setBetaTesterRoleId(roleID);
+        discordModule.saveAsync("servers." + guildID + ".beta-tester-role-id", Long.valueOf(roleID));
+    }
 
     public static void setTicketsCategoryID(String guildID, String ticketCategoryID) {
         discordServerProfiles.get(guildID).setTicketCategoryId(ticketCategoryID);
-        save(discordModule, "servers." + guildID + ".tickets-category-id", ticketCategoryID);
+        discordModule.saveAsync("servers." + guildID + ".tickets-category-id", Long.valueOf(ticketCategoryID));
     }
 
     public static void setStaffRoleID(String guildID, String staffRoleID) {
         discordServerProfiles.get(guildID).setStaffRoleId(staffRoleID);
-        save(discordModule, "servers." + guildID + ".staff-role-id", staffRoleID);
+        discordModule.saveAsync("servers." + guildID + ".staff-role-id", Long.valueOf(staffRoleID));
     }
 
     public static void setLogChannelID(String guildID, String logChannelID) {
         discordServerProfiles.get(guildID).setLogChannelId(logChannelID);
-        save(discordModule, "servers." + guildID + ".log-channel-id", logChannelID);
+        discordModule.saveAsync("servers." + guildID + ".log-channel-id", Long.valueOf(logChannelID));
     }
 
     public static void setMaintenanceMode(boolean maintenanceMode) {
         Config.maintenanceMode = maintenanceMode;
-        save(minecraftModule, "maintenance-mode", maintenanceMode);
-    }
-
-
-    public static void save(FileUtils file, String key, Object value) {
-        file.set(key, value);
-        file.save();
+        minecraftModule.saveAsync("maintenance-mode", maintenanceMode);
     }
 }
 

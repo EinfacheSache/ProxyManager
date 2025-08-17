@@ -53,6 +53,8 @@ public class MemberJoinGuildListener extends ListenerAdapter {
         List<Role> rolesToAdd = new ArrayList<>(Collections.singletonList(playerRole));
         if (!Config.getBetaTesterRoleID(guild.getId()).equals("-1") && currentBetaTesterCount + 1 <= maxBetaTesterCount) {
             rolesToAdd.add(betaTesterRole);
+        } else {
+            Config.setBetaTesterRoleID(guild.getId(), "-1");
         }
 
         guild

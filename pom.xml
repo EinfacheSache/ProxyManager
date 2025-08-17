@@ -102,7 +102,7 @@
         <dependency>
             <groupId>com.github.EinfacheSache</groupId>
             <artifactId>easyapi</artifactId>
-            <version>e2f604edcc</version>
+            <version>c03b14a744</version>
         </dependency>
 
         <dependency>

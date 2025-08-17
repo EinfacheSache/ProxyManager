@@ -7,10 +7,10 @@ public class DiscordServerProfile {
     private final String name;
     private final String guildId;
     private final String joinRoleId;
-    private final String betaTesterRoleId;
     private final String countingChannelId;
     private final String giveawayChannelId;
     private String inviteLogChannelId;
+    private String betaTesterRoleId;
     private String ticketCategoryId;
     private String staffRoleId;
     private String logChannelId;
@@ -88,6 +88,10 @@ public class DiscordServerProfile {
 
     public String getGiveawayChannelId() {
         return giveawayChannelId;
+    }
+
+    public void setBetaTesterRoleId(String betaTesterRoleId) {
+        this.betaTesterRoleId = betaTesterRoleId;
     }
 
     public String getBetaTesterRoleId() {
