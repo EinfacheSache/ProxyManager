@@ -1,0 +1,58 @@
+name: Build
+
+on:
+  push:
+    branches: [ main, master ]
+  # PRs bauen wir, aber Release-Upload nur bei Push auf main/master
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # nötig für Release-Erstellung/Upload
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Build with Maven
+        run: mvn -B -V clean package
+
+      - name: Get short commit SHA
+        id: vars
+        run: echo "short_sha=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+
+      # Release pro Commit (Tag = build-<shortsha>) => Source-ZIPs immer aktuell
+      - name: Create GitHub Release (per commit)
+        if: github.event_name == 'push'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ steps.vars.outputs.short_sha }}
+          name: "Build ${{ steps.vars.outputs.short_sha }}"
+          body: |
+            Automated build from ${{ github.repository }} @ ${{ github.sha }}
+          draft: false
+          prerelease: false
+          generate_release_notes: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # JAR als einzelnes Asset (keine ZIP) an das eben erstellte Release anhängen
+      - name: Upload JAR asset
+        if: github.event_name == 'push'
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: target/ProxyManager-v1.0.0.jar
+          asset_name: ProxyManager-v1.0.0.jar
+          tag: build-${{ steps.vars.outputs.short_sha }}
+          overwrite: true
