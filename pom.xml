@@ -134,7 +134,7 @@
         </dependency>
         <dependency>
             <groupId>com.velocitypowered</groupId>
-            <artifactId>velocity-proxy</artifactId>
+            <artifactId>velocity-api</artifactId>
             <version>3.4.0-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
