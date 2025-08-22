@@ -17,4 +17,5 @@ servers:
     tickets-category-id: 1120488702511161447
     counting-channel-id: 1389001094109331627
     giveaway-channel-id: 1110668721296511086
+    whitelist-channel-id: 1397695956605992996
     invite-log-channel-id: 1396658613405356072

@@ -14,10 +14,7 @@ import de.einfachesache.api.minecraft.metric.StatsProvider;
 import de.einfachesache.proxymanager.core.Config;
 import de.einfachesache.proxymanager.core.Core;
 import de.einfachesache.proxymanager.velocity.command.*;
-import de.einfachesache.proxymanager.velocity.listener.CommandListener;
-import de.einfachesache.proxymanager.velocity.listener.ConnectionListener;
-import de.einfachesache.proxymanager.velocity.listener.MessageListener;
-import de.einfachesache.proxymanager.velocity.listener.TabCompleteListener;
+import de.einfachesache.proxymanager.velocity.listener.*;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
@@ -64,6 +61,7 @@ public class VProxyManager implements ProxyInstance, StatsProvider {
 
         em.register(this, new MessageListener(this));
         em.register(this, new CommandListener(this));
+        em.register(this, new WhitelistListener(this));
         em.register(this, new TabCompleteListener());
         em.register(this, new VPermissionProvider());
 

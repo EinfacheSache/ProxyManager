@@ -13,9 +13,9 @@ import java.util.Properties;
 @SuppressWarnings("unused")
 public class DataSourceProvider {
 
-    private javax.sql.DataSource source;
+    private DataSource source;
 
-    public DataSourceProvider() {
+    public void init() {
         if (!Config.connectMySQL()) return;
         source = connect();
     }

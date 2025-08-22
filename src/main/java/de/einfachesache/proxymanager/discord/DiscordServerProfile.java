@@ -9,6 +9,7 @@ public class DiscordServerProfile {
     private final String joinRoleId;
     private final String countingChannelId;
     private final String giveawayChannelId;
+    private final String whitelistChannelId;
     private String inviteLogChannelId;
     private String betaTesterRoleId;
     private String ticketCategoryId;
@@ -25,6 +26,7 @@ public class DiscordServerProfile {
                                 String ticketCategoryId,
                                 String countingChannelId,
                                 String giveawayChannelId,
+                                String whitelistChannelId,
                                 String inviteLogChannelId) {
         this.name = name;
 
@@ -37,6 +39,7 @@ public class DiscordServerProfile {
         this.ticketCategoryId = ticketCategoryId;
         this.countingChannelId = countingChannelId;
         this.giveawayChannelId = giveawayChannelId;
+        this.whitelistChannelId = whitelistChannelId;
         this.inviteLogChannelId = inviteLogChannelId;
     }
 
@@ -47,6 +50,7 @@ public class DiscordServerProfile {
         this.joinRoleId = null;
         this.countingChannelId = null;
         this.giveawayChannelId = null;
+        this.whitelistChannelId = null;
         this.betaTesterRoleId = null;
     }
 
@@ -90,6 +94,10 @@ public class DiscordServerProfile {
         return giveawayChannelId;
     }
 
+    public String getWhitelistChannelId() {
+        return whitelistChannelId;
+    }
+
     public void setBetaTesterRoleId(String betaTesterRoleId) {
         this.betaTesterRoleId = betaTesterRoleId;
     }
@@ -118,6 +126,7 @@ public class DiscordServerProfile {
                 ", logChannelId='" + logChannelId + '\'' +
                 ", countingChannelId='" + countingChannelId + '\'' +
                 ", giveawayChannelId='" + giveawayChannelId + '\'' +
+                ", whitelistChannelId='" + whitelistChannelId + '\'' +
                 ", betaTesterRoleId='" + betaTesterRoleId + '\'' +
                 '}';
     }

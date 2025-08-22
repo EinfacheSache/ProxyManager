@@ -15,9 +15,7 @@ public class RedisConnector {
     private JedisPool jedisPool = null;
     private final Map<String, String> localCache = new ConcurrentHashMap<>();
 
-
-    public RedisConnector() {
-
+    public void init() {
         if (!Core.isMinecraftServer()) {
             return;
         }

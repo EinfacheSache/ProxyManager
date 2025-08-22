@@ -1,5 +1,6 @@
-server-domain-name: 'YourServerName.de'
+server-domain: 'YourServerName.de'
 maintenance-mode: false
+event-whitelist: true
 manage-connections:
   enabled: true
   player-head-as-server-icon: false

@@ -12,6 +12,8 @@ public class Config {
 
     private static String serverName;
 
+    private static Map<String, String> whitelistedPlayers;
+
     private static Map<String, Integer> countingNumbers;
     private static Map<String, Long> giveawayEndtimes;
     private static Map<String, Set<String>> giveawayParticipantSets;
@@ -39,6 +41,7 @@ public class Config {
     private static boolean manageConnectionEnabled;
     private static boolean playerHeadAsServerIcon;
     private static boolean maintenanceMode;
+    private static boolean eventWhitelist;
     private static String serverDomainName;
     private static String verifyServerDomain;
     private static String verifyServer;
@@ -58,6 +61,7 @@ public class Config {
     private static void loadData() {
         countingNumbers = new HashMap<>();
         giveawayEndtimes = new HashMap<>();
+        whitelistedPlayers = new HashMap<>();
         giveawayParticipantSets = new HashMap<>();
         eligibleUsersForGiveawaySets = new HashMap<>();
 
@@ -67,6 +71,18 @@ public class Config {
             giveawayParticipantSets.put(guildID, new HashSet<>(data.getStringList("servers." + guildID + ".giveaway.participants")));
             eligibleUsersForGiveawaySets.put(guildID, new HashSet<>(data.getStringList("servers." + guildID + ".giveaway.eligible-users")));
         });
+
+        Map<String, Object> raw = data.getMap("minecraft.whitelist", true);
+        for (var e : raw.entrySet()) {
+            String discordID = e.getKey();
+            String minecraftName = e.getValue().toString();
+            try {
+                whitelistedPlayers.put(discordID, minecraftName);
+                Core.info("User " + discordID + " whitelisted player " + minecraftName + " has been found!");
+            } catch (Exception ex) {
+                Core.severe("Whitelist: Invalid entry - key='" + discordID + "' value='" + minecraftName + "' (" + ex.getMessage() + "). Skipped.");
+            }
+        }
     }
 
     private static final FileUtils config = Core.config;
@@ -100,9 +116,10 @@ public class Config {
 
     private static void loadMinecraftModule() {
         maintenanceMode = minecraftModule.getBoolean("maintenance-mode", false);
+        eventWhitelist = minecraftModule.getBoolean("event-whitelist", false);
         manageConnectionEnabled = minecraftModule.getBoolean("manage-connections.enabled", false);
         playerHeadAsServerIcon = minecraftModule.getBoolean("manage-connections.player-head-as-server-icon", false);
-        serverDomainName = minecraftModule.get("server-domain-name", "yourdomain.com");
+        serverDomainName = minecraftModule.get("server-domain", "yourdomain.com");
         verifyServerDomain = minecraftModule.get("manage-connections.verify-server-domain", "verify.yourdomain.com");
         verifyServer = minecraftModule.get("manage-connections.verify-server", "Verify");
         allowedDomains = minecraftModule.getStringList("manage-connections.allowed-domains");
@@ -141,9 +158,15 @@ public class Config {
                 String.valueOf(discordModule.getLong("servers." + guildId + ".counting-channel-id", -1)),
                 // giveawayChannelId
                 String.valueOf(discordModule.getLong("servers." + guildId + ".giveaway-channel-id", -1)),
+                // whitelistChannelId
+                String.valueOf(discordModule.getLong("servers." + guildId + ".whitelist-channel-id", -1)),
                 // inviteLogChannelId
                 String.valueOf(discordModule.getLong("servers." + guildId + ".invite-log-channel-id", -1))
         )));
+    }
+
+    public static Map<String, String> getWhitelistedPlayers() {
+        return whitelistedPlayers;
     }
 
     public static Integer getCountingNumber(String guildID) {
@@ -286,6 +309,10 @@ public class Config {
         return playerHeadAsServerIcon;
     }
 
+    public static boolean isEventWhitelist() {
+        return eventWhitelist;
+    }
+
     public static boolean isMaintenanceMode() {
         return maintenanceMode;
     }
@@ -328,6 +355,11 @@ public class Config {
         var set = eligibleUsersForGiveawaySets.computeIfAbsent(guildId, id -> new HashSet<>());
         set.add(userId);
         data.saveAsync("servers." + guildId + ".giveaway.eligible-users", new ArrayList<>(set));
+    }
+
+    public static void whitelistPlayer(String userId, String minecraftName) {
+        whitelistedPlayers.put(userId, minecraftName);
+        data.saveAsync("minecraft.whitelist", whitelistedPlayers);
     }
 
     public static void resetLastGiveaway(String guildId) {

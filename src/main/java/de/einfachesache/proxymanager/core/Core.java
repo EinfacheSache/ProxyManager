@@ -25,7 +25,7 @@ public class Core {
     public static FileUtils config;
     public static FileUtils data;
 
-    private static RedisConnector RedisConnector;
+    private static RedisConnector redisConnector;
     private static DiscordAPI discordAPI;
     private static DataSourceProvider datasource;
 
@@ -38,6 +38,10 @@ public class Core {
     public static void run(ProxyInstance proxyInstance, Object logger) {
         Core.proxyInstance = proxyInstance;
         Core.UPTIME = System.currentTimeMillis();
+        Core.discordAPI = new DiscordAPI();
+        Core.redisConnector = new RedisConnector();
+        Core.datasource = new DataSourceProvider();
+
         LogManager.getLogger().setLogger(logger);
         run();
     }
@@ -63,9 +67,9 @@ public class Core {
 
     public static void initAsync(ProxyInstance proxyInstance) {
         AsyncExecutor.getService().submit(() -> {
-            discordAPI = new DiscordAPI(proxyInstance);
-            datasource = new DataSourceProvider();
-            RedisConnector = new RedisConnector();
+            discordAPI.init(proxyInstance);
+            redisConnector.init();
+            datasource.init();
         });
     }
 
@@ -74,7 +78,7 @@ public class Core {
         info("Stopping running services...");
         TcpServer.stop();
         discordAPI.shutdown();
-        RedisConnector.close();
+        redisConnector.close();
         info("Services successfully stopped");
     }
 
@@ -100,7 +104,7 @@ public class Core {
 
 
     public static RedisConnector getRedisConnector() {
-        return RedisConnector;
+        return redisConnector;
     }
 
     public static DiscordAPI getDiscordAPI() {

@@ -38,7 +38,7 @@ public class DiscordAPI extends ListenerAdapter {
 
     public static final long DEV_USER_ID = 571736032165232651L;
 
-    public DiscordAPI(ProxyInstance proxyInstance) {
+    public void init(ProxyInstance proxyInstance) {
         try {
             if (Config.isDiscordDisabled()) return;
 
@@ -54,6 +54,7 @@ public class DiscordAPI extends ListenerAdapter {
                     new TicketCommand(this),
                     new TicketListener(this),
                     new GiveawayCommand(this),
+                    new WhitelistCommand(),
                     new MessageListener(),
                     new ContextMenuListener(),
                     new BotGuildJoinListener(),
@@ -97,6 +98,11 @@ public class DiscordAPI extends ListenerAdapter {
         guild.updateCommands()
                 .addCommands(
                         Commands.slash("info", "Zeige Informationen über das Server an"),
+
+                        Commands.slash("whitelist", "Whitelist dich für den Server")
+                                .addOptions(
+                                        new OptionData(OptionType.STRING, "name", "Gebe dein Spielername an", true)
+                                ),
 
                         Commands.slash("close", "Schließe ein Ticket")
                                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MODERATE_MEMBERS))
