@@ -24,10 +24,16 @@ public class WhitelistCommand extends ListenerAdapter {
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
 
         if (event.getGuild() == null || !Config.getGuildIDs().contains(event.getGuild().getId())) return;
-        if (!event.getChannel().getId().equals(Config.getDiscordServerProfile(event.getGuild().getId()).getWhitelistChannelId())) return;
         if (!event.getName().equalsIgnoreCase("whitelist")) return;
 
         EmbedBuilder embed = MessageUtils.getDefaultEmbed().setTitle("Event Whitelist");
+        String whitelistChannelId = Config.getDiscordServerProfile(event.getGuild().getId()).getWhitelistChannelId();
+
+        if (!event.getChannel().getId().equals(whitelistChannelId)) {
+            event.replyEmbeds( embed.setDescription("❌ Falscher Kanal. Bitte nutze <#" + whitelistChannelId + "> für `/whitelist <name>`.").setColor(Color.RED).build()).setEphemeral(true).queue();
+            return;
+        }
+
         OptionMapping nameOpt = event.getOption("name");
         if (nameOpt == null) {
             event.replyEmbeds(embed.setDescription("❌ Bitte gib einen Namen an: `/whitelist <name>`.").setColor(Color.RED).build()).setEphemeral(true).queue();
