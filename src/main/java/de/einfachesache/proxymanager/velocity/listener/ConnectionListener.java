@@ -56,15 +56,7 @@ public class ConnectionListener {
             return;
         }
 
-        player.disconnect(new ScreenBuilder()
-                .addLine("§c§lWartungsarbeiten")
-                .addLine("")
-                .addLine("§7Unser Server befindet sich derzeit im §eWartungsmodus§7.")
-                .addLine("§7Bitte schaue später noch einmal vorbei.")
-                .addLine("")
-                .addLine("§7Weitere Infos findest du auf unserem Discord:")
-                .addLine("§b" + Config.getServerDomainName() + "/discord")
-                .build());
+        player.disconnect(new ScreenBuilder().getMaintenanceScreen());
     }
 
     @Subscribe(order = PostOrder.LAST)
@@ -142,7 +134,7 @@ public class ConnectionListener {
         }
     }
 
-    private boolean isAllowed(Player player) {
+    public static boolean isAllowed(Player player) {
         if (player.hasPermission(BYPASS_PERMISSION)) return true;
         List<String> maintenanceAccess = Config.getMaintenanceAccess();
         return maintenanceAccess != null &&  maintenanceAccess.stream().anyMatch(name -> name.equalsIgnoreCase(player.getUsername()));

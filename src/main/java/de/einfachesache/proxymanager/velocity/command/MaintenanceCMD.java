@@ -3,6 +3,9 @@ package de.einfachesache.proxymanager.velocity.command;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.command.SimpleCommand;
 import de.einfachesache.proxymanager.core.Config;
+import de.einfachesache.proxymanager.velocity.ScreenBuilder;
+import de.einfachesache.proxymanager.velocity.VProxyManager;
+import de.einfachesache.proxymanager.velocity.listener.ConnectionListener;
 import net.kyori.adventure.text.Component;
 
 import java.util.Collections;
@@ -13,6 +16,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class MaintenanceCMD implements SimpleCommand {
+
+    public final VProxyManager instance;
+
+    public MaintenanceCMD(VProxyManager instance) {
+        this.instance = instance;
+    }
+
 
     @Override
     public void execute(Invocation invocation) {
@@ -28,6 +38,9 @@ public class MaintenanceCMD implements SimpleCommand {
         if (args.length == 1) {
             if (args[0].equalsIgnoreCase("on")) {
                 Config.setMaintenanceMode(true);
+                instance.getProxy().getAllPlayers().stream()
+                        .filter(player -> !ConnectionListener.isAllowed(player))
+                        .forEach(player -> player.disconnect(new ScreenBuilder().getMaintenanceScreen()));
                 source.sendMessage(Component.text("§cDu hast den MaintenanceMode §aaktiviert"));
                 return;
             } else if (args[0].equalsIgnoreCase("off")) {
