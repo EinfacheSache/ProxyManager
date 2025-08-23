@@ -38,19 +38,15 @@ public class InfoCommand extends ListenerAdapter {
         embedBuilder.setTitle(Config.getServerName() + " Informationen");
         embedBuilder.setColor(Color.GREEN);
 
-        long currentTime = System.currentTimeMillis();
-        boolean isPinged = isOnline(Config.getServerDomainName().toLowerCase());
-        currentTime = System.currentTimeMillis() - currentTime;
-
         String strBasic = "IP: " + Config.getServerDomainName() + "\n" +
-                "Version: 1.21.6+ \n" +
-                "Ping: " + (isPinged ? currentTime + "ms" : "No Connection") + "\n" +
-                "Spieler Online: " + proxyInstance.getOnlinePlayerCount() + "/" + proxyInstance.getPlayerLimit() + "\n" +
+                "Version: 1.21.5+ \n" +
+                "Status: " + (isOnline(Config.getServerDomainName().toLowerCase()) ? "Online" : "Offline") + "\n" +
+                "Spieler: " + proxyInstance.getOnlinePlayerCount() + "/" + proxyInstance.getPlayerLimit() + "\n" +
                 "Up-Time: " + Duration.ofMillis(System.currentTimeMillis() - Core.UPTIME).toString().substring(2).replaceAll("(\\d[HMS])(?!$)", "$1 ").toLowerCase() + "\n";
 
         embedBuilder.addField("Basic Information", strBasic, false);
 
-        embedBuilder.addField("Ram Verbrauch", RuntimeUsageUtils.getSystemUsedRam() + " / " + RuntimeUsageUtils.getSystemMaxRam() + "MB", false);
+        embedBuilder.addField("Ram Verbrauch", RuntimeUsageUtils.getHostUsedRamMB() + " / " + RuntimeUsageUtils.getHostMaxRamMB() + "MB", false);
         embedBuilder.addField("CPU Verbrauch", BigDecimal.valueOf(RuntimeUsageUtils.getCpuUsage()).setScale(2, RoundingMode.HALF_UP) + "%", false);
 
         final StringBuilder strServer = new StringBuilder();
