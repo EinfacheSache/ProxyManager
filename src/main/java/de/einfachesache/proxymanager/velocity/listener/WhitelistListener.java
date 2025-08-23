@@ -17,7 +17,7 @@ public class WhitelistListener {
     private static final String EVENT_SERVER = "Event";
     private static final String FALLBACK_SERVER = "Limbo";
     private static final String BYPASS_PERMISSION = "event.whitelist.bypass";
-    private static final Component DENY_MESSAGE = Component.text("⛔ Du bist nicht whitelisted für das Event. Verwende /whitelist im Discord.", NamedTextColor.RED);
+    private static final Component DENY_MESSAGE = Component.text("⛔ Du bist fürs Event nicht whitelisted » /whitelist im Discord", NamedTextColor.RED);
 
     private final VProxyManager proxy;
 
