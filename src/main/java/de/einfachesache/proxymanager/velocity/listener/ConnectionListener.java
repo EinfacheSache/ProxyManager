@@ -21,12 +21,14 @@ import net.kyori.adventure.text.Component;
 import javax.imageio.ImageIO;
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @SuppressWarnings("deprecation")
 public class ConnectionListener {
 
+    private static final String BYPASS_PERMISSION = "proxy.maintenance.bypass";
     private final Map<String, Favicon> images = new ConcurrentHashMap<>();
     private ServerPing.Version version;
 
@@ -50,13 +52,18 @@ public class ConnectionListener {
     public void onPostLogin(PostLoginEvent event) {
         Player player = event.getPlayer();
 
-        if (!Config.isMaintenanceMode() || player.hasPermission("proxy.maintenance.bypass")) {
+        if (!Config.isMaintenanceMode() || isAllowed(player)) {
             return;
         }
 
         player.disconnect(new ScreenBuilder()
-                .addLine("§4§lWe are currently in maintenance\n")
-                .addLine("§7Discord: §b" + Config.getServerDomainName() + "/discord")
+                .addLine("§c§lWartungsarbeiten")
+                .addLine("")
+                .addLine("§7Unser Server befindet sich derzeit im §eWartungsmodus§7.")
+                .addLine("§7Bitte schaue später noch einmal vorbei.")
+                .addLine("")
+                .addLine("§7Weitere Infos findest du auf unserem Discord:")
+                .addLine("§b" + Config.getServerDomainName() + "/discord")
                 .build());
     }
 
@@ -135,6 +142,12 @@ public class ConnectionListener {
         }
     }
 
+    private boolean isAllowed(Player player) {
+        if (player.hasPermission(BYPASS_PERMISSION)) return true;
+        List<String> maintenanceAccess = Config.getMaintenanceAccess();
+        return maintenanceAccess != null &&  maintenanceAccess.stream().anyMatch(name -> name.equalsIgnoreCase(player.getUsername()));
+    }
+
     private String getVirtualHost(InboundConnection connection) {
         if (connection.getVirtualHost().isEmpty()) {
             return "not_found";
@@ -145,5 +158,4 @@ public class ConnectionListener {
     private String getPlayerAddress(InboundConnection connection) {
         return connection.getRemoteAddress().getHostString();
     }
-
 }

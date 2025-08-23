@@ -5,9 +5,12 @@ import com.velocitypowered.api.command.SimpleCommand;
 import de.einfachesache.proxymanager.core.Config;
 import net.kyori.adventure.text.Component;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class MaintenanceCMD implements SimpleCommand {
 
@@ -34,26 +37,28 @@ public class MaintenanceCMD implements SimpleCommand {
             }
         }
 
-        source.sendMessage(Component.text("§cBitte verwende /maintenance (on/off)"));
+        if (args.length == 2) {
+            if (args[0].equalsIgnoreCase("add")) {
+                Config.addMaintenanceAccess(args[1]);
+                source.sendMessage(Component.text("§cDu hast " + args[1] + " zum Maintenance Access hinzugefügt"));
+                return;
+            }
+        }
+
+        source.sendMessage(Component.text("§cBitte verwende /maintenance (on/off/add) [player]"));
     }
 
     @Override
     public CompletableFuture<List<String>> suggestAsync(Invocation invocation) {
         return CompletableFuture.supplyAsync(() -> {
-            List<String> list = new ArrayList<>();
             String[] args = invocation.arguments();
 
-            list.add("on");
-            list.add("off");
+            if (args.length > 1) return Collections.emptyList();
 
-            for (String tab : list) {
-                if (args.length == 0) continue;
-                if (!tab.toLowerCase().startsWith(args[args.length - 1].toLowerCase())) {
-                    list.remove(tab);
-                }
-            }
-
-            return list;
+            String last = (args.length == 0) ? "" : args[args.length - 1].toLowerCase(Locale.ROOT);
+            return Stream.of("on", "off", "add")
+                    .filter(s -> s.startsWith(last))
+                    .collect(Collectors.toList());
         });
     }
 

@@ -13,7 +13,6 @@ public class Config {
     private static String serverName;
 
     private static Map<String, String> whitelistedPlayers;
-
     private static Map<String, Integer> countingNumbers;
     private static Map<String, Long> giveawayEndtimes;
     private static Map<String, Set<String>> giveawayParticipantSets;
@@ -45,6 +44,7 @@ public class Config {
     private static String serverDomainName;
     private static String verifyServerDomain;
     private static String verifyServer;
+    private static List<String> maintenanceAccess;
     private static List<String> allowedDomains;
 
     public static void loadModules() {
@@ -59,11 +59,14 @@ public class Config {
     private static final FileUtils data = Core.data;
 
     private static void loadData() {
+        maintenanceAccess = new ArrayList<>();
         countingNumbers = new HashMap<>();
         giveawayEndtimes = new HashMap<>();
         whitelistedPlayers = new HashMap<>();
         giveawayParticipantSets = new HashMap<>();
         eligibleUsersForGiveawaySets = new HashMap<>();
+
+        maintenanceAccess.addAll(data.getStringList("minecraft.maintenance-access"));
 
         guildIDs.forEach(guildID -> {
             countingNumbers.put(guildID, data.getInt("servers." + guildID + ".counting.current-number"));
@@ -333,6 +336,9 @@ public class Config {
         return allowedDomains;
     }
 
+    public static List<String> getMaintenanceAccess() {
+        return maintenanceAccess;
+    }
 
     public static void setCountingNumber(String guildId, Integer countingNumber) {
         countingNumbers.put(guildId, countingNumber);
@@ -360,6 +366,11 @@ public class Config {
     public static void whitelistPlayer(String userId, String minecraftName) {
         whitelistedPlayers.put(userId, minecraftName);
         data.saveAsync("minecraft.whitelist", whitelistedPlayers);
+    }
+
+    public static void addMaintenanceAccess(String minecraftName) {
+        maintenanceAccess.add(minecraftName);
+        data.saveAsync("minecraft.maintenance-access", maintenanceAccess);
     }
 
     public static void resetLastGiveaway(String guildId) {
