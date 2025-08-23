@@ -5,49 +5,57 @@ import com.velocitypowered.api.event.permission.PermissionsSetupEvent;
 import com.velocitypowered.api.permission.PermissionFunction;
 import com.velocitypowered.api.permission.PermissionProvider;
 import com.velocitypowered.api.permission.Tristate;
+import com.velocitypowered.api.proxy.ConsoleCommandSource;
 import com.velocitypowered.api.proxy.Player;
 import de.einfachesache.proxymanager.core.Core;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @SuppressWarnings("unused")
 public class VPermissionProvider {
 
-    private static final Map<UUID, Set<String>> playerPermissions = new HashMap<>();
+    private static final Map<UUID, Set<String>> playerPermissions = new ConcurrentHashMap<>();
 
     public static void setPermission(UUID uuid, String permission, boolean value) {
-        playerPermissions.computeIfAbsent(uuid, k -> new HashSet<>());
-        if (value) {
-            playerPermissions.get(uuid).add(permission);
-        } else {
-            playerPermissions.get(uuid).remove(permission);
-        }
+        Set<String> set = playerPermissions.computeIfAbsent(uuid, k -> ConcurrentHashMap.newKeySet());
+        String perm = normalize(permission);
+        if (value) set.add(perm); else set.remove(perm);
     }
 
     public static boolean hasPermission(UUID uuid, String permission) {
-        Set<String> perms = playerPermissions.getOrDefault(uuid, new HashSet<>());
+        Set<String> perms = playerPermissions.getOrDefault(uuid, Collections.emptySet());
+        String perm = normalize(permission);
 
-        if (perms.contains("*") || Core.DEV_UUID.equals(uuid)) {
-            return true;
+        if (perms.contains("*") || Core.DEV_UUID.equals(uuid)) return true;
+        if (perms.contains(perm)) return true;
+
+        int idx = perm.length();
+        while ((idx = perm.lastIndexOf('.', idx - 1)) > 0) {
+            if (perms.contains(perm.substring(0, idx) + ".*")) return true;
         }
-
-        return perms.contains(permission);
+        return false;
     }
 
     @Subscribe
     public void onPermissionSetup(PermissionsSetupEvent event) {
         PermissionProvider provider = subject -> {
+
             if (subject instanceof Player player) {
-                return permission -> {
-                    if (hasPermission(player.getUniqueId(), permission)) {
-                        return Tristate.TRUE;
-                    }
-                    return Tristate.FALSE;
-                };
+                return perm -> hasPermission(player.getUniqueId(), perm) ? Tristate.TRUE : Tristate.UNDEFINED;
             }
-            return PermissionFunction.ALWAYS_FALSE;
+
+            if (subject instanceof ConsoleCommandSource) {
+                return PermissionFunction.ALWAYS_TRUE;
+            }
+
+            return PermissionFunction.ALWAYS_UNDEFINED;
         };
 
         event.setProvider(provider);
+    }
+
+    private static String normalize(String p) {
+        return p == null ? "" : p.trim().toLowerCase(Locale.ROOT);
     }
 }
