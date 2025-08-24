@@ -6,8 +6,11 @@ import de.einfachesache.api.logger.LogManager;
 import de.einfachesache.api.shutdown.ShutdownHook;
 import de.einfachesache.api.util.FileUtils;
 import de.einfachesache.api.util.version.VersionUtils;
-import de.einfachesache.proxymanager.velocity.ProxyInstance;
 import de.einfachesache.proxymanager.discord.DiscordAPI;
+import de.einfachesache.proxymanager.velocity.ProxyInstance;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.config.Configurator;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
@@ -17,6 +20,7 @@ public class Core {
     public static final UUID DEV_UUID = UUID.fromString("201e5046-24df-4830-8b4a-82b635eb7cc7");
 
     private static ProxyInstance proxyInstance;
+    private static Logger logger;
 
     public static FileUtils minecraftModule;
     public static FileUtils discordModule;
@@ -25,9 +29,9 @@ public class Core {
     public static FileUtils config;
     public static FileUtils data;
 
+    private static DataSourceProvider datasource;
     private static RedisConnector redisConnector;
     private static DiscordAPI discordAPI;
-    private static DataSourceProvider datasource;
 
     public static Long UPTIME = 0L;
 
@@ -35,14 +39,17 @@ public class Core {
         run(null, LoggerFactory.getLogger(Core.class));
     }
 
-    public static void run(ProxyInstance proxyInstance, Object logger) {
+    public static void run(ProxyInstance proxyInstance, Logger logger) {
+
+        LogManager.getLogger().setLogger(logger);
+
+        Core.logger = logger;
         Core.proxyInstance = proxyInstance;
         Core.UPTIME = System.currentTimeMillis();
         Core.discordAPI = new DiscordAPI();
         Core.redisConnector = new RedisConnector();
         Core.datasource = new DataSourceProvider();
 
-        LogManager.getLogger().setLogger(logger);
         run();
     }
 
@@ -61,6 +68,7 @@ public class Core {
         data = new FileUtils(Core.class.getResourceAsStream("/data.yml"), isMinecraftServer() ? "plugins/ProxyManager" : ".", "data.yml");
 
         Config.loadModules();
+        Configurator.setLevel(logger.getName(), Level.toLevel(Config.getLogLevel(), Level.INFO));
 
         initAsync(proxyInstance);
     }
@@ -80,6 +88,10 @@ public class Core {
         discordAPI.shutdown();
         redisConnector.close();
         info("Services successfully stopped");
+    }
+
+    public static void trace(String output) {
+        LogManager.getLogger().trace(output);
     }
 
     public static void debug(String output) {

@@ -10,6 +10,7 @@ import java.util.*;
 @SuppressWarnings("unused")
 public class Config {
 
+    private static String logLevel;
     private static String serverName;
 
     private static Map<String, String> whitelistedPlayers;
@@ -37,15 +38,19 @@ public class Config {
     private static String password;
     private static String database;
 
-    private static boolean manageConnectionEnabled;
     private static boolean playerHeadAsServerIcon;
     private static boolean maintenanceMode;
     private static boolean eventWhitelist;
+    private static boolean customMotd;
+    private static boolean hostAllowlist;
+    private static boolean proxyProtocol;
     private static String serverDomainName;
     private static String verifyServerDomain;
     private static String verifyServer;
+    private static String pingVersionName;
     private static List<String> maintenanceAccess;
     private static List<String> allowedDomains;
+    private static List<String> allowedSubnet;
 
     public static void loadModules() {
         loadMinecraftModule();
@@ -54,6 +59,52 @@ public class Config {
         loadRedisModule();
         loadConfig();
         loadData();
+    }
+
+    private static final FileUtils config = Core.config;
+
+    private static void loadConfig() {
+        logLevel = config.get("log-level", "INFO");
+        serverName = config.get("server-name", "YourServerName");
+    }
+
+    private static final FileUtils redis = Core.redisModule;
+
+    private static void loadRedisModule() {
+        portRedis = redis.getInt("redis.port", 1337);
+        hostRedis = redis.get("redis.host", "127.0.0.1").replace("localhost", "127.0.0.1");
+        userRedis = redis.get("redis.user", "default");
+        passwordRedis = redis.get("redis.password", "");
+    }
+
+    private static final FileUtils mysql = Core.mysqlModule;
+
+    private static void loadMySQLModule() {
+        connectMySQl = mysql.getBoolean("mysql.connect", false);
+        portMySQL = mysql.getInt("mysql.port", 3306);
+        hostMySQL = mysql.get("mysql.host", "127.0.0.1");
+        user = mysql.get("mysql.user", "root");
+        password = mysql.get("mysql.password", "");
+        database = mysql.get("mysql.database", "");
+    }
+
+
+    private static final FileUtils minecraftModule = Core.minecraftModule;
+
+    private static void loadMinecraftModule() {
+        customMotd = minecraftModule.getBoolean("custom-motd", false);
+        hostAllowlist = minecraftModule.getBoolean("host-allowlist", false);
+        proxyProtocol = minecraftModule.getBoolean("proxy-protocol", false);
+        eventWhitelist = minecraftModule.getBoolean("event-whitelist", false);
+        maintenanceMode = minecraftModule.getBoolean("maintenance-mode", false);
+        playerHeadAsServerIcon = minecraftModule.getBoolean("ping.icon.use-player-head", false);
+
+        pingVersionName = minecraftModule.get("ping.version-name", "Version 1.x");
+        serverDomainName = minecraftModule.get("server-domain", "yourdomain.com");
+        verifyServerDomain = minecraftModule.get("manage-connections.verify-server-domain", "verify.yourdomain.com");
+        verifyServer = minecraftModule.get("manage-connections.verify-server", "Verify");
+        allowedSubnet = minecraftModule.getStringList("security.allow-subnets");
+        allowedDomains = minecraftModule.getStringList("security.allowed-domains");
     }
 
     private static final FileUtils data = Core.data;
@@ -86,46 +137,6 @@ public class Config {
                 Core.severe("Whitelist: Invalid entry - key='" + discordID + "' value='" + minecraftName + "' (" + ex.getMessage() + "). Skipped.");
             }
         }
-    }
-
-    private static final FileUtils config = Core.config;
-
-    private static void loadConfig() {
-        serverName = config.get("server-name", "YourServerName");
-    }
-
-    private static final FileUtils redis = Core.redisModule;
-
-    private static void loadRedisModule() {
-        portRedis = redis.getInt("redis.port", 1337);
-        hostRedis = redis.get("redis.host", "127.0.0.1").replace("localhost", "127.0.0.1");
-        userRedis = redis.get("redis.user", "default");
-        passwordRedis = redis.get("redis.password", "");
-    }
-
-    private static final FileUtils mysql = Core.mysqlModule;
-
-    private static void loadMySQLModule() {
-        connectMySQl = mysql.getBoolean("mysql.connect", false);
-        portMySQL = mysql.getInt("mysql.port", 3306);
-        hostMySQL = mysql.get("mysql.host", "127.0.0.1");
-        user = mysql.get("mysql.user", "root");
-        password = mysql.get("mysql.password", "");
-        database = mysql.get("mysql.database", "");
-    }
-
-
-    private static final FileUtils minecraftModule = Core.minecraftModule;
-
-    private static void loadMinecraftModule() {
-        maintenanceMode = minecraftModule.getBoolean("maintenance-mode", false);
-        eventWhitelist = minecraftModule.getBoolean("event-whitelist", false);
-        manageConnectionEnabled = minecraftModule.getBoolean("manage-connections.enabled", false);
-        playerHeadAsServerIcon = minecraftModule.getBoolean("manage-connections.player-head-as-server-icon", false);
-        serverDomainName = minecraftModule.get("server-domain", "yourdomain.com");
-        verifyServerDomain = minecraftModule.get("manage-connections.verify-server-domain", "verify.yourdomain.com");
-        verifyServer = minecraftModule.get("manage-connections.verify-server", "Verify");
-        allowedDomains = minecraftModule.getStringList("manage-connections.allowed-domains");
     }
 
 
@@ -164,34 +175,18 @@ public class Config {
                 // whitelistChannelId
                 String.valueOf(discordModule.getLong("servers." + guildId + ".whitelist-channel-id", -1)),
                 // inviteLogChannelId
-                String.valueOf(discordModule.getLong("servers." + guildId + ".invite-log-channel-id", -1))
-        )));
+                String.valueOf(discordModule.getLong("servers." + guildId + ".invite-log-channel-id", -1)))));
     }
 
-    public static Map<String, String> getWhitelistedPlayers() {
-        return whitelistedPlayers;
-    }
 
-    public static Integer getCountingNumber(String guildID) {
-        return countingNumbers.get(guildID);
+    public static String getLogLevel() {
+        return logLevel;
     }
-
-    public static long getGiveawayEndtimeInMilli(String guildID) {
-        return giveawayEndtimes.get(guildID);
-    }
-
-    public static Set<String> getGiveawayParticipantSet(String guildID) {
-        return giveawayParticipantSets.get(guildID);
-    }
-
-    public static Set<String> getEligibleUsersForGiveawaySet(String guildID) {
-        return eligibleUsersForGiveawaySets.get(guildID);
-    }
-
 
     public static String getServerName() {
         return serverName;
     }
+
 
     public static int getPortRedis() {
         return portRedis;
@@ -210,20 +205,111 @@ public class Config {
     }
 
 
+    public static int getMySQLPort() {
+        return portMySQL;
+    }
+
+    public static boolean connectMySQL() {
+        return connectMySQl;
+    }
+
+    public static String getMySQLHost() {
+        return hostMySQL;
+    }
+
+    public static String getMySQLUser() {
+        return user;
+    }
+
+    public static String getMySQLPassword() {
+        return password;
+    }
+
+    public static String getMySQLDatabase() {
+        return database;
+    }
+
+
+    public static Integer getCountingNumber(String guildID) {
+        return countingNumbers.get(guildID);
+    }
+
+    public static long getGiveawayEndtimeInMilli(String guildID) {
+        return giveawayEndtimes.get(guildID);
+    }
+
+    public static Set<String> getGiveawayParticipantSet(String guildID) {
+        return giveawayParticipantSets.get(guildID);
+    }
+
+    public static Set<String> getEligibleUsersForGiveawaySet(String guildID) {
+        return eligibleUsersForGiveawaySets.get(guildID);
+    }
+
+    public static List<String> getMaintenanceAccess() {
+        return maintenanceAccess;
+    }
+
+    public static Map<String, String> getWhitelistedPlayers() {
+        return whitelistedPlayers;
+    }
+
+
+    public static boolean usePlayerHeadAsServerIcon() {
+        return playerHeadAsServerIcon;
+    }
+
+    public static boolean isEventWhitelist() {
+        return eventWhitelist;
+    }
+
+    public static boolean isMaintenanceMode() {
+        return maintenanceMode;
+    }
+
+    public static boolean isCustomMotd() {
+        return customMotd;
+    }
+
+    public static boolean isHostAllowlist() {
+        return hostAllowlist;
+    }
+
+    public static boolean isProxyProtocol() {
+        return proxyProtocol;
+    }
+
+    public static String getServerDomainName() {
+        return serverDomainName;
+    }
+
+    public static String getVerifyServerDomain() {
+        return verifyServerDomain;
+    }
+
+    public static String getVerifyServer() {
+        return verifyServer;
+    }
+
+    public static String getPingVersionName() {
+        return pingVersionName;
+    }
+
+    public static List<String> getAllowedDomains() {
+        return allowedDomains;
+    }
+
+    public static List<String> getAllowedSubnet() {
+        return allowedSubnet;
+    }
+
+
     public static boolean isDiscordDisabled() {
         return !discordEnable;
     }
 
-    public static String getToken() {
-        try {
-            Properties prop = new Properties();
-            InputStream in = DiscordAPI.class.getResourceAsStream("/application.properties");
-            prop.load(in);
-            return prop.getProperty("TOKEN");
-        } catch (Exception ex) {
-            Core.severe("./application.properties file can't be found", ex);
-            return "NOT_FOUND";
-        }
+    public static boolean isConnectTCPServer() {
+        return connectTCPServer;
     }
 
     public static String getActivity() {
@@ -274,70 +360,27 @@ public class Config {
         return discordServerProfiles.get(guildID).getInviteLogChannelId();
     }
 
-    public static boolean isConnectTCPServer() {
-        return connectTCPServer;
+    public static String getToken() {
+        try {
+            Properties prop = new Properties();
+            InputStream in = DiscordAPI.class.getResourceAsStream("/application.properties");
+            prop.load(in);
+            return prop.getProperty("TOKEN");
+        } catch (Exception ex) {
+            Core.severe("./application.properties file can't be found", ex);
+            return "NOT_FOUND";
+        }
     }
 
 
-    public static int getMySQLPort() {
-        return portMySQL;
+    public static void whitelistPlayer(String userId, String minecraftName) {
+        whitelistedPlayers.put(userId, minecraftName);
+        data.saveAsync("minecraft.whitelist", whitelistedPlayers);
     }
 
-    public static boolean connectMySQL() {
-        return connectMySQl;
-    }
-
-    public static String getMySQLHost() {
-        return hostMySQL;
-    }
-
-    public static String getMySQLUser() {
-        return user;
-    }
-
-    public static String getMySQLPassword() {
-        return password;
-    }
-
-    public static String getMySQLDatabase() {
-        return database;
-    }
-
-
-    public static boolean isManageConnectionEnabled() {
-        return manageConnectionEnabled;
-    }
-
-    public static boolean isPlayerHeadAsServerIcon() {
-        return playerHeadAsServerIcon;
-    }
-
-    public static boolean isEventWhitelist() {
-        return eventWhitelist;
-    }
-
-    public static boolean isMaintenanceMode() {
-        return maintenanceMode;
-    }
-
-    public static String getServerDomainName() {
-        return serverDomainName;
-    }
-
-    public static String getVerifyServerDomain() {
-        return verifyServerDomain;
-    }
-
-    public static String getVerifyServer() {
-        return verifyServer;
-    }
-
-    public static List<String> getAllowedDomains() {
-        return allowedDomains;
-    }
-
-    public static List<String> getMaintenanceAccess() {
-        return maintenanceAccess;
+    public static void addMaintenanceAccess(String minecraftName) {
+        maintenanceAccess.add(minecraftName);
+        data.saveAsync("minecraft.maintenance-access", maintenanceAccess);
     }
 
     public static void setCountingNumber(String guildId, Integer countingNumber) {
@@ -363,32 +406,6 @@ public class Config {
         data.saveAsync("servers." + guildId + ".giveaway.eligible-users", new ArrayList<>(set));
     }
 
-    public static void whitelistPlayer(String userId, String minecraftName) {
-        whitelistedPlayers.put(userId, minecraftName);
-        data.saveAsync("minecraft.whitelist", whitelistedPlayers);
-    }
-
-    public static void addMaintenanceAccess(String minecraftName) {
-        maintenanceAccess.add(minecraftName);
-        data.saveAsync("minecraft.maintenance-access", maintenanceAccess);
-    }
-
-    public static void resetLastGiveaway(String guildId) {
-        // Ende-Zeit zurücksetzen
-        setGiveawayEndtime(guildId, -1L);
-
-        // Teilnehmer- und Eligibility-Sets für diese Guild leeren
-        giveawayParticipantSets
-                .computeIfAbsent(guildId, id -> new HashSet<>())
-                .clear();
-        eligibleUsersForGiveawaySets
-                .computeIfAbsent(guildId, id -> new HashSet<>())
-                .clear();
-
-        // kompletten Giveaway-Abschnitt in der Config für diese Guild löschen
-        data.saveAsync("servers." + guildId + ".giveaway", null);
-    }
-
     public static void setBetaTesterRoleID(String guildID, String roleID) {
         discordServerProfiles.get(guildID).setBetaTesterRoleId(roleID);
         discordModule.saveAsync("servers." + guildID + ".beta-tester-role-id", Long.valueOf(roleID));
@@ -412,6 +429,15 @@ public class Config {
     public static void setMaintenanceMode(boolean maintenanceMode) {
         Config.maintenanceMode = maintenanceMode;
         minecraftModule.saveAsync("maintenance-mode", maintenanceMode);
+    }
+
+    public static void resetLastGiveaway(String guildId) {
+        setGiveawayEndtime(guildId, -1L);
+
+        giveawayParticipantSets.computeIfAbsent(guildId, id -> new HashSet<>()).clear();
+        eligibleUsersForGiveawaySets.computeIfAbsent(guildId, id -> new HashSet<>()).clear();
+
+        data.saveAsync("servers." + guildId + ".giveaway", null);
     }
 }
 

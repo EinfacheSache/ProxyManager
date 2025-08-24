@@ -15,12 +15,13 @@ import de.einfachesache.proxymanager.core.Config;
 import de.einfachesache.proxymanager.core.Core;
 import de.einfachesache.proxymanager.velocity.command.*;
 import de.einfachesache.proxymanager.velocity.listener.*;
+import de.einfachesache.proxymanager.velocity.proxyprotocol.ProxyProtocol;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class VProxyManager implements ProxyInstance, StatsProvider {
@@ -59,14 +60,19 @@ public class VProxyManager implements ProxyInstance, StatsProvider {
         cm.register(cm.metaBuilder("commands").build(), new CommandsCMD());
         cm.register(cm.metaBuilder("gmute").build(), new GlobalMuteCMD());
 
+        em.register(this, new LoginAccessControlListener(this));
         em.register(this, new MessageListener(this));
         em.register(this, new CommandListener(this));
-        em.register(this, new WhitelistListener(this));
         em.register(this, new TabCompleteListener());
         em.register(this, new VPermissionProvider());
 
-        if (Config.isManageConnectionEnabled()) {
-            em.register(this, new ConnectionListener());
+        if (Config.isCustomMotd()) {
+            em.register(this, new ProxyPingListener());
+        }
+
+        if (Config.isHostAllowlist()) {
+            new ProxyProtocol(this);
+            em.register(this, new LoginHostFilterListener());
         }
     }
 

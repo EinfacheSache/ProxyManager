@@ -1,1 +1,2 @@
 server-name: 'YourServerName'
+log-level: "INFO" # ALL, TRACE, DEBUG, INFO, WARN, FATAL, OFF

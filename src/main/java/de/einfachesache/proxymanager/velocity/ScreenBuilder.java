@@ -2,34 +2,40 @@ package de.einfachesache.proxymanager.velocity;
 
 import de.einfachesache.proxymanager.core.Config;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
 public class ScreenBuilder {
 
-    StringBuilder screen;
-    Component maintenanceScreen = new ScreenBuilder()
+    private static final LegacyComponentSerializer LEGACY = LegacyComponentSerializer.legacySection();
+
+    private static final Component maintenanceScreen = new ScreenBuilder()
             .addLine("§c§lWartungsarbeiten")
-            .addLine("")
+            .addEmptyLine()
             .addLine("§7Unser Server befindet sich derzeit im §eWartungsmodus§7.")
             .addLine("§7Bitte schaue später noch einmal vorbei.")
-            .addLine("")
+            .addEmptyLine()
             .addLine("§7Weitere Infos findest du auf unserem Discord:")
             .addLine("§b" + Config.getServerDomainName() + "/discord")
             .build();
 
-    public ScreenBuilder() {
-        screen = new StringBuilder();
-    }
+
+    StringBuilder screen = new StringBuilder();
 
     public ScreenBuilder addLine(String line) {
-        screen.append(line).append("§r").append("\n");
+        screen.append(line).append("\n");
         return this;
     }
 
-    public Component getMaintenanceScreen() {
-         return maintenanceScreen;
+    public ScreenBuilder addEmptyLine() {
+        screen.append("\n");
+        return this;
     }
 
     public Component build() {
-        return Component.text(String.valueOf(screen));
+        return LEGACY.deserialize(screen.toString().strip());
+    }
+
+    public static Component getMaintenanceScreen() {
+        return maintenanceScreen;
     }
 }

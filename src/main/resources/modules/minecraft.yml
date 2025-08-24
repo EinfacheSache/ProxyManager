@@ -1,10 +1,22 @@
-server-domain: 'YourServerName.de'
-maintenance-mode: false
-event-whitelist: true
-manage-connections:
-  enabled: true
-  player-head-as-server-icon: false
-  verify-server-domain: ''
-  verify-server: ''
-  allowed-domains:
-    - 'YourServerName.de'
+server-domain: 'your-server-domain.de'
+
+custom-motd: true            # MOTD/Player-Name/Icon dynamisch
+proxy-protocol: true         # Aktiviere ProxyProtocol
+maintenance-mode: true       # Spieler ohne Bypass fliegen beim Join raus
+event-whitelist: true        # (falls du das hier weiterverwenden willst)
+host-allowlist: true         # prüft VirtualHost/Domain vor dem Login
+
+security:
+  allow-subnets:             # dürfen IMMER verbinden (statt hart "192.168.178.")
+    - 192.168.178.0/24
+  allowed-domains:           # exakte Domains oder Wildcards
+    - flareonevents.de
+    - einfachesache.de
+    - '*.einfachesache.de'
+    - '*.flareonevents.de'
+    - 74c28de0-74f5-43a1-971a-747bfa27e8dc.shield.neoprotect.ovh
+
+ping:
+  version-name: "Version 1.21.5+"     # nur Anzeige-String im Serverlisteneintrag
+  icon:
+    use-player-head: false
