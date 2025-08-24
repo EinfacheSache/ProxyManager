@@ -1,10 +1,10 @@
 server-domain: 'your-server-domain.de'
 
-custom-motd: true            # MOTD/Player-Name/Icon dynamisch
-proxy-protocol: true         # Aktiviere ProxyProtocol
 maintenance-mode: true       # Spieler ohne Bypass fliegen beim Join raus
 event-whitelist: true        # (falls du das hier weiterverwenden willst)
 host-allowlist: true         # prüft VirtualHost/Domain vor dem Login
+proxy-protocol: true         # Aktiviere ProxyProtocol
+custom-motd: true            # MOTD/Player-Name/Icon dynamisch
 
 security:
   allow-subnets:             # dürfen IMMER verbinden (statt hart "192.168.178.")
