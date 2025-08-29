@@ -6,6 +6,7 @@ import de.einfachesache.proxymanager.discord.DiscordAPI;
 import de.einfachesache.proxymanager.discord.MessageUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
@@ -20,16 +21,17 @@ public class CoreCommand extends ListenerAdapter {
         if (event.getGuild() != null && !Config.getGuildIDs().contains(event.getGuild().getId())) return;
         if (!event.getName().equalsIgnoreCase("core")) return;
 
-        EmbedBuilder embedBuilder = MessageUtils.getDefaultEmbed();
-
         if (!Objects.equals(event.getUser().getIdLong(), DiscordAPI.DEV_USER_ID)) {
-            embedBuilder.setDescription("You are not allowed to use this command!");
-            embedBuilder.setColor(Color.RED);
-            event.replyEmbeds(embedBuilder.build()).setEphemeral(true).queue();
+            event.replyEmbeds(
+                    MessageUtils.getErrorEmbed()
+                            .setDescription("You are not allowed to use this command!")
+                            .build())
+                    .setEphemeral(true).queue();
             return;
         }
 
         event.deferReply(true).setEphemeral(true).queue();
+        EmbedBuilder embedBuilder = MessageUtils.getDefaultEmbed();
 
         switch (Objects.requireNonNull(event.getSubcommandName())) {
 
@@ -39,6 +41,21 @@ public class CoreCommand extends ListenerAdapter {
                 embedBuilder.setDescription("Restart wird ausgeführt!");
                 Core.shutdown();
                 Core.run();
+            }
+
+            case "invite-link" -> {
+
+                if (!(event.getChannel() instanceof TextChannel channel)) {
+                    embedBuilder.setDescription("Command kann hier nicht ausgeführt werden!");
+                    break;
+                }
+
+                channel.createInvite().setMaxAge(0).queue(invite -> {
+                    embedBuilder.setDescription(invite.getUrl());
+                    event.getHook().sendMessageEmbeds(embedBuilder.build()).setEphemeral(true).queue();
+                });
+
+                return;
             }
 
             case "reload-commands" -> {

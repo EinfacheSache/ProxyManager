@@ -43,7 +43,7 @@ public class ReadyListener implements EventListener {
             }
 
             Core.info("Running for Guilds: " + guilds.stream()
-                    .map(g -> g.getName() + "(MemberCount=" + g.getMembers().size() + ")")
+                    .map(g -> g.getName() + "(Members=" + g.getMembers().size() + ")")
                     .collect(Collectors.joining(", ")));
 
 

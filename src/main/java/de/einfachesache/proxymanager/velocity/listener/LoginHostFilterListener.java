@@ -19,10 +19,10 @@ public class LoginHostFilterListener {
         }
 
         connection.disconnect(new ScreenBuilder()
-                .addLine("§4-----------------------------")
-                .addLine("§4Login over " + virtualHost + " is not allowed")
-                .addLine("§4Please join over " + Config.getServerDomainName())
-                .addLine("§4-----------------------------")
+                .addLine("§c§l✖ Verbindung nicht möglich ✖")
+                .addEmptyLine()
+                .addLine("§7Login über §e" + virtualHost + " §7ist nicht erlaubt.")
+                .addLine("§7Bitte verbinde dich über: §b" + Config.getServerDomainName())
                 .build());
     }
 

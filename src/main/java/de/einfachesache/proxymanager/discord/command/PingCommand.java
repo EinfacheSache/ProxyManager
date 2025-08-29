@@ -19,7 +19,6 @@ public class PingCommand extends ListenerAdapter {
         EmbedBuilder embedBuilder = MessageUtils.getDefaultEmbed();
         embedBuilder.setTitle("Der Ping des Bots beträgt ..." +
                 "\nDer Ping zum Discord Websocket beträgt ...");
-        embedBuilder.setColor(Color.RED);
 
         Core.getDiscordAPI().getJDA().getGatewayPing();
         long time = System.currentTimeMillis();

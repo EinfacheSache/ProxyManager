@@ -58,7 +58,7 @@ public class ProxyPingListener {
                 .onlinePlayers(original.getPlayers().orElseThrow().getOnline())
                 .maximumPlayers(original.getPlayers().get().getMax());
 
-        if (Config.usePlayerHeadAsServerIcon() && images.containsKey(playerName)) {
+        if (Config.usePlayerHeadAsServerIcon() && playerName != null && images.containsKey(playerName)) {
             builder.favicon(images.get(playerName));
         } else if (original.getFavicon().isPresent()) {
             builder.favicon(original.getFavicon().get());

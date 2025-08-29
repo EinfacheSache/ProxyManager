@@ -48,7 +48,6 @@ public class TicketCommand extends ListenerAdapter {
             case "setup" -> {
                 embedBuilder.setDescription("Ticket message wurde erstellt!");
                 EmbedBuilder ticket = MessageUtils.getDefaultEmbed()
-                        .setColor(Color.BLUE)
                         .setDescription("""
                                 # Erstelle ein Ticket
                                  Derzeit werden Tickets nur auf Deutsch oder Englisch beantwortet.

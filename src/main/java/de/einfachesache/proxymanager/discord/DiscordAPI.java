@@ -78,6 +78,7 @@ public class DiscordAPI extends ListenerAdapter {
                         Commands.slash("core", "Befehle für Developer")
                                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR))
                                 .addSubcommands(new SubcommandData("restart", "Restart alle Services"))
+                                .addSubcommands(new SubcommandData("invite-link", "Generiere Invite Link für den Discord"))
                                 .addSubcommands(new SubcommandData("reload-commands", "Reloade alle Discord Commands"))
                                 .addSubcommands(new SubcommandData("reload-commands-global", "Reloade alle Discord Commands Global"))
                                 .addSubcommands(new SubcommandData("register", "Registers this server and enables the bot to operate on it")),
@@ -103,6 +104,9 @@ public class DiscordAPI extends ListenerAdapter {
                                 .addOptions(
                                         new OptionData(OptionType.STRING, "name", "Gebe dein Spielername an", true)
                                 ),
+
+                        Commands.slash("whitelist-list", "Zeige alle Whitelisted Spieler an")
+                                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MODERATE_MEMBERS)),
 
                         Commands.slash("close", "Schließe ein Ticket")
                                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MODERATE_MEMBERS))

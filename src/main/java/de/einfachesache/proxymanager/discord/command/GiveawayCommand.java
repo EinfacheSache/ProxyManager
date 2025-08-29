@@ -98,8 +98,7 @@ public class GiveawayCommand extends ListenerAdapter {
                     .addField("Teilnehmer (" + participants.size() + ")", participantsList, false)
                     .addField("Berechtigte User (" + eligibleUsers.size() + ")",
                             eligibleList + "\n\n*Nutzer, die jemanden eingeladen haben, dürfen teilnehmen*", false)
-                    .addField("Endzeit", endTimeFormatted, false)
-                    .setColor(Color.ORANGE);
+                    .addField("Endzeit", endTimeFormatted, false);
 
             event.replyEmbeds(embed.build()).setEphemeral(true).queue();
             return;

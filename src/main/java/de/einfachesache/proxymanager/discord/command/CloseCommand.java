@@ -27,16 +27,13 @@ public class CloseCommand extends ListenerAdapter {
         String guildID = event.getGuild().getId();
 
         if (channel.getParentCategory() == null || !channel.getParentCategory().getId().equals(Config.getTicketsCategoryID(guildID))) {
-            event.replyEmbeds(MessageUtils.getDefaultEmbed().setTitle("Fehler").setDescription("Das ist kein Ticket").build()).setEphemeral(true).queue();
+            event.replyEmbeds(MessageUtils.getErrorEmbed().setTitle("Fehler").setDescription("Das ist kein Ticket").build()).setEphemeral(true).queue();
             return;
         }
 
-        String reason = "einer Lösung";
-        if (!event.getOptionsByName("reason").isEmpty()) {
-            reason = event.getOptionsByName("reason").getFirst().getAsString();
-        }
-
-        closeTicket(guildID, channel, Objects.requireNonNull(event.getMember()), reason);
+        closeTicket(guildID, channel, Objects.requireNonNull(event.getMember()),
+                event.getOptionsByName("reason").isEmpty() ?
+                        "einer Lösung" : event.getOptionsByName("reason").getFirst().getAsString());
     }
 
     @Override
@@ -74,7 +71,6 @@ public class CloseCommand extends ListenerAdapter {
                 Objects.requireNonNull(mpOverride.getMember()).getUser().openPrivateChannel().flatMap(privateChannel ->
                         privateChannel.sendMessageEmbeds(MessageUtils.getDefaultEmbed()
                                 .setAuthor(Config.getServerName())
-                                .setColor(Color.GREEN)
                                 .setTitle("Vielen Dank, dass Sie den Support kontaktiert haben!")
                                 .setDescription("Ihr Fall wurde aufgrund " + reason + " geschlossen. \nWenn Sie ein anderes Problem haben, können Sie möglicherweise ein weiteres Ticket eröffnen.")
                                 .build())).queue());
@@ -82,7 +78,6 @@ public class CloseCommand extends ListenerAdapter {
         Core.getDiscordAPI().getDiscordLogChannel(guildID).sendMessageEmbeds(MessageUtils
                 .getDefaultEmbed()
                 .setAuthor(Config.getServerName())
-                .setColor(Color.GREEN)
                 .setTitle("Ticket '" + channel.getName() + "' wurde von " + member.getEffectiveName() + " geschlossen.")
                 .setDescription("Users : " + channel.getMemberPermissionOverrides().stream().map(permissionOverride -> Objects.requireNonNull(permissionOverride.getMember()).getEffectiveName()).toList().toString().replace("[", "'").replace("]", "'\nGrund: " + (reason == null ? "Kein Grund angegeben" : reason)))
                 .build()).queue();

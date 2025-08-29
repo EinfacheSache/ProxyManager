@@ -28,14 +28,12 @@ public class LookupCommand extends ListenerAdapter {
         User user = new User(MinecraftAPI.loadUUID(name), name);
 
         embedBuilder.setDescription("Loading Data from " + user.getName());
-        embedBuilder.setColor(Color.YELLOW);
 
         event.replyEmbeds(embedBuilder.build()).setEphemeral(true).flatMap(it -> {
 
                     if (user.getUUID() == null) {
-                        return event.getHook().editOriginalEmbeds(embedBuilder
+                        return event.getHook().editOriginalEmbeds(MessageUtils.getErrorEmbed()
                                 .setTitle("🔍 Nutzer nicht gefunden")
-                                .setColor(Color.RED)
                                 .setDescription("Der Nutzername **" + name + "** konnte nicht gefunden werden.")
                                 .addField("Mögliche Ursachen:",
                                         """
@@ -45,9 +43,8 @@ public class LookupCommand extends ListenerAdapter {
                     }
 
                     if (Core.getDatasource().isClosed()) {
-                        return event.getHook().editOriginalEmbeds(embedBuilder
+                        return event.getHook().editOriginalEmbeds(MessageUtils.getErrorEmbed()
                                 .setTitle("❌ Verbindungsfehler")
-                                .setColor(Color.RED)
                                 .setDescription("Die Verbindung zur MySQL-Datenbank konnte nicht hergestellt werden.")
                                 .build());
                     }
