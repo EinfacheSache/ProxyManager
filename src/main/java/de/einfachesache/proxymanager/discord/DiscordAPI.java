@@ -1,12 +1,12 @@
 package de.einfachesache.proxymanager.discord;
 
 import de.einfachesache.api.AsyncExecutor;
-import de.einfachesache.proxymanager.velocity.ProxyInstance;
 import de.einfachesache.proxymanager.core.Config;
 import de.einfachesache.proxymanager.core.Core;
 import de.einfachesache.proxymanager.core.TcpServer;
 import de.einfachesache.proxymanager.discord.command.*;
 import de.einfachesache.proxymanager.discord.listener.*;
+import de.einfachesache.proxymanager.velocity.ProxyInstance;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
@@ -31,6 +31,7 @@ import java.awt.*;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 public class DiscordAPI extends ListenerAdapter {
 
@@ -69,12 +70,20 @@ public class DiscordAPI extends ListenerAdapter {
         }
     }
 
-    public void reloadGuildsAsync() {
-        AsyncExecutor.getService().submit(() -> {
-            loadGlobalDiscordCommands();
-            this.getGuilds().forEach((s, guild) -> this.loadGuildDiscordCommands(guild));
-            Core.info("Commands successfully reloaded");
-        });
+    public CompletableFuture<Boolean> reloadGuildsAsync() {
+        return CompletableFuture
+                .runAsync(() -> {
+                    loadGlobalDiscordCommands();
+                    this.getGuilds().forEach((id, guild) -> this.loadGuildDiscordCommands(guild));
+                }, AsyncExecutor.getService())
+                .thenApply(v -> {
+                    Core.info("Discord commands successfully reloaded");
+                    return true;
+                })
+                .exceptionally(ex -> {
+                    Core.severe("Discord command reload failed", ex);
+                    return false;
+                });
     }
 
     public void loadGlobalDiscordCommands() {

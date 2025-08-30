@@ -19,6 +19,24 @@ public class VPermissionProvider {
 
     private static final Map<UUID, Set<String>> playerPermissions = new ConcurrentHashMap<>();
 
+    public static void clearPermissions() {
+        playerPermissions.clear();
+    }
+
+    public static void setPermission(UUID uuid, String permission, boolean value) {
+        Set<String> set = playerPermissions.computeIfAbsent(uuid, k -> ConcurrentHashMap.newKeySet());
+        String perm = normalize(permission);
+        if (value) set.add(perm);
+        else set.remove(perm);
+    }
+
+    public static void addPermissions(UUID uuid, List<String> permissions) {
+        Set<String> set = playerPermissions.computeIfAbsent(uuid, k -> ConcurrentHashMap.newKeySet());
+        for (String permission : permissions) {
+            set.add(normalize(permission));
+        }
+    }
+
     public static void addPermissions(String name, List<String> permissions) {
         AsyncExecutor.getService().submit(() -> {
             UUID uuid = MinecraftAPI.loadUUID(name);
@@ -30,20 +48,6 @@ public class VPermissionProvider {
 
             addPermissions(uuid, permissions);
         });
-    }
-
-    public static void addPermissions(UUID uuid, List<String> permissions) {
-        Set<String> set = playerPermissions.computeIfAbsent(uuid, k -> ConcurrentHashMap.newKeySet());
-        for (String permission : permissions) {
-            set.add(normalize(permission));
-        }
-    }
-
-    public static void setPermission(UUID uuid, String permission, boolean value) {
-        Set<String> set = playerPermissions.computeIfAbsent(uuid, k -> ConcurrentHashMap.newKeySet());
-        String perm = normalize(permission);
-        if (value) set.add(perm);
-        else set.remove(perm);
     }
 
     public static boolean hasPermission(UUID uuid, String permission) {

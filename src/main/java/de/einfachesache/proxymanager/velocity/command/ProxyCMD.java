@@ -49,9 +49,14 @@ public class ProxyCMD implements SimpleCommand {
 
                 if (args.length == 1) {
                     source.sendMessage(Component.text("Reload: Config + Discord …").color(NamedTextColor.GRAY));
-                    Config.reloadFilesAsync();
-                    Core.getDiscordAPI().reloadGuildsAsync();
-                    source.sendMessage(Component.text("Reload ausgeführt (Config + Discord).").color(NamedTextColor.GREEN));
+                    Config.reloadFilesAsync().thenAccept(ok -> {
+                        if (ok) source.sendMessage(Component.text("§aConfigs neu geladen."));
+                        else source.sendMessage(Component.text("§cConfig Reload fehlgeschlagen. Details im Log."));
+                    });
+                    Core.getDiscordAPI().reloadGuildsAsync().thenAccept(ok -> {
+                        if (ok) source.sendMessage(Component.text("§aDiscord-Commands neu geladen."));
+                        else source.sendMessage(Component.text("§cDiscord Reload fehlgeschlagen. Details im Log."));
+                    });
                     return;
                 }
 
@@ -59,14 +64,19 @@ public class ProxyCMD implements SimpleCommand {
                 switch (sub) {
                     case "config" -> {
                         source.sendMessage(Component.text("Reload: Config …").color(NamedTextColor.GRAY));
-                        Config.reloadFilesAsync();
+                        Config.reloadFilesAsync().thenAccept(ok -> {
+                            if (ok) source.sendMessage(Component.text("§aConfigs neu geladen."));
+                            else source.sendMessage(Component.text("§cConfig Reload fehlgeschlagen. Details im Log."));
+                        });
                         source.sendMessage(Component.text("Config neu geladen.").color(NamedTextColor.GREEN));
                         return;
                     }
                     case "discord", "jda" -> {
                         source.sendMessage(Component.text("Reload: Discord …").color(NamedTextColor.GRAY));
-                        Core.getDiscordAPI().reloadGuildsAsync();
-                        source.sendMessage(Component.text("Discord neu geladen.").color(NamedTextColor.GREEN));
+                        Core.getDiscordAPI().reloadGuildsAsync().thenAccept(ok -> {
+                            if (ok) source.sendMessage(Component.text("§aDiscord-Commands neu geladen."));
+                            else source.sendMessage(Component.text("§cDiscord Reload fehlgeschlagen. Details im Log."));
+                        });
                         return;
                     }
                     default -> {

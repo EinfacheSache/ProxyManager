@@ -64,8 +64,8 @@ public class Config {
         loadData();
     }
 
-    public static void reloadFilesAsync() {
-        CompletableFuture.allOf(
+    public static CompletableFuture<Boolean> reloadFilesAsync() {
+        return CompletableFuture.allOf(
                 Core.data.reloadConfigurationAsync(),
                 Core.config.reloadConfigurationAsync(),
                 Core.mysqlModule.reloadConfigurationAsync(),
@@ -79,12 +79,12 @@ public class Config {
             loadRedisModule();
             loadDiscordModule();
             loadMinecraftModule();
-        }, AsyncExecutor.getService()).whenComplete((ok, ex) -> {
-            if (ex != null) {
-                Core.severe("Config reload failed", ex);
-            } else {
-                Core.info("Config successfully reloaded");
-            }
+        }, AsyncExecutor.getService()).thenApply((ok) -> {
+            Core.info("Config successfully reloaded");
+            return true;
+        }).exceptionally((ex) -> {
+            Core.severe("Config reload failed", ex);
+            return false;
         });
     }
 
@@ -165,7 +165,7 @@ public class Config {
             }
         }
 
-
+        VPermissionProvider.clearPermissions();
         data.getConfigurationSection("minecraft.permissions").getKeys(false).forEach(playerName ->
                 VPermissionProvider.addPermissions(playerName, data.getStringList("minecraft.permissions." + playerName)));
     }
