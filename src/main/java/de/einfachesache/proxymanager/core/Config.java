@@ -1,11 +1,14 @@
 package de.einfachesache.proxymanager.core;
 
+import de.einfachesache.api.AsyncExecutor;
 import de.einfachesache.api.util.FileUtils;
 import de.einfachesache.proxymanager.discord.DiscordAPI;
 import de.einfachesache.proxymanager.discord.DiscordServerProfile;
+import de.einfachesache.proxymanager.velocity.VPermissionProvider;
 
 import java.io.InputStream;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 @SuppressWarnings("unused")
 public class Config {
@@ -59,6 +62,30 @@ public class Config {
         loadRedisModule();
         loadConfig();
         loadData();
+    }
+
+    public static void reloadFilesAsync() {
+        CompletableFuture.allOf(
+                Core.data.reloadConfigurationAsync(),
+                Core.config.reloadConfigurationAsync(),
+                Core.mysqlModule.reloadConfigurationAsync(),
+                Core.redisModule.reloadConfigurationAsync(),
+                Core.discordModule.reloadConfigurationAsync(),
+                Core.minecraftModule.reloadConfigurationAsync()
+        ).thenRunAsync(() -> {
+            loadData();
+            loadConfig();
+            loadMySQLModule();
+            loadRedisModule();
+            loadDiscordModule();
+            loadMinecraftModule();
+        }, AsyncExecutor.getService()).whenComplete((ok, ex) -> {
+            if (ex != null) {
+                Core.severe("Config reload failed", ex);
+            } else {
+                Core.info("Config successfully reloaded");
+            }
+        });
     }
 
     private static final FileUtils config = Core.config;
@@ -137,6 +164,10 @@ public class Config {
                 Core.severe("Whitelist: Invalid entry - key='" + discordID + "' value='" + minecraftName + "' (" + ex.getMessage() + "). Skipped.");
             }
         }
+
+
+        data.getConfigurationSection("minecraft.permissions").getKeys(false).forEach(playerName ->
+                VPermissionProvider.addPermissions(playerName, data.getStringList("minecraft.permissions." + playerName)));
     }
 
 

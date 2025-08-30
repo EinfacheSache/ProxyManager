@@ -6,3 +6,4 @@ servers:
 minecraft:
   whitelist:
   maintenance-access:
+  permissions:

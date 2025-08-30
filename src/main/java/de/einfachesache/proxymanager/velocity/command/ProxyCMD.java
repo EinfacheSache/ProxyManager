@@ -2,13 +2,12 @@ package de.einfachesache.proxymanager.velocity.command;
 
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.command.SimpleCommand;
-import com.velocitypowered.api.proxy.ConsoleCommandSource;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
+import de.einfachesache.proxymanager.core.Config;
 import de.einfachesache.proxymanager.core.Core;
 import de.einfachesache.proxymanager.core.RedisConnector;
-import de.einfachesache.proxymanager.discord.DiscordAPI;
 import de.einfachesache.proxymanager.velocity.VProxyManager;
 import dev.simplix.protocolize.api.Protocolize;
 import dev.simplix.protocolize.api.chat.ChatElement;
@@ -17,16 +16,15 @@ import dev.simplix.protocolize.api.item.ItemStack;
 import dev.simplix.protocolize.data.ItemType;
 import dev.simplix.protocolize.data.inventory.InventoryType;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ProxyCMD implements SimpleCommand {
 
     private final List<String> SUB_COMMANDS = Arrays.asList("reload", "send");
+    private static final List<String> RELOAD_SUBS = List.of("config", "discord");
 
     private final VProxyManager instance;
 
@@ -45,24 +43,38 @@ public class ProxyCMD implements SimpleCommand {
             return;
         }
 
-        if (args.length == 1) {
+        if (args.length >= 1) {
 
             if (args[0].equalsIgnoreCase("reload") || args[0].equalsIgnoreCase("rl")) {
-                if (!(source instanceof ConsoleCommandSource)) {
-                    source.sendMessage(Component.text("§cThis command can only be executed via console"));
+
+                if (args.length == 1) {
+                    source.sendMessage(Component.text("Reload: Config + Discord …").color(NamedTextColor.GRAY));
+                    Config.reloadFilesAsync();
+                    Core.getDiscordAPI().reloadGuildsAsync();
+                    source.sendMessage(Component.text("Reload ausgeführt (Config + Discord).").color(NamedTextColor.GREEN));
                     return;
                 }
 
-                if (Core.getDiscordAPI().getJDA() == null) {
-                    Core.warn("Can't reload cause Discord JDA is null");
-                    return;
+                String sub = args[1].toLowerCase(Locale.ROOT);
+                switch (sub) {
+                    case "config" -> {
+                        source.sendMessage(Component.text("Reload: Config …").color(NamedTextColor.GRAY));
+                        Config.reloadFilesAsync();
+                        source.sendMessage(Component.text("Config neu geladen.").color(NamedTextColor.GREEN));
+                        return;
+                    }
+                    case "discord", "jda" -> {
+                        source.sendMessage(Component.text("Reload: Discord …").color(NamedTextColor.GRAY));
+                        Core.getDiscordAPI().reloadGuildsAsync();
+                        source.sendMessage(Component.text("Discord neu geladen.").color(NamedTextColor.GREEN));
+                        return;
+                    }
+                    default -> {
+                        source.sendMessage(Component.text("Unbekanntes Argument: " + sub).color(NamedTextColor.RED));
+                        source.sendMessage(Component.text("Nutzung: /proxy reload [config|discord]").color(NamedTextColor.RED));
+                        return;
+                    }
                 }
-
-                DiscordAPI discordAPI = Core.getDiscordAPI();
-                discordAPI.getGuilds().forEach((s, guild) -> discordAPI.loadGuildDiscordCommands(guild));
-                Core.info("Commands successfully reloaded");
-                return;
-
             }
         }
 
@@ -122,40 +134,60 @@ public class ProxyCMD implements SimpleCommand {
         player.sendMessage(Component.text((type.contains("Chat") ? "§7The Chat is" : "§7Commands are") + " now " + (newState ? "§cinaktive" : "§aactive")));
     }
 
+
     @Override
     public List<String> suggest(final Invocation invocation) {
         String[] args = invocation.arguments();
 
         if (args.length == 0) {
             return SUB_COMMANDS;
-        } else if (args.length == 1) {
-            String prefix = args[0].toLowerCase();
+        }
+
+        if (args.length == 1) {
+            String prefix = args[0].toLowerCase(Locale.ROOT);
             return SUB_COMMANDS.stream()
                     .filter(sub -> sub.startsWith(prefix))
                     .collect(Collectors.toList());
         }
 
-        else if (args.length == 2) {
-            String prefix = args[1].toLowerCase();
-            return instance.getProxy().getAllPlayers().stream()
-                    .map(Player::getUsername)
-                    .filter(name -> name.toLowerCase().startsWith(prefix))
-                    .collect(Collectors.toList());
+        String first = args[0].toLowerCase(Locale.ROOT);
+
+        if (args.length == 2) {
+            String prefix = args[1].toLowerCase(Locale.ROOT);
+
+            if (first.equals("send")) {
+                return instance.getProxy().getAllPlayers().stream()
+                        .map(Player::getUsername)
+                        .filter(name -> name.toLowerCase(Locale.ROOT).startsWith(prefix))
+                        .collect(Collectors.toList());
+            }
+
+            if (first.equals("reload") || first.equals("rl")) {
+                return RELOAD_SUBS.stream()
+                        .filter(sub -> sub.startsWith(prefix))
+                        .collect(Collectors.toList());
+            }
+
+            return Collections.emptyList();
         }
 
-        else if (args.length == 3) {
-            String prefix = args[2].toLowerCase();
-            return instance.getProxy().getAllServers().stream()
-                    .map(RegisteredServer::getServerInfo)
-                    .map(ServerInfo::getName)
-                    .filter(name -> name.toLowerCase().startsWith(prefix))
-                    .collect(Collectors.toList());
+        if (args.length == 3) {
+            if (first.equals("send")) {
+                String prefix = args[2].toLowerCase(Locale.ROOT);
+                return instance.getProxy().getAllServers().stream()
+                        .map(RegisteredServer::getServerInfo)
+                        .map(ServerInfo::getName)
+                        .filter(name -> name.toLowerCase(Locale.ROOT).startsWith(prefix))
+                        .collect(Collectors.toList());
+            }
+            return Collections.emptyList();
         }
+
         return Collections.emptyList();
     }
 
     @Override
     public boolean hasPermission(Invocation invocation) {
-        return invocation.source().hasPermission("proxy.*");
+        return invocation.source().hasPermission("*");
     }
 }

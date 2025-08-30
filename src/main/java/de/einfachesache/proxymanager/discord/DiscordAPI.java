@@ -1,5 +1,6 @@
 package de.einfachesache.proxymanager.discord;
 
+import de.einfachesache.api.AsyncExecutor;
 import de.einfachesache.proxymanager.velocity.ProxyInstance;
 import de.einfachesache.proxymanager.core.Config;
 import de.einfachesache.proxymanager.core.Core;
@@ -68,6 +69,13 @@ public class DiscordAPI extends ListenerAdapter {
         }
     }
 
+    public void reloadGuildsAsync() {
+        AsyncExecutor.getService().submit(() -> {
+            loadGlobalDiscordCommands();
+            this.getGuilds().forEach((s, guild) -> this.loadGuildDiscordCommands(guild));
+            Core.info("Commands successfully reloaded");
+        });
+    }
 
     public void loadGlobalDiscordCommands() {
 

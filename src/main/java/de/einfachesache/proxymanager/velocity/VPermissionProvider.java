@@ -7,6 +7,8 @@ import com.velocitypowered.api.permission.PermissionProvider;
 import com.velocitypowered.api.permission.Tristate;
 import com.velocitypowered.api.proxy.ConsoleCommandSource;
 import com.velocitypowered.api.proxy.Player;
+import de.einfachesache.api.AsyncExecutor;
+import de.einfachesache.api.minecraft.MinecraftAPI;
 import de.einfachesache.proxymanager.core.Core;
 
 import java.util.*;
@@ -17,10 +19,31 @@ public class VPermissionProvider {
 
     private static final Map<UUID, Set<String>> playerPermissions = new ConcurrentHashMap<>();
 
+    public static void addPermissions(String name, List<String> permissions) {
+        AsyncExecutor.getService().submit(() -> {
+            UUID uuid = MinecraftAPI.loadUUID(name);
+
+            if (uuid == null) {
+                Core.warn("Permissions load failed -> could not find uuid for name " + name);
+                return;
+            }
+
+            addPermissions(uuid, permissions);
+        });
+    }
+
+    public static void addPermissions(UUID uuid, List<String> permissions) {
+        Set<String> set = playerPermissions.computeIfAbsent(uuid, k -> ConcurrentHashMap.newKeySet());
+        for (String permission : permissions) {
+            set.add(normalize(permission));
+        }
+    }
+
     public static void setPermission(UUID uuid, String permission, boolean value) {
         Set<String> set = playerPermissions.computeIfAbsent(uuid, k -> ConcurrentHashMap.newKeySet());
         String perm = normalize(permission);
-        if (value) set.add(perm); else set.remove(perm);
+        if (value) set.add(perm);
+        else set.remove(perm);
     }
 
     public static boolean hasPermission(UUID uuid, String permission) {
