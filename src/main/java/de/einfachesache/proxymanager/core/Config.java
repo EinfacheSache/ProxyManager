@@ -51,6 +51,7 @@ public class Config {
     private static String verifyServerDomain;
     private static String verifyServer;
     private static String pingVersionName;
+    private static String assignedGuildID;
     private static List<String> maintenanceAccess;
     private static List<String> allowedDomains;
     private static List<String> allowedSubnet;
@@ -132,6 +133,8 @@ public class Config {
         verifyServer = minecraftModule.get("manage-connections.verify-server", "Verify");
         allowedSubnet = minecraftModule.getStringList("security.allow-subnets");
         allowedDomains = minecraftModule.getStringList("security.allowed-domains");
+
+        assignedGuildID = minecraftModule.get("discord.assigned-guild-id");
     }
 
     private static final FileUtils data = Core.data;
@@ -324,6 +327,10 @@ public class Config {
 
     public static String getPingVersionName() {
         return pingVersionName;
+    }
+
+    public static String getAssignedGuildID() {
+        return assignedGuildID;
     }
 
     public static List<String> getAllowedDomains() {

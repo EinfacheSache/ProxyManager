@@ -54,6 +54,10 @@ public class DiscordServerProfile {
         this.betaTesterRoleId = null;
     }
 
+    public String getGuildId() {
+        return guildId;
+    }
+
     public String getName() {
         return name;
     }

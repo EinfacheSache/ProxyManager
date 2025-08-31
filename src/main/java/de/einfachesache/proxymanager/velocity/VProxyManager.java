@@ -8,6 +8,8 @@ import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
+import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
+import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import de.einfachesache.api.minecraft.metric.StatsContainer;
 import de.einfachesache.api.minecraft.metric.StatsManager;
 import de.einfachesache.api.minecraft.metric.StatsProvider;
@@ -25,6 +27,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class VProxyManager implements ProxyInstance, StatsProvider {
+    public static final ChannelIdentifier TICKET = MinecraftChannelIdentifier.create("proxymanager", "ticket");
 
     private final ProxyServer proxy;
     private final Logger logger;
@@ -35,6 +38,7 @@ public class VProxyManager implements ProxyInstance, StatsProvider {
     public VProxyManager(ProxyServer proxy, Logger logger) {
         this.proxy = proxy;
         this.logger = logger;
+        proxy.getChannelRegistrar().register(TICKET);
     }
 
     @Subscribe
@@ -64,6 +68,7 @@ public class VProxyManager implements ProxyInstance, StatsProvider {
         em.register(this, new LoginAccessControlListener(this));
         em.register(this, new MessageListener(this));
         em.register(this, new CommandListener(this));
+        em.register(this, new PluginMessageListener());
         em.register(this, new TabCompleteListener());
         em.register(this, new VPermissionProvider());
 

@@ -102,13 +102,13 @@
         <dependency>
             <groupId>com.github.EinfacheSache</groupId>
             <artifactId>easyapi</artifactId>
-            <version>9dd0230e8a</version>
+            <version>719c164f88</version>
         </dependency>
 
         <dependency>
             <groupId>net.dv8tion</groupId>
             <artifactId>JDA</artifactId>
-            <version>6.0.0-rc.2</version>
+            <version>6.0.0-rc.3</version>
         </dependency>
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
@@ -118,12 +118,13 @@
         <dependency>
             <groupId>redis.clients</groupId>
             <artifactId>jedis</artifactId>
-            <version>6.1.0</version>
+            <version>6.2.0</version>
         </dependency>
         <dependency>
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
-            <version>7.0.1</version>
+            <version>7.0.2</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>

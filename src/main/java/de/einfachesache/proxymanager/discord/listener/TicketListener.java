@@ -1,6 +1,7 @@
 package de.einfachesache.proxymanager.discord.listener;
 
 import de.einfachesache.proxymanager.core.Config;
+import de.einfachesache.proxymanager.core.Core;
 import de.einfachesache.proxymanager.discord.DiscordAPI;
 import de.einfachesache.proxymanager.discord.MessageUtils;
 import net.dv8tion.jda.api.Permission;
@@ -9,12 +10,13 @@ import net.dv8tion.jda.api.components.buttons.Button;
 import net.dv8tion.jda.api.components.textinput.TextInput;
 import net.dv8tion.jda.api.components.textinput.TextInputStyle;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.modals.Modal;
+import net.dv8tion.jda.api.modals.Modal;
 
 import java.awt.*;
 import java.util.EnumSet;
@@ -22,10 +24,10 @@ import java.util.Objects;
 
 public class TicketListener extends ListenerAdapter {
 
-    private final DiscordAPI discordAPI;
+    private static DiscordAPI discordAPI;
 
     public TicketListener(DiscordAPI discordAPI) {
-        this.discordAPI = discordAPI;
+        TicketListener.discordAPI = discordAPI;
     }
 
     @Override
@@ -56,23 +58,43 @@ public class TicketListener extends ListenerAdapter {
 
             String body = Objects.requireNonNull(event.getValue("body")).getAsString();
 
-            Role staffRoleID = discordAPI.getStaffRole(event.getGuild().getId());
-            Category ticketCategory = discordAPI.getTicketCategory(event.getGuild().getId());
-            TextChannel channel = ticketCategory.createTextChannel(event.getModalId().split(":")[2] + "-" + event.getUser().getName()).complete();
-
-            channel.getManager().putMemberPermissionOverride(event.getUser().getIdLong(), EnumSet.of(Permission.VIEW_CHANNEL), null).queue();
-
-            channel.sendMessageEmbeds(MessageUtils.getDefaultEmbed()
-                            .setDescription("# Willkommen bei deinem Ticket " + "<@" + event.getUser().getId() + ">\n" +
-                                    "Es wird Ihnen schnellstmöglich ein Helfer zur Seite stehen.\n" +
-                                    "Bitte pingen Sie unsere Team nicht selbst an, sondern nur in Notsituationen.\n" +
-                                    "(Die Nichtbeachtung dieser Regel führt zu einem Timeout/Ban)"
-                            ).setColor(Color.GREEN).build())
-                    .addComponents(ActionRow.of(Button.danger("delete_ticket", "\uD83D\uDDD1️ Ticket schließen")))
-                    .queue();
-
-            channel.sendMessage("<@&" + staffRoleID.getId() + ">")
-                    .setEmbeds(MessageUtils.getDefaultEmbed().setDescription("### Erste Anfrage/Problem:\n" + body).setColor(Color.GREEN).build()).queue();
+            createTicket(event.getGuild().getId(), event.getModalId().split(":")[2], event.getUser(), body);
         }
+    }
+
+    public static void createTicket(String guildID, String category, User user, String initialRequest) {
+        Role staffRoleID = discordAPI.getStaffRole(guildID);
+        Category ticketCategory = discordAPI.getTicketCategory(guildID);
+        TextChannel channel = ticketCategory.createTextChannel(category + "-" + user.getName()).complete();
+
+        channel.getManager().putMemberPermissionOverride(user.getIdLong(), EnumSet.of(Permission.VIEW_CHANNEL), null).queue();
+
+        channel.sendMessageEmbeds(MessageUtils.getDefaultEmbed()
+                        .setDescription("# Willkommen bei deinem Ticket " + "<@" + user.getId() + ">\n" +
+                                "Es wird Ihnen schnellstmöglich ein Helfer zur Seite stehen.\n" +
+                                "Bitte pingen Sie unsere Team nicht selbst an, sondern nur in Notsituationen.\n" +
+                                "(Die Nichtbeachtung dieser Regel führt zu einem Timeout/Ban)"
+                        ).setColor(Color.GREEN).build())
+                .addComponents(ActionRow.of(Button.danger("delete_ticket", "\uD83D\uDDD1️ Ticket schließen")))
+                .queue();
+
+        channel.sendMessage("<@&" + staffRoleID.getId() + ">")
+                .setEmbeds(MessageUtils.getDefaultEmbed().setDescription("### Erste Anfrage/Problem:\n" + initialRequest).setColor(Color.GREEN).build()).queue();
+    }
+
+    public static void createBugReportTicket(String guildID, String userID, String report) {
+        User user = Core.getDiscordAPI().getJDA().getUserById(userID);
+
+        if(Config.getDiscordServerProfile(guildID).getGuildId() == null) {
+            Core.warn("Can't create bugreport. guild with ID " + guildID + " is null");
+            return;
+        }
+
+        if(user == null) {
+            Core.warn("Can't create bugreport. user with ID " + userID + " is null");
+            return;
+        }
+
+        createTicket(guildID, "report", user, report);
     }
 }

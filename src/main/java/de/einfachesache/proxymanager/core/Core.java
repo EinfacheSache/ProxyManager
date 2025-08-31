@@ -60,12 +60,12 @@ public class Core {
 
         Core.info("running ProxyManager on version " + VersionUtils.getPomVersion(Core.class));
 
-        minecraftModule = new FileUtils(Core.class.getResourceAsStream("/modules/minecraft.yml"), isMinecraftServer() ? "plugins/ProxyManager" : ".", "modules/minecraft.yml");
-        discordModule = new FileUtils(Core.class.getResourceAsStream("/modules/discord.yml"), isMinecraftServer() ? "plugins/ProxyManager" : ".", "modules/discord.yml");
-        redisModule = new FileUtils(Core.class.getResourceAsStream("/modules/redis.yml"), isMinecraftServer() ? "plugins/ProxyManager" : ".", "modules/redis.yml");
-        mysqlModule = new FileUtils(Core.class.getResourceAsStream("/modules/mysql.yml"), isMinecraftServer() ? "plugins/ProxyManager" : ".", "modules/mysql.yml");
-        config = new FileUtils(Core.class.getResourceAsStream("/config.yml"), isMinecraftServer() ? "plugins/ProxyManager" : ".", "config.yml");
-        data = new FileUtils(Core.class.getResourceAsStream("/data.yml"), isMinecraftServer() ? "plugins/ProxyManager" : ".", "data.yml");
+        minecraftModule = new FileUtils(Core.class.getResource("/modules/minecraft.yml"), isMinecraftServer() ? "plugins/ProxyManager" : ".", "modules/minecraft.yml");
+        discordModule = new FileUtils(Core.class.getResource("/modules/discord.yml"), isMinecraftServer() ? "plugins/ProxyManager" : ".", "modules/discord.yml");
+        redisModule = new FileUtils(Core.class.getResource("/modules/redis.yml"), isMinecraftServer() ? "plugins/ProxyManager" : ".", "modules/redis.yml");
+        mysqlModule = new FileUtils(Core.class.getResource("/modules/mysql.yml"), isMinecraftServer() ? "plugins/ProxyManager" : ".", "modules/mysql.yml");
+        config = new FileUtils(Core.class.getResource("/config.yml"), isMinecraftServer() ? "plugins/ProxyManager" : ".", "config.yml");
+        data = new FileUtils(Core.class.getResource("/data.yml"), isMinecraftServer() ? "plugins/ProxyManager" : ".", "data.yml");
 
         Config.loadModules();
         Configurator.setLevel(logger.getName(), Level.toLevel(Config.getLogLevel(), Level.INFO));
