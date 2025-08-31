@@ -48,7 +48,7 @@ public class PluginMessageListener {
         var c = (p.context != null) ? p.context : new PluginMessageListener.TicketPayload.Context();
 
         String msg = cleanMsg(p.message);
-        String held = (c.heldType != null ? c.heldType : "-");
+        String held = (c.heldItem == null || "AIR".equalsIgnoreCase(c.heldItem)) ? "-" : c.heldItem;
         String pos = (Double.isFinite(c.x) && Double.isFinite(c.y) && Double.isFinite(c.z))
                 ? String.format("(%.1f / %.1f / %.1f)", c.x, c.y, c.z)
                 : "-";
@@ -104,7 +104,7 @@ public class PluginMessageListener {
         public static final class Context {
             public String server, world;
             public double x, y, z;
-            public String gamemode, heldType;
+            public String gamemode, heldItem;
             public String phase, team, client;
         }
     }
