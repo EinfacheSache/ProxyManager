@@ -27,6 +27,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class VProxyManager implements ProxyInstance, StatsProvider {
+
     public static final ChannelIdentifier TICKET = MinecraftChannelIdentifier.create("proxymanager", "ticket");
 
     private final ProxyServer proxy;

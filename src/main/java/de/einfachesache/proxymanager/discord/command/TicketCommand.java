@@ -58,6 +58,7 @@ public class TicketCommand extends ListenerAdapter {
                         .addOption("Report", "report", "Für Spieler- und Bug-Reports")
                         .addOption("Käufe", "purchases", "Für Probleme oder Fragen bezüglich Käufen z.B. Ränge")
                         .addOption("Bewerbung", "application", "Bewerbe dich als Builder, Supporter, Developer...")
+                        .addOption("Partnerschaft", "partnership", "Für Anfragen zu Partnerschaften und Kooperationen")
                         .build();
 
                 event.getChannel().sendMessageEmbeds(ticket.build()).addComponents(ActionRow.of(menu)).queue();

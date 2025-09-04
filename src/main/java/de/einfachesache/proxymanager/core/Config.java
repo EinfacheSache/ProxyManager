@@ -5,6 +5,7 @@ import de.einfachesache.api.util.FileUtils;
 import de.einfachesache.proxymanager.discord.DiscordAPI;
 import de.einfachesache.proxymanager.discord.DiscordServerProfile;
 import de.einfachesache.proxymanager.velocity.VPermissionProvider;
+import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 
 import java.io.InputStream;
 import java.util.*;
@@ -169,7 +170,14 @@ public class Config {
         }
 
         VPermissionProvider.clearPermissions();
-        data.getConfigurationSection("minecraft.permissions").getKeys(false).forEach(playerName ->
+        ConfigurationSection section = data.getConfigurationSection("minecraft.permissions");
+
+        if(section == null) {
+            Core.warn("minecraft.permissions section is null");
+            return;
+        }
+
+        section.getKeys(false).forEach(playerName ->
                 VPermissionProvider.addPermissions(playerName, data.getStringList("minecraft.permissions." + playerName)));
     }
 

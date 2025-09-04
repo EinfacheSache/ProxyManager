@@ -68,7 +68,10 @@ public class Core {
         data = new FileUtils(Core.class.getResource("/data.yml"), isMinecraftServer() ? "plugins/ProxyManager" : ".", "data.yml");
 
         Config.loadModules();
-        Configurator.setLevel(logger.getName(), Level.toLevel(Config.getLogLevel(), Level.INFO));
+
+        if (isMinecraftServer()) {
+            Configurator.setLevel(logger.getName(), Level.toLevel(Config.getLogLevel(), Level.INFO));
+        }
 
         initAsync(proxyInstance);
     }
@@ -79,6 +82,16 @@ public class Core {
             redisConnector.init();
             datasource.init();
         });
+
+        if (isMinecraftServer()) {
+            return;
+        }
+
+        try {
+            Thread.currentThread().join();
+        } catch (InterruptedException e) {
+            severe(e.getMessage(), e);
+        }
     }
 
 

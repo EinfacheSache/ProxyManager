@@ -10,8 +10,7 @@ import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.EventListener;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ReadyListener implements EventListener {
@@ -28,26 +27,29 @@ public class ReadyListener implements EventListener {
 
             JDA jda = event.getJDA();
             Thread.currentThread().setName("DISCORD");
-            Config.getGuildIDs().forEach(id -> discordAPI.getGuilds().put(id, jda.getGuildById(id)));
+            discordAPI.getGuilds().putAll(Config.getGuildIDs().stream()
+                    .map(jda::getGuildById)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toMap(Guild::getId, g -> g)));
 
             List<Guild> joinedGuilds = jda.getGuilds();
-            List<Guild> guilds = discordAPI.getGuilds().values().stream().toList();
+            Collection<Guild> connectedGuilds = discordAPI.getGuilds().values();
 
             Core.info("DiscordAPI is ready!");
             Core.info("Logged in as " + jda.getSelfUser().getName() + "#" + jda.getSelfUser().getDiscriminator());
             Core.info("Connected to " + joinedGuilds.size() + " Guilds : " + Arrays.toString(joinedGuilds.toArray()));
 
-            if (guilds.isEmpty()) {
+            if (connectedGuilds.isEmpty()) {
                 Core.severe("Running for Guild : NULL");
                 return;
             }
 
-            Core.info("Running for Guilds: " + guilds.stream()
+            Core.info("Running for Guilds: " + connectedGuilds.stream()
                     .map(g -> g.getName() + "(Members=" + g.getMembers().size() + ")")
                     .collect(Collectors.joining(", ")));
 
 
-            guilds.forEach(guild ->
+            connectedGuilds.forEach(guild ->
                     guild.retrieveInvites().queue(invites ->
                             invites.forEach(invite ->
                                     MemberJoinGuildListener.getInviteUses().put(invite.getCode(), invite.getUses()))));

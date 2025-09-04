@@ -16,9 +16,11 @@ import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.managers.channel.concrete.TextChannelManager;
 import net.dv8tion.jda.api.modals.Modal;
 
 import java.awt.*;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Objects;
 
@@ -38,7 +40,7 @@ public class TicketListener extends ListenerAdapter {
             TextInput body = TextInput.create("body", "Bitte beschreibe dein Problem", TextInputStyle.PARAGRAPH)
                     .setPlaceholder("Beschreiben Sie Ihr Problem/Ihre Anfrage")
                     .setMinLength(24)
-                    .setMaxLength(2048)
+                    .setMaxLength(4096)
                     .build();
 
             Modal modal = Modal.create("ticket:describe:" + event.getSelectedOptions().getFirst().getValue(), event.getSelectedOptions().getFirst().getLabel())
@@ -57,17 +59,26 @@ public class TicketListener extends ListenerAdapter {
             event.reply("Danke für Ihre Anfrage").setEphemeral(true).queue();
 
             String body = Objects.requireNonNull(event.getValue("body")).getAsString();
+            String type = event.getModalId().split(":")[2];
+            boolean adminOnly = type.equalsIgnoreCase("partnership");
 
-            createTicket(event.getGuild().getId(), event.getModalId().split(":")[2], event.getUser(), body);
+            createTicket(event.getGuild().getId(), type, event.getUser(), body, adminOnly);
         }
     }
 
-    public static void createTicket(String guildID, String category, User user, String initialRequest) {
-        Role staffRoleID = discordAPI.getStaffRole(guildID);
+    public static void createTicket(String guildID, String category, User user, String initialRequest, boolean adminOnly) {
+        Role staffRole = discordAPI.getStaffRole(guildID);
         Category ticketCategory = discordAPI.getTicketCategory(guildID);
         TextChannel channel = ticketCategory.createTextChannel(category + "-" + user.getName()).complete();
+        TextChannelManager manager = channel.getManager();
 
-        channel.getManager().putMemberPermissionOverride(user.getIdLong(), EnumSet.of(Permission.VIEW_CHANNEL), null).queue();
+        manager.putMemberPermissionOverride(user.getIdLong(), EnumSet.of(Permission.VIEW_CHANNEL), Collections.emptySet()).queue();
+
+        if (adminOnly) {
+            manager.removePermissionOverride(staffRole).queue();
+        } else {
+            manager.putRolePermissionOverride(staffRole.getIdLong(), EnumSet.of(Permission.VIEW_CHANNEL), Collections.emptySet()).queue();
+        }
 
         channel.sendMessageEmbeds(MessageUtils.getDefaultEmbed()
                         .setDescription("# Willkommen bei deinem Ticket " + "<@" + user.getId() + ">\n" +
@@ -78,23 +89,24 @@ public class TicketListener extends ListenerAdapter {
                 .addComponents(ActionRow.of(Button.danger("delete_ticket", "\uD83D\uDDD1️ Ticket schließen")))
                 .queue();
 
-        channel.sendMessage("<@&" + staffRoleID.getId() + ">")
-                .setEmbeds(MessageUtils.getDefaultEmbed().setDescription("### Erste Anfrage/Problem:\n" + initialRequest).setColor(Color.GREEN).build()).queue();
+        channel.sendMessage("<@&" + staffRole.getId() + ">")
+                .setEmbeds(MessageUtils.getDefaultEmbed().setDescription("### Erste Anfrage/Problem:\n" + initialRequest).setColor(Color.GREEN).build())
+                .queue();
     }
 
     public static void createBugReportTicket(String guildID, String userID, String report) {
         User user = Core.getDiscordAPI().getJDA().getUserById(userID);
 
-        if(Config.getDiscordServerProfile(guildID).getGuildId() == null) {
+        if (Config.getDiscordServerProfile(guildID).getGuildId() == null) {
             Core.warn("Can't create bugreport. guild with ID " + guildID + " is null");
             return;
         }
 
-        if(user == null) {
+        if (user == null) {
             Core.warn("Can't create bugreport. user with ID " + userID + " is null");
             return;
         }
 
-        createTicket(guildID, "report", user, report);
+        createTicket(guildID, "report", user, report, false);
     }
 }
