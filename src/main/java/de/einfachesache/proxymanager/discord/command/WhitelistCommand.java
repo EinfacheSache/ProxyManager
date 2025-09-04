@@ -100,6 +100,11 @@ public class WhitelistCommand extends ListenerAdapter {
         EmbedBuilder embed = MessageUtils.getDefaultEmbed().setTitle("Event Whitelist");
         String whitelistChannelId = Config.getDiscordServerProfile(Objects.requireNonNull(event.getGuild()).getId()).getWhitelistChannelId();
 
+        if (whitelistChannelId == null || whitelistChannelId.equalsIgnoreCase("-1")) {
+            event.replyEmbeds(embed.setDescription("❌ Whitelisten ist deaktiviert — momentan kannst du dich nicht whitelisten.").setColor(Color.RED).build()).setEphemeral(true).queue();
+            return;
+        }
+
         if (!event.getChannel().getId().equals(whitelistChannelId)) {
             event.replyEmbeds(embed.setDescription("❌ Falscher Kanal. Bitte nutze <#" + whitelistChannelId + "> für `/whitelist <name>`.").setColor(Color.RED).build()).setEphemeral(true).queue();
             return;
