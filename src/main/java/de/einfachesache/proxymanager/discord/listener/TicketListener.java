@@ -9,7 +9,6 @@ import net.dv8tion.jda.api.components.actionrow.ActionRow;
 import net.dv8tion.jda.api.components.buttons.Button;
 import net.dv8tion.jda.api.components.textinput.TextInput;
 import net.dv8tion.jda.api.components.textinput.TextInputStyle;
-import net.dv8tion.jda.api.entities.PermissionOverride;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
@@ -17,7 +16,6 @@ import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.managers.channel.concrete.TextChannelManager;
 import net.dv8tion.jda.api.modals.Modal;
 
 import java.awt.*;
@@ -71,18 +69,15 @@ public class TicketListener extends ListenerAdapter {
         Role staffRole = discordAPI.getStaffRole(guildID);
         Category ticketCategory = discordAPI.getTicketCategory(guildID);
         TextChannel channel = ticketCategory.createTextChannel(category + "-" + user.getName()).complete();
-        TextChannelManager manager = channel.getManager();
 
-        manager.putMemberPermissionOverride(user.getIdLong(), EnumSet.of(Permission.VIEW_CHANNEL), Collections.emptySet()).queue();
-
-        if (adminOnly) {
-            PermissionOverride po = channel.getPermissionOverride(staffRole);
-            if (po != null) po.delete().queue();
-        } else {
-            channel.upsertPermissionOverride(staffRole)
-                    .grant(Permission.VIEW_CHANNEL)
-                    .queue();
-        }
+        channel.getManager()
+                .putMemberPermissionOverride(user.getIdLong(), EnumSet.of(Permission.VIEW_CHANNEL), Collections.emptySet())
+                .putRolePermissionOverride(
+                        staffRole.getIdLong(),
+                        adminOnly ? Collections.emptySet() : EnumSet.of(Permission.VIEW_CHANNEL),
+                        adminOnly ? EnumSet.of(Permission.VIEW_CHANNEL) : Collections.emptySet()
+                )
+                .queue();
 
         channel.sendMessageEmbeds(MessageUtils.getDefaultEmbed()
                         .setDescription("# Willkommen bei deinem Ticket " + "<@" + user.getId() + ">\n" +
