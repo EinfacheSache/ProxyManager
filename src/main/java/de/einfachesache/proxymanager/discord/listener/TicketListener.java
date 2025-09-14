@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.components.actionrow.ActionRow;
 import net.dv8tion.jda.api.components.buttons.Button;
 import net.dv8tion.jda.api.components.textinput.TextInput;
 import net.dv8tion.jda.api.components.textinput.TextInputStyle;
+import net.dv8tion.jda.api.entities.PermissionOverride;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
@@ -40,7 +41,7 @@ public class TicketListener extends ListenerAdapter {
             TextInput body = TextInput.create("body", "Bitte beschreibe dein Problem", TextInputStyle.PARAGRAPH)
                     .setPlaceholder("Beschreiben Sie Ihr Problem/Ihre Anfrage")
                     .setMinLength(24)
-                    .setMaxLength(4096)
+                    .setMaxLength(4000)
                     .build();
 
             Modal modal = Modal.create("ticket:describe:" + event.getSelectedOptions().getFirst().getValue(), event.getSelectedOptions().getFirst().getLabel())
@@ -75,9 +76,12 @@ public class TicketListener extends ListenerAdapter {
         manager.putMemberPermissionOverride(user.getIdLong(), EnumSet.of(Permission.VIEW_CHANNEL), Collections.emptySet()).queue();
 
         if (adminOnly) {
-            manager.removePermissionOverride(staffRole).queue();
+            PermissionOverride po = channel.getPermissionOverride(staffRole);
+            if (po != null) po.delete().queue();
         } else {
-            manager.putRolePermissionOverride(staffRole.getIdLong(), EnumSet.of(Permission.VIEW_CHANNEL), Collections.emptySet()).queue();
+            channel.upsertPermissionOverride(staffRole)
+                    .grant(Permission.VIEW_CHANNEL)
+                    .queue();
         }
 
         channel.sendMessageEmbeds(MessageUtils.getDefaultEmbed()
