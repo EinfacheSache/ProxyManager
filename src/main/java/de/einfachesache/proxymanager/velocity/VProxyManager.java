@@ -67,9 +67,9 @@ public class VProxyManager implements ProxyInstance, StatsProvider {
         cm.register(cm.metaBuilder("gmute").build(), new GlobalMuteCMD());
 
         em.register(this, new LoginAccessControlListener(this));
+        em.register(this, new PluginMessageListener(this));
         em.register(this, new MessageListener(this));
         em.register(this, new CommandListener(this));
-        em.register(this, new PluginMessageListener());
         em.register(this, new TabCompleteListener());
         em.register(this, new VPermissionProvider());
 

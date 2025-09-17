@@ -4,6 +4,7 @@ import com.google.common.io.ByteStreams;
 import com.google.gson.Gson;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.PluginMessageEvent;
+import com.velocitypowered.api.network.ProtocolVersion;
 import com.velocitypowered.api.proxy.ServerConnection;
 import de.einfachesache.proxymanager.core.Config;
 import de.einfachesache.proxymanager.core.Core;
@@ -13,10 +14,16 @@ import de.einfachesache.proxymanager.velocity.VProxyManager;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
 public class PluginMessageListener {
 
+    private final VProxyManager proxy;
     private final Gson gson = new Gson();
+
+    public PluginMessageListener(VProxyManager proxy) {
+        this.proxy = proxy;
+    }
 
     @Subscribe
     public void onPluginMessage(PluginMessageEvent event) {
@@ -32,6 +39,12 @@ public class PluginMessageListener {
 
         TicketPayload payload = gson.fromJson(json, TicketPayload.class);
         payload.context.server = serverConnection.getServerInfo().getName();
+
+        proxy.getProxy().getPlayer(UUID.fromString(payload.reporter.uuid)).ifPresent(player -> {
+            ProtocolVersion pVersion = player.getProtocolVersion();
+            payload.context.protocol = String.valueOf(pVersion.getProtocol());
+            payload.context.version = pVersion.getMostRecentSupportedVersion();
+        });
 
         TicketListener.createBugReportTicket(
                 Config.getAssignedGuildID(),
@@ -60,7 +73,9 @@ public class PluginMessageListener {
                 "Position: " + capitalizeFirst(nz(c.world)) + " / " + pos + "\n" +
                 "Gamemode: " + nz(c.gamemode) + "\n" +
                 "Phase: " + nz(c.phase) + "\n" +
-                "Client: " + capitalizeFirst(nz(c.client)) + "\n" +
+                "Client: " + capitalizeFirst(nz(c.client)) + " · Ping: " + c.ping + "ms\n" +
+                "Version: "  + nz(c.version) + " · Protocol: " + nz(c.protocol) + "\n" +
+                "Performance: TPS " + c.tps + " · MSPT " + c.mspt + "ms/tick\n" +
                 "Item: " + held + "\n" +
                 "Team: " + nz(c.team) + "\n" +
                 "Nachricht: " + indentMultiline(capitalizeFirst(msg)) + "```";
@@ -104,8 +119,10 @@ public class PluginMessageListener {
         public static final class Context {
             public String server, world;
             public double x, y, z;
-            public String gamemode, heldItem;
-            public String phase, team, client;
+            public String gamemode, heldItem, phase, team;
+            public String client, version, protocol;
+            public Integer ping;
+            public Double tps, mspt;
         }
     }
 }
