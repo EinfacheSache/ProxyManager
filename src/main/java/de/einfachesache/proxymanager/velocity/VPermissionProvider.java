@@ -69,7 +69,7 @@ public class VPermissionProvider {
         PermissionProvider provider = subject -> {
 
             if (subject instanceof Player player) {
-                return perm -> hasPermission(player.getUniqueId(), perm) ? Tristate.TRUE : Tristate.UNDEFINED;
+                return perm -> hasPermission(player.getUniqueId(), perm) ? Tristate.TRUE : Tristate.FALSE;
             }
 
             if (subject instanceof ConsoleCommandSource) {
