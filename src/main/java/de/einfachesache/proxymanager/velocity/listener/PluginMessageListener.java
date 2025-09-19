@@ -117,12 +117,12 @@ public class PluginMessageListener {
         }
 
         public static final class Context {
-            public String server, world;
+            public String server;
+            public int ping;
             public double x, y, z;
+            public double tps, mspt;
+            public String world, client, version, protocol;
             public String gamemode, heldItem, phase, team;
-            public String client, version, protocol;
-            public Integer ping;
-            public Double tps, mspt;
         }
     }
 }
