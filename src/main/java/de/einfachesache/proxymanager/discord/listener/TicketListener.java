@@ -7,6 +7,7 @@ import de.einfachesache.proxymanager.discord.MessageUtils;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.components.actionrow.ActionRow;
 import net.dv8tion.jda.api.components.buttons.Button;
+import net.dv8tion.jda.api.components.label.Label;
 import net.dv8tion.jda.api.components.textinput.TextInput;
 import net.dv8tion.jda.api.components.textinput.TextInputStyle;
 import net.dv8tion.jda.api.entities.Role;
@@ -36,14 +37,14 @@ public class TicketListener extends ListenerAdapter {
         if (event.getGuild() == null || !Config.getGuildIDs().contains(event.getGuild().getId())) return;
         if (event.getComponentId().equals("ticket:select")) {
 
-            TextInput body = TextInput.create("body", "Bitte beschreibe dein Problem", TextInputStyle.PARAGRAPH)
+            TextInput body = TextInput.create("body", TextInputStyle.PARAGRAPH)
                     .setPlaceholder("Beschreiben Sie Ihr Problem/Ihre Anfrage")
                     .setMinLength(24)
                     .setMaxLength(4000)
                     .build();
 
             Modal modal = Modal.create("ticket:describe:" + event.getSelectedOptions().getFirst().getValue(), event.getSelectedOptions().getFirst().getLabel())
-                    .addComponents(ActionRow.of(body))
+                    .addComponents(Label.of("Bitte beschreibe dein Problem", body))
                     .build();
 
             event.replyModal(modal).queue();

@@ -3,7 +3,7 @@ package de.einfachesache.proxymanager.discord.command;
 import de.einfachesache.proxymanager.core.Config;
 import de.einfachesache.proxymanager.core.Core;
 import de.einfachesache.proxymanager.discord.MessageUtils;
-import net.dv8tion.jda.api.components.actionrow.ActionRow;
+import net.dv8tion.jda.api.components.label.Label;
 import net.dv8tion.jda.api.components.textinput.TextInput;
 import net.dv8tion.jda.api.components.textinput.TextInputStyle;
 import net.dv8tion.jda.api.entities.Member;
@@ -14,7 +14,6 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.modals.Modal;
 
-import java.awt.*;
 import java.util.Objects;
 
 public class CloseCommand extends ListenerAdapter {
@@ -41,14 +40,14 @@ public class CloseCommand extends ListenerAdapter {
         if (event.getGuild() == null || !Config.getGuildIDs().contains(event.getGuild().getId())) return;
         if (!event.getComponentId().equals("delete_ticket")) return;
 
-        TextInput body = TextInput.create("body", "Begründung für das schließen", TextInputStyle.PARAGRAPH)
-                .setPlaceholder("Nenne denn Grund für das schließen des Tickets")
+        TextInput body = TextInput.create("body", TextInputStyle.PARAGRAPH)
+                .setPlaceholder("Nenne den Grund für das Schließen des Tickets")
                 .setMinLength(12)
                 .setMaxLength(256)
                 .build();
 
         Modal modal = Modal.create("ticket:delete:" + event.getChannelId(), "Ticket schließen")
-                .addComponents(ActionRow.of(body))
+                .addComponents(Label.of("Begründung für das Schließen", body))
                 .build();
 
         event.replyModal(modal).queue();
