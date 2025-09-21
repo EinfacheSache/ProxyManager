@@ -114,7 +114,7 @@ public class MemberJoinGuildListener extends ListenerAdapter {
                 }
             }
 
-            if (!foundInviter) {
+            if (!foundInviter && guild.getVanityUrl() != null) {
                 guild.retrieveVanityInvite().queue(vanity -> {
                     String code = vanity.getCode();
                     int uses = vanity.getUses();
