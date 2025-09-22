@@ -68,7 +68,7 @@ public class ResourcePackCMD implements SimpleCommand {
     }
 
     private void sendUsage(Invocation invocation) {
-        invocation.source().sendMessage(Component.text("Verwende /" + invocation.alias() + " (clear/load)"));
+        invocation.source().sendMessage(Component.text("Verwende /" + invocation.alias() + " (clear/load)", NamedTextColor.RED));
     }
 
     @Override

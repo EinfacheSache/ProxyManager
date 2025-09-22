@@ -50,6 +50,6 @@ public class SettingsCMD implements SimpleCommand {
 
     @Override
     public boolean hasPermission(Invocation invocation) {
-        return invocation.source().hasPermission("proxy.*");
+        return invocation.source().hasPermission("*");
     }
 }
