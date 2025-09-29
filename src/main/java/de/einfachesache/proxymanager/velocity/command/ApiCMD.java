@@ -12,11 +12,11 @@ import dev.simplix.protocolize.data.ItemType;
 import dev.simplix.protocolize.data.inventory.InventoryType;
 import net.kyori.adventure.text.Component;
 
-public class SettingsCMD implements SimpleCommand {
+public class ApiCMD implements SimpleCommand {
 
     private final VProxyManager instance;
 
-    public SettingsCMD(VProxyManager instance) {
+    public ApiCMD(VProxyManager instance) {
         this.instance = instance;
     }
 
@@ -34,7 +34,7 @@ public class SettingsCMD implements SimpleCommand {
             return;
         }
 
-        Inventory inventory = new Inventory(InventoryType.GENERIC_9X3).title(ChatElement.ofLegacyText("§6§lSettings"));
+        Inventory inventory = new Inventory(InventoryType.GENERIC_9X3).title(ChatElement.ofLegacyText("§6§lAPI Settings"));
 
         ItemStack item = new ItemStack(ItemType.REDSTONE);
         item.displayName(ChatElement.ofLegacyText("§4API settings"));
@@ -44,7 +44,7 @@ public class SettingsCMD implements SimpleCommand {
         inventory.onClick(event -> player.sendMessage(Component.text("§7Aufgeführt")));
 
         Protocolize.playerProvider().player(player.getUniqueId()).openInventory(inventory);
-        player.sendMessage(Component.text("§aOpening settings..."));
+        player.sendMessage(Component.text("§aOpening api settings..."));
     }
 
 
