@@ -81,6 +81,6 @@ public class CloseCommand extends ListenerAdapter {
                 .setDescription("Users : " + channel.getMemberPermissionOverrides().stream().map(permissionOverride -> Objects.requireNonNull(permissionOverride.getMember()).getEffectiveName()).toList().toString().replace("[", "'").replace("]", "'\nGrund: " + (reason == null ? "Kein Grund angegeben" : reason)))
                 .build()).queue();
 
-        channel.delete().queue();
+        channel.delete().reason("Ticket geschlossen wegen " + reason).queue();
     }
 }
