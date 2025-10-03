@@ -7,6 +7,9 @@ import com.velocitypowered.api.proxy.Player;
 import de.einfachesache.proxymanager.core.Config;
 import de.einfachesache.proxymanager.velocity.ScreenBuilder;
 
+import java.net.Inet4Address;
+import java.net.InetAddress;
+
 public class LoginHostFilterListener {
 
     @Subscribe()
@@ -41,14 +44,14 @@ public class LoginHostFilterListener {
 
     public static boolean ipInCidrs(String ip) {
         try {
-            var addr = java.net.InetAddress.getByName(ip);
-            if (!(addr instanceof java.net.Inet4Address)) return false;
+            var addr = InetAddress.getByName(ip);
+            if (!(addr instanceof Inet4Address)) return false;
             int ipInt = bytesToInt(addr.getAddress());
             for (String cidr : Config.getAllowedSubnet()) {
                 String[] parts = cidr.split("/");
                 int maskBits = Integer.parseInt(parts[1]);
                 int mask = maskBits == 0 ? 0 : -(1 << (32 - maskBits));
-                int net = bytesToInt(java.net.InetAddress.getByName(parts[0]).getAddress()) & mask;
+                int net = bytesToInt(InetAddress.getByName(parts[0]).getAddress()) & mask;
                 if ((ipInt & mask) == net) return true;
             }
             return false;

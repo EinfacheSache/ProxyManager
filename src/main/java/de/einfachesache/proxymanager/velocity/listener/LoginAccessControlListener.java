@@ -19,7 +19,8 @@ public class LoginAccessControlListener {
 
     private static final String EVENT_SERVER = "Event";
     private static final String FALLBACK_SERVER = "Limbo";
-    private static final String BYPASS_PERMISSION = "proxy.join.bypass";
+    private static final String BYPASS_PERMISSION_WHITELIST = "proxy.bypass.whitelist";
+    private static final String BYPASS_PERMISSION_MAINTENANCE = "proxy.bypass.maintenance";
     private static final Component DENY_MESSAGE = Component.text("⛔ Du bist fürs Event nicht whitelisted » /whitelist im Discord", NamedTextColor.RED);
 
     private final VProxyManager proxy;
@@ -45,7 +46,7 @@ public class LoginAccessControlListener {
         if (!event.getOriginalServer().getServerInfo().getName().equalsIgnoreCase(EVENT_SERVER)) return;
 
         var player = event.getPlayer();
-        if (hasWhitelistAccess(player)) return;
+        if (hasWhitelistAccess(player) || hasMaintenanceAccess(player)) return;
 
         if (event.getPreviousServer() == null) {
             Optional<RegisteredServer> fallback = proxy.getProxy().getServer(FALLBACK_SERVER);
@@ -61,13 +62,13 @@ public class LoginAccessControlListener {
     }
 
     private boolean hasWhitelistAccess(Player player) {
-        if (player.hasPermission(BYPASS_PERMISSION)) return true;
+        if (player.hasPermission(BYPASS_PERMISSION_WHITELIST)) return true;
         Map<String, String> wl = Config.getWhitelistedPlayers();
         return wl != null && wl.values().stream().anyMatch(name -> name.equalsIgnoreCase(player.getUsername()));
     }
 
     public static boolean hasMaintenanceAccess(Player player) {
-        if (player.hasPermission(BYPASS_PERMISSION)) return true;
+        if (player.hasPermission(BYPASS_PERMISSION_MAINTENANCE)) return true;
         List<String> maintenanceAccess = Config.getMaintenanceAccess();
         return maintenanceAccess != null && maintenanceAccess.stream().anyMatch(name -> name.equalsIgnoreCase(player.getUsername()));
     }

@@ -31,7 +31,7 @@ public class MessageListener {
 
         RedisConnector jedis = Core.getRedisConnector();
         if (Boolean.parseBoolean(jedis.get("Chat-Disabled"))) {
-            if (!player.hasPermission("proxy.chat.disabled.bypass")) {
+            if (!player.hasPermission("proxy.bypass.chat.disabled")) {
                 event.setResult(PlayerChatEvent.ChatResult.denied());
                 player.sendMessage(Component.text(VProxyManager.PREFIX + "§cDer Chat ist deaktiviert"));
                 return;
@@ -39,7 +39,7 @@ public class MessageListener {
         }
 
 
-        if (player.hasPermission("proxy.cooldown.bypass")) {
+        if (player.hasPermission("proxy.bypass.chat.cooldown")) {
             return;
         }
 
