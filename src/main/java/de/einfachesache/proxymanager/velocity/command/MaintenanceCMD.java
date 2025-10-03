@@ -77,6 +77,6 @@ public class MaintenanceCMD implements SimpleCommand {
 
     @Override
     public boolean hasPermission(Invocation invocation) {
-        return invocation.source().hasPermission("*");
+        return invocation.source().hasPermission("proxy.command.maintenance");
     }
 }
