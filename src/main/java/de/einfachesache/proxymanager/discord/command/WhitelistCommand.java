@@ -4,7 +4,9 @@ import de.einfachesache.api.minecraft.MinecraftAPI;
 import de.einfachesache.proxymanager.core.Config;
 import de.einfachesache.proxymanager.discord.MessageUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -74,6 +76,7 @@ public class WhitelistCommand extends ListenerAdapter {
             String discordId = entry.getKey();
             String minecraftName = entry.getValue();
 
+            var whitelistedRoles = guild != null ? guild.getRoleById(Config.getWhitelistedRoleID(guild.getId())) : null;
             var member = guild != null ? guild.getMemberById(discordId) : null;
             var user = event.getJDA().getUserById(discordId);
             String fieldName = "`" + minecraftName + "`";
@@ -84,6 +87,10 @@ public class WhitelistCommand extends ListenerAdapter {
 
             page.addField(fieldName, fieldValue, false);
             fieldsInPage++;
+
+            if (guild != null && member != null && whitelistedRoles != null) {
+                guild.addRoleToMember(member, whitelistedRoles).reason("Auto-Role on Whitelist").queue();
+            }
         }
 
         if (fieldsInPage > 0) {
@@ -95,6 +102,7 @@ public class WhitelistCommand extends ListenerAdapter {
 
     private void handleWhitelist(SlashCommandInteractionEvent event) {
 
+        if (event.getMember() == null) return;
         if (!event.getName().equalsIgnoreCase("whitelist")) return;
 
         EmbedBuilder embed = MessageUtils.getDefaultEmbed().setTitle("Event Whitelist");
@@ -136,6 +144,11 @@ public class WhitelistCommand extends ListenerAdapter {
 
             String oldName = Config.getWhitelistedPlayers().getOrDefault(discordId, null);
             Config.whitelistPlayer(discordId, name);
+            Guild guild = event.getGuild();
+            Role whitelistedRole = guild.getRoleById(Config.getWhitelistedRoleID(guild.getId()));
+            if (whitelistedRole != null) {
+                event.getGuild().addRoleToMember(event.getMember(), whitelistedRole).reason("Auto-Role on Whitelist").queue();
+            }
 
             if (oldName == null) {
                 return new WhitelistResult("✅ `" + name + "` wurde whitelisted.", Color.GREEN, false);

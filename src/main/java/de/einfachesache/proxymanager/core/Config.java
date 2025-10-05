@@ -205,6 +205,8 @@ public class Config {
                 String.valueOf(discordModule.getLong("servers." + guildId + ".staff-role-id", -1)),
                 // betaTesterRoleId
                 String.valueOf(discordModule.getLong("servers." + guildId + ".beta-tester-role-id", -1)),
+                // whitelistedRoleId
+                String.valueOf(discordModule.getLong("servers." + guildId + ".whitelisted-role-id", -1)),
 
                 // logChannelId
                 String.valueOf(discordModule.getLong("servers." + guildId + ".log-channel-id", -1)),
@@ -380,6 +382,10 @@ public class Config {
 
     public static String getBetaTesterRoleID(String guildID) {
         return discordServerProfiles.get(guildID).getBetaTesterRoleId();
+    }
+
+    public static String getWhitelistedRoleID(String guildID) {
+        return discordServerProfiles.get(guildID).getWhitelistedRoleId();
     }
 
     public static String getTicketsCategoryID(String guildID) {
