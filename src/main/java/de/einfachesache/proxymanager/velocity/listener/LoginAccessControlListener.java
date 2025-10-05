@@ -46,7 +46,7 @@ public class LoginAccessControlListener {
         if (!event.getOriginalServer().getServerInfo().getName().equalsIgnoreCase(EVENT_SERVER)) return;
 
         var player = event.getPlayer();
-        if (hasWhitelistAccess(player) || hasMaintenanceAccess(player)) return;
+        if (hasWhitelistAccess(player)) return;
 
         if (event.getPreviousServer() == null) {
             Optional<RegisteredServer> fallback = proxy.getProxy().getServer(FALLBACK_SERVER);
