@@ -48,17 +48,19 @@ public class LoginAccessControlListener {
         var player = event.getPlayer();
         if (hasWhitelistAccess(player)) return;
 
-        if (event.getPreviousServer() == null) {
-            Optional<RegisteredServer> fallback = proxy.getProxy().getServer(FALLBACK_SERVER);
-            if (fallback.isEmpty()) {
-                player.disconnect(DENY_MESSAGE);
-                return;
-            }
-            event.setResult(ServerPreConnectEvent.ServerResult.allowed(fallback.get()));
-        } else {
+        if (event.getPreviousServer() != null) {
             event.setResult(ServerPreConnectEvent.ServerResult.denied());
+            player.sendMessage(DENY_MESSAGE);
+            return;
         }
-        player.sendMessage(DENY_MESSAGE);
+
+        Optional<RegisteredServer> fallback = proxy.getProxy().getServer(FALLBACK_SERVER);
+        if (fallback.isEmpty()) {
+            player.disconnect(DENY_MESSAGE);
+            return;
+        }
+
+        event.setResult(ServerPreConnectEvent.ServerResult.allowed(fallback.get()));
     }
 
     private boolean hasWhitelistAccess(Player player) {
