@@ -1,7 +1,7 @@
 package de.einfachesache.proxymanager.velocity.listener;
 
 import com.velocitypowered.api.event.Subscribe;
-import com.velocitypowered.api.event.connection.PostLoginEvent;
+import com.velocitypowered.api.event.connection.LoginEvent;
 import com.velocitypowered.api.event.player.ServerPreConnectEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
@@ -30,7 +30,7 @@ public class LoginAccessControlListener {
     }
 
     @Subscribe
-    public void onPostLogin(PostLoginEvent event) {
+    public void onLogin(LoginEvent event) {
         Player player = event.getPlayer();
 
         if (!Config.isMaintenanceMode() || hasMaintenanceAccess(player)) {
@@ -41,7 +41,7 @@ public class LoginAccessControlListener {
     }
 
     @Subscribe
-    public void onPreConnect(ServerPreConnectEvent event) {
+    public void onServerPreConnect(ServerPreConnectEvent event) {
         if (!Config.isEventWhitelist()) return;
         if (!event.getOriginalServer().getServerInfo().getName().equalsIgnoreCase(EVENT_SERVER)) return;
 
