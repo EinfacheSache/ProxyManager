@@ -102,18 +102,18 @@
         <dependency>
             <groupId>com.github.EinfacheSache</groupId>
             <artifactId>easyapi</artifactId>
-            <version>719c164f88</version>
+            <version>04a5da3880</version>
         </dependency>
 
         <dependency>
             <groupId>net.dv8tion</groupId>
             <artifactId>JDA</artifactId>
-            <version>6.0.0-rc.5</version>
+            <version>6.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
-            <version>5.1.0</version>
+            <version>5.2.1</version>
         </dependency>
         <dependency>
             <groupId>redis.clients</groupId>
