@@ -150,11 +150,17 @@ public class MemberJoinGuildListener extends ListenerAdapter {
         try {
             Member member = event.getMember();
             Guild guild = event.getGuild();
-            TextChannel channel = guild.getChannelById(
-                    TextChannel.class,
-                    Config.getDiscordServerProfile(guild.getId()).getWelcomeChannelId());
 
-            if (channel == null) return;
+            String welcomeChannelId = Config.getDiscordServerProfile(guild.getId()).getWelcomeChannelId();
+            if (Objects.equals(welcomeChannelId, "-1")) {
+                return;
+            }
+
+            TextChannel channel = guild.getChannelById(TextChannel.class, welcomeChannelId);
+            if (channel == null) {
+                Core.info(guild.getName() + " | ❌  Welcome channel wurde für (" + guild.getName() + ") nicht gefunden: " + welcomeChannelId);
+                return;
+            }
 
             // Hintergrundbild laden
             BufferedImage background = ImageIO.read(Objects.requireNonNull(getClass().getResource("/flareon_dragon.png")));
