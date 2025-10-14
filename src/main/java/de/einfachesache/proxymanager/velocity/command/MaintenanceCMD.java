@@ -41,11 +41,11 @@ public class MaintenanceCMD implements SimpleCommand {
                 instance.getProxy().getAllPlayers().stream()
                         .filter(player -> !LoginAccessControlListener.hasMaintenanceAccess(player))
                         .forEach(player -> player.disconnect(ScreenBuilder.getMaintenanceScreen()));
-                source.sendMessage(Component.text("§cDu hast den MaintenanceMode §aaktiviert"));
+                source.sendMessage(Component.text("§cDu hast die Maintenance §aaktiviert"));
                 return;
             } else if (args[0].equalsIgnoreCase("off")) {
                 Config.setMaintenanceMode(false);
-                source.sendMessage(Component.text("§cDu hast den MaintenanceMode §4deaktiviert"));
+                source.sendMessage(Component.text("§cDu hast die Maintenance §4deaktiviert"));
                 return;
             }
         }
