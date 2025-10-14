@@ -38,23 +38,34 @@ public class MemberJoinGuildListener extends ListenerAdapter {
         trackInvite(event);
 
         Guild guild = event.getGuild();
+        List<Role> rolesToAdd = new ArrayList<>();
         Role playerRole = guild.getRoleById(Config.getJoinRoleID(guild.getId()));
         Role betaTesterRole = guild.getRoleById(Config.getBetaTesterRoleID(guild.getId()));
-
-        if (playerRole == null) {
-            Core.info(guild.getName() + " | ❌Join Rollen wurden für (" + event.getUser().getName() + ") nicht gefunden: " + Config.getJoinRoleID(guild.getId()));
-            return;
-        }
 
         int currentBetaTesterCount = (int) guild.getMembers().stream()
                 .filter(m -> m.getRoles().contains(betaTesterRole))
                 .count();
 
-        List<Role> rolesToAdd = new ArrayList<>(Collections.singletonList(playerRole));
-        if (!Config.getBetaTesterRoleID(guild.getId()).equals("-1") && currentBetaTesterCount + 1 <= maxBetaTesterCount) {
-            rolesToAdd.add(betaTesterRole);
+        if (!Config.getJoinRoleID(guild.getId()).equals("-1")) {
+            if (playerRole == null) {
+                Core.info(guild.getName() + " | ❌  Join Rolle wurden für (" + event.getUser().getName() + ") nicht gefunden: " + Config.getJoinRoleID(guild.getId()));
+            } else {
+                rolesToAdd.add(playerRole);
+            }
+        }
+
+        if (!Config.getBetaTesterRoleID(guild.getId()).equals("-1") && currentBetaTesterCount < maxBetaTesterCount) {
+            if (betaTesterRole == null) {
+                Core.info(guild.getName() + " | ❌  BetaTester Rolle wurden für (" + event.getUser().getName() + ") nicht gefunden: " + Config.getBetaTesterRoleID(guild.getId()));
+            } else {
+                rolesToAdd.add(betaTesterRole);
+            }
         } else {
             Config.setBetaTesterRoleID(guild.getId(), "-1");
+        }
+
+        if (rolesToAdd.isEmpty()) {
+            return;
         }
 
         guild
@@ -70,7 +81,7 @@ public class MemberJoinGuildListener extends ListenerAdapter {
 
                             String userName = event.getMember().getUser().getName();
 
-                            String info = guild.getName() + " | ✅ Zugewiesene Rollen: " + rollen + " | User: " + userName;
+                            String info = guild.getName() + " | ✅  Zugewiesene Rollen: " + rollen + " | User: " + userName;
 
                             if (rolesToAdd.contains(betaTesterRole)) {
                                 info += "(BetaTester #" + (currentBetaTesterCount + 1) + "/" + maxBetaTesterCount + ")";
