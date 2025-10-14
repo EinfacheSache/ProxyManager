@@ -58,10 +58,6 @@ public class DiscordServerProfile {
         this.whitelistedRoleId = null;
     }
 
-    public String getGuildId() {
-        return guildId;
-    }
-
     public String getName() {
         return name;
     }

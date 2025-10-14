@@ -198,7 +198,7 @@ public class Config {
                 // guildId
                 guildId,
                 // name
-                discordModule.get("servers." + guildId + ".name", "NULL"),
+                discordModule.get("servers." + guildId + ".name", guildId),
                 // joinRoleId (user-role-id im YAML)
                 String.valueOf(discordModule.getLong("servers." + guildId + ".join-role-id", -1)),
                 // staffRoleId
