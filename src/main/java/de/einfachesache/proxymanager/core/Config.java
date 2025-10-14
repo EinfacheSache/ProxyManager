@@ -163,7 +163,7 @@ public class Config {
             String minecraftName = e.getValue().toString();
             try {
                 whitelistedPlayers.put(discordID, minecraftName);
-                Core.info("User " + discordID + " whitelisted player " + minecraftName + " has been found!");
+                Core.debug("User " + discordID + " whitelisted player " + minecraftName);
             } catch (Exception ex) {
                 Core.severe("Whitelist: Invalid entry - key='" + discordID + "' value='" + minecraftName + "' (" + ex.getMessage() + "). Skipped.");
             }
@@ -172,7 +172,7 @@ public class Config {
         VPermissionProvider.clearPermissions();
         ConfigurationSection section = data.getConfigurationSection("minecraft.permissions");
 
-        if(section == null) {
+        if (section == null) {
             Core.warn("minecraft.permissions section is null");
             return;
         }
