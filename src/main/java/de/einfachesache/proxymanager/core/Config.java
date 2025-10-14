@@ -210,6 +210,8 @@ public class Config {
 
                 // logChannelId
                 String.valueOf(discordModule.getLong("servers." + guildId + ".log-channel-id", -1)),
+                // welcomeChannelId
+                String.valueOf(discordModule.getLong("servers." + guildId + ".welcome-channel-id", -1)),
                 // ticketCategoryId
                 String.valueOf(discordModule.getLong("servers." + guildId + ".tickets-category-id", -1)),
                 // countingChannelId

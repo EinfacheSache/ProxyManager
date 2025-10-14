@@ -7,10 +7,12 @@ public class DiscordServerProfile {
     private final String name;
     private final String guildId;
     private final String joinRoleId;
+    private final String welcomeChannelId;
     private final String whitelistedRoleId;
     private final String countingChannelId;
     private final String giveawayChannelId;
     private final String whitelistChannelId;
+
     private String inviteLogChannelId;
     private String betaTesterRoleId;
     private String ticketCategoryId;
@@ -25,6 +27,7 @@ public class DiscordServerProfile {
                                 String betaTesterRoleId,
                                 String whitelistedRoleId,
                                 String logChannelId,
+                                String welcomeChannelId,
                                 String ticketCategoryId,
                                 String countingChannelId,
                                 String giveawayChannelId,
@@ -39,6 +42,7 @@ public class DiscordServerProfile {
         this.whitelistedRoleId = whitelistedRoleId;
 
         this.logChannelId = logChannelId;
+        this.welcomeChannelId = welcomeChannelId;
         this.ticketCategoryId = ticketCategoryId;
         this.countingChannelId = countingChannelId;
         this.giveawayChannelId = giveawayChannelId;
@@ -50,17 +54,21 @@ public class DiscordServerProfile {
     public DiscordServerProfile() {
         this.name = null;
         this.guildId = null;
+
         this.joinRoleId = null;
+        this.betaTesterRoleId = null;
+        this.whitelistedRoleId = null;
+
+        this.welcomeChannelId = null;
         this.countingChannelId = null;
         this.giveawayChannelId = null;
         this.whitelistChannelId = null;
-        this.betaTesterRoleId = null;
-        this.whitelistedRoleId = null;
     }
 
     public String getName() {
         return name;
     }
+
 
     public String getJoinRoleId() {
         return joinRoleId;
@@ -68,14 +76,6 @@ public class DiscordServerProfile {
 
     public String getWhitelistedRoleId() {
         return whitelistedRoleId;
-    }
-
-    public String getTicketCategoryId() {
-        return ticketCategoryId;
-    }
-
-    public void setTicketCategoryId(String ticketCategoryId) {
-        this.ticketCategoryId = ticketCategoryId;
     }
 
     public String getStaffRoleId() {
@@ -86,12 +86,33 @@ public class DiscordServerProfile {
         this.staffRoleId = staffRoleId;
     }
 
+    public String getBetaTesterRoleId() {
+        return betaTesterRoleId;
+    }
+
+    public void setBetaTesterRoleId(String betaTesterRoleId) {
+        this.betaTesterRoleId = betaTesterRoleId;
+    }
+
+
+    public String getTicketCategoryId() {
+        return ticketCategoryId;
+    }
+
+    public void setTicketCategoryId(String ticketCategoryId) {
+        this.ticketCategoryId = ticketCategoryId;
+    }
+
     public String getLogChannelId() {
         return logChannelId;
     }
 
     public void setLogChannelId(String logChannelId) {
         this.logChannelId = logChannelId;
+    }
+
+    public String getWelcomeChannelId() {
+        return welcomeChannelId;
     }
 
     public String getCountingChannelId() {
@@ -106,17 +127,10 @@ public class DiscordServerProfile {
         return whitelistChannelId;
     }
 
-    public void setBetaTesterRoleId(String betaTesterRoleId) {
-        this.betaTesterRoleId = betaTesterRoleId;
-    }
-
-    public String getBetaTesterRoleId() {
-        return betaTesterRoleId;
-    }
-
     public String getInviteLogChannelId() {
         return inviteLogChannelId;
     }
+
 
     @Override
     public int hashCode() {
@@ -132,6 +146,7 @@ public class DiscordServerProfile {
                 ", ticketCategoryId='" + ticketCategoryId + '\'' +
                 ", staffRoleId='" + staffRoleId + '\'' +
                 ", logChannelId='" + logChannelId + '\'' +
+                ", welcomeChannelId='" + welcomeChannelId + '\'' +
                 ", countingChannelId='" + countingChannelId + '\'' +
                 ", giveawayChannelId='" + giveawayChannelId + '\'' +
                 ", whitelistChannelId='" + whitelistChannelId + '\'' +
