@@ -14,6 +14,7 @@ servers:
     beta-tester-role-id: 1398068570201522257
     # Channel IDs
     log-channel-id: 1396658613405356072
+    welcome-channel-id: 1006339616053411932
     tickets-category-id: 1120488702511161447
     counting-channel-id: 1389001094109331627
     giveaway-channel-id: 1110668721296511086

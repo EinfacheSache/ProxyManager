@@ -150,7 +150,11 @@ public class MemberJoinGuildListener extends ListenerAdapter {
         try {
             Member member = event.getMember();
             Guild guild = event.getGuild();
-            TextChannel channel = Objects.requireNonNull(guild.getSystemChannel());
+            TextChannel channel = guild.getChannelById(
+                    TextChannel.class,
+                    Config.getDiscordServerProfile(guild.getId()).getWelcomeChannelId());
+
+            if (channel == null) return;
 
             // Hintergrundbild laden
             BufferedImage background = ImageIO.read(Objects.requireNonNull(getClass().getResource("/flareon_dragon.png")));
