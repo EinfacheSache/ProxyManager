@@ -2,7 +2,9 @@ package de.einfachesache.proxymanager.discord.command;
 
 import de.einfachesache.api.minecraft.MinecraftAPI;
 import de.einfachesache.proxymanager.core.Config;
+import de.einfachesache.proxymanager.core.Core;
 import de.einfachesache.proxymanager.discord.MessageUtils;
+import de.einfachesache.proxymanager.velocity.listener.LoginAccessControlListener;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -153,6 +155,9 @@ public class WhitelistCommand extends ListenerAdapter {
             if (oldName == null) {
                 return new WhitelistResult("✅ `" + name + "` wurde whitelisted.", Color.GREEN, false);
             } else {
+                if(Core.isMinecraftServer()){
+                    LoginAccessControlListener.kickOnWhitelistRemove(oldName);
+                }
                 return new WhitelistResult("🔄 Aktualisiert: `" + oldName + "` ➜ `" + name + "`. Neuer Spielername whitelisted.", Color.CYAN, false);
             }
         }).thenAccept(result ->

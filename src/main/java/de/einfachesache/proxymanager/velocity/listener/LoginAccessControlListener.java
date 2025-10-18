@@ -23,10 +23,10 @@ public class LoginAccessControlListener {
     private static final String BYPASS_PERMISSION_MAINTENANCE = "proxy.bypass.maintenance";
     private static final Component DENY_MESSAGE = Component.text("⛔ Du bist fürs Event nicht whitelisted » /whitelist im Discord", NamedTextColor.RED);
 
-    private final VProxyManager proxy;
+    private static VProxyManager proxy;
 
     public LoginAccessControlListener(VProxyManager proxy) {
-        this.proxy = proxy;
+        LoginAccessControlListener.proxy = proxy;
     }
 
     @Subscribe
@@ -73,5 +73,12 @@ public class LoginAccessControlListener {
         if (player.hasPermission(BYPASS_PERMISSION_MAINTENANCE)) return true;
         List<String> maintenanceAccess = Config.getMaintenanceAccess();
         return maintenanceAccess != null && maintenanceAccess.stream().anyMatch(name -> name.equalsIgnoreCase(player.getUsername()));
+    }
+
+    public static void kickOnWhitelistRemove(String playerName) {
+        Optional<Player> oPlayer = proxy.getProxy().getPlayer(playerName);
+
+        oPlayer.ifPresent(player
+                -> player.disconnect(DENY_MESSAGE));
     }
 }
