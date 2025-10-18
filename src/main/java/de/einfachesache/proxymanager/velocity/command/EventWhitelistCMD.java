@@ -2,6 +2,8 @@ package de.einfachesache.proxymanager.velocity.command;
 
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.command.SimpleCommand;
+import com.velocitypowered.api.proxy.ConsoleCommandSource;
+import com.velocitypowered.api.proxy.Player;
 import de.einfachesache.proxymanager.core.Config;
 import de.einfachesache.proxymanager.velocity.VProxyManager;
 import de.einfachesache.proxymanager.velocity.listener.LoginAccessControlListener;
@@ -49,10 +51,23 @@ public class EventWhitelistCMD implements SimpleCommand {
         }
 
         if (args.length == 2) {
+            if (args[0].equalsIgnoreCase("add")) {
+                boolean isWhitelisted = Config.getWhitelistedPlayers().values().stream().anyMatch(value -> value.equalsIgnoreCase(args[1]));
+
+                if (isWhitelisted) {
+                    source.sendMessage(Component.text("§c" + args[1] + " ist bereits auf der Event-Whitelist"));
+                    return;
+                }
+
+                Config.whitelistPlayer(args[1] + "_by_" + getSourceName(source), args[1]);
+                source.sendMessage(Component.text("§cDu hast " + args[1] + " zu der Event-Whitelist hinzugefügt"));
+                return;
+            }
+
             if (args[0].equalsIgnoreCase("remove")) {
                 boolean wasWhitelisted = Config.removeFromWhitelist(args[1]);
 
-                if(!wasWhitelisted) {
+                if (!wasWhitelisted) {
                     source.sendMessage(Component.text("§c" + args[1] + " konnte von der Event-Whitelist nicht entfernt"));
                     return;
                 }
@@ -66,6 +81,16 @@ public class EventWhitelistCMD implements SimpleCommand {
         source.sendMessage(Component.text("§cBitte verwende /maintenance (on/off/add) [player]"));
     }
 
+    public static String getSourceName(CommandSource source) {
+        if (source instanceof Player player) {
+            return player.getUsername();
+        }
+        if (source instanceof ConsoleCommandSource) {
+            return "CONSOLE";
+        }
+        return "UNKNOWN";
+    }
+
     @Override
     public CompletableFuture<List<String>> suggestAsync(Invocation invocation) {
         return CompletableFuture.supplyAsync(() -> {
@@ -74,7 +99,7 @@ public class EventWhitelistCMD implements SimpleCommand {
             if (args.length > 1) return Collections.emptyList();
 
             String last = (args.length == 0) ? "" : args[args.length - 1].toLowerCase(Locale.ROOT);
-            return Stream.of("on", "off", "remove")
+            return Stream.of("on", "off", "add", "remove")
                     .filter(s -> s.startsWith(last))
                     .collect(Collectors.toList());
         });

@@ -78,6 +78,10 @@ public class WhitelistCommand extends ListenerAdapter {
             String discordId = entry.getKey();
             String minecraftName = entry.getValue();
 
+            if(!discordId.matches("^[0-9]+$")) {
+                continue;
+            }
+
             var whitelistedRoles = guild != null ? guild.getRoleById(Config.getWhitelistedRoleID(guild.getId())) : null;
             var member = guild != null ? guild.getMemberById(discordId) : null;
             var user = event.getJDA().getUserById(discordId);
