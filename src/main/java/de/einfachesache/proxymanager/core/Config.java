@@ -432,6 +432,17 @@ public class Config {
         data.saveAsync("minecraft.whitelist", whitelistedPlayers);
     }
 
+    public static boolean removeFromWhitelist(String minecraftName) {
+        boolean wasWhitelisted= whitelistedPlayers.values().
+                removeIf(value -> value == null || value.equalsIgnoreCase(minecraftName));
+
+        if(wasWhitelisted) {
+            data.saveAsync("minecraft.whitelist", whitelistedPlayers);
+        }
+
+        return wasWhitelisted;
+    }
+
     public static void addMaintenanceAccess(String minecraftName) {
         maintenanceAccess.add(minecraftName);
         data.saveAsync("minecraft.maintenance-access", maintenanceAccess);
@@ -483,6 +494,11 @@ public class Config {
     public static void setMaintenanceMode(boolean maintenanceMode) {
         Config.maintenanceMode = maintenanceMode;
         minecraftModule.saveAsync("maintenance-mode", maintenanceMode);
+    }
+
+    public static void setEventWhitelist(boolean eventWhitelist) {
+        Config.eventWhitelist = eventWhitelist;
+        minecraftModule.saveAsync("maintenance-mode", eventWhitelist);
     }
 
     public static void resetLastGiveaway(String guildId) {

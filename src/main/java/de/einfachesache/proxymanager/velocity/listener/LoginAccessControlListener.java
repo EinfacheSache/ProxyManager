@@ -63,7 +63,7 @@ public class LoginAccessControlListener {
         event.setResult(ServerPreConnectEvent.ServerResult.allowed(fallback.get()));
     }
 
-    private boolean hasWhitelistAccess(Player player) {
+    public static boolean hasWhitelistAccess(Player player) {
         if (player.hasPermission(BYPASS_PERMISSION_WHITELIST)) return true;
         Map<String, String> wl = Config.getWhitelistedPlayers();
         return wl != null && wl.values().stream().anyMatch(name -> name.equalsIgnoreCase(player.getUsername()));

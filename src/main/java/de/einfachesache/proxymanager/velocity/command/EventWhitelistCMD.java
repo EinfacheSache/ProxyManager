@@ -1,0 +1,87 @@
+package de.einfachesache.proxymanager.velocity.command;
+
+import com.velocitypowered.api.command.CommandSource;
+import com.velocitypowered.api.command.SimpleCommand;
+import de.einfachesache.proxymanager.core.Config;
+import de.einfachesache.proxymanager.velocity.VProxyManager;
+import de.einfachesache.proxymanager.velocity.listener.LoginAccessControlListener;
+import net.kyori.adventure.text.Component;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+public class EventWhitelistCMD implements SimpleCommand {
+
+    public final VProxyManager instance;
+
+    public EventWhitelistCMD(VProxyManager instance) {
+        this.instance = instance;
+    }
+
+    @Override
+    public void execute(Invocation invocation) {
+        CommandSource source = invocation.source();
+        String[] args = invocation.arguments();
+
+        if (args.length == 0) {
+            boolean eventWhitelist = Config.isEventWhitelist();
+            source.sendMessage(Component.text("§7Die Event-Whitelist ist aktuell §" + (eventWhitelist ? "aaktiviert" : "4deaktiviert")));
+            return;
+        }
+
+        if (args.length == 1) {
+            if (args[0].equalsIgnoreCase("on")) {
+                Config.setEventWhitelist(true);
+                instance.getProxy().getAllPlayers().stream()
+                        .filter(player -> !LoginAccessControlListener.hasWhitelistAccess(player))
+                        .forEach(player -> LoginAccessControlListener.kickOnWhitelistRemove(player.getUsername()));
+                source.sendMessage(Component.text("§cDu hast die Event-Whiteliste §aaktiviert"));
+                return;
+            } else if (args[0].equalsIgnoreCase("off")) {
+                Config.setEventWhitelist(false);
+                source.sendMessage(Component.text("§cDu hast die Event-Whitelist §4deaktiviert"));
+                return;
+            }
+        }
+
+        if (args.length == 2) {
+            if (args[0].equalsIgnoreCase("remove")) {
+                boolean wasWhitelisted = Config.removeFromWhitelist(args[1]);
+
+                if(!wasWhitelisted) {
+                    source.sendMessage(Component.text("§c" + args[1] + " konnte von der Event-Whitelist nicht entfernt"));
+                    return;
+                }
+
+                LoginAccessControlListener.kickOnWhitelistRemove(args[1]);
+                source.sendMessage(Component.text("§cDu hast " + args[1] + " von der Event-Whitelist entfernt"));
+                return;
+            }
+        }
+
+        source.sendMessage(Component.text("§cBitte verwende /maintenance (on/off/add) [player]"));
+    }
+
+    @Override
+    public CompletableFuture<List<String>> suggestAsync(Invocation invocation) {
+        return CompletableFuture.supplyAsync(() -> {
+            String[] args = invocation.arguments();
+
+            if (args.length > 1) return Collections.emptyList();
+
+            String last = (args.length == 0) ? "" : args[args.length - 1].toLowerCase(Locale.ROOT);
+            return Stream.of("on", "off", "remove")
+                    .filter(s -> s.startsWith(last))
+                    .collect(Collectors.toList());
+        });
+    }
+
+    @Override
+    public boolean hasPermission(Invocation invocation) {
+        return invocation.source().hasPermission("*");
+    }
+}
