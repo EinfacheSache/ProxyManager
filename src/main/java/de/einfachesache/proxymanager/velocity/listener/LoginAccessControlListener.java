@@ -75,10 +75,21 @@ public class LoginAccessControlListener {
         return maintenanceAccess != null && maintenanceAccess.stream().anyMatch(name -> name.equalsIgnoreCase(player.getUsername()));
     }
 
-    public static void kickOnWhitelistRemove(String playerName) {
+    public static void sendLimboOnWhitelistRemove(String playerName) {
         Optional<Player> oPlayer = proxy.getProxy().getPlayer(playerName);
 
-        oPlayer.ifPresent(player
-                -> player.disconnect(DENY_MESSAGE));
+        if (oPlayer.isEmpty()) {
+            return;
+        }
+
+        Player player = oPlayer.get();
+
+        Optional<RegisteredServer> fallback = proxy.getProxy().getServer(FALLBACK_SERVER);
+        if (fallback.isEmpty()) {
+            player.disconnect(DENY_MESSAGE);
+            return;
+        }
+
+        player.createConnectionRequest(fallback.get()).connect();
     }
 }

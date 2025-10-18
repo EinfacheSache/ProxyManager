@@ -160,7 +160,7 @@ public class WhitelistCommand extends ListenerAdapter {
                 return new WhitelistResult("✅ `" + name + "` wurde whitelisted.", Color.GREEN, false);
             } else {
                 if(Core.isMinecraftServer()){
-                    LoginAccessControlListener.kickOnWhitelistRemove(oldName);
+                    LoginAccessControlListener.sendLimboOnWhitelistRemove(oldName);
                 }
                 return new WhitelistResult("🔄 Aktualisiert: `" + oldName + "` ➜ `" + name + "`. Neuer Spielername whitelisted.", Color.CYAN, false);
             }

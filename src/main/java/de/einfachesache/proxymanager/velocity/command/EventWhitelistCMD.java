@@ -40,7 +40,7 @@ public class EventWhitelistCMD implements SimpleCommand {
                 Config.setEventWhitelist(true);
                 instance.getProxy().getAllPlayers().stream()
                         .filter(player -> !LoginAccessControlListener.hasWhitelistAccess(player))
-                        .forEach(player -> LoginAccessControlListener.kickOnWhitelistRemove(player.getUsername()));
+                        .forEach(player -> LoginAccessControlListener.sendLimboOnWhitelistRemove(player.getUsername()));
                 source.sendMessage(Component.text("§cDu hast die Event-Whiteliste §aaktiviert"));
                 return;
             } else if (args[0].equalsIgnoreCase("off")) {
@@ -72,7 +72,7 @@ public class EventWhitelistCMD implements SimpleCommand {
                     return;
                 }
 
-                LoginAccessControlListener.kickOnWhitelistRemove(args[1]);
+                LoginAccessControlListener.sendLimboOnWhitelistRemove(args[1]);
                 source.sendMessage(Component.text("§cDu hast " + args[1] + " von der Event-Whitelist entfernt"));
                 return;
             }
