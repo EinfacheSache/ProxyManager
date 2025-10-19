@@ -1,7 +1,8 @@
 package de.einfachesache.proxymanager.velocity.listener;
 
+import com.velocitypowered.api.command.CommandResult;
 import com.velocitypowered.api.event.Subscribe;
-import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
+import com.velocitypowered.api.event.command.PostCommandInvocationEvent;
 import de.einfachesache.proxymanager.velocity.VProxyManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -14,11 +15,15 @@ public class ProxyShutdownListener {
         this.instance = instance;
     }
 
-    @Subscribe(priority = Short.MAX_VALUE)
-    public void onProxyShutdown(ProxyShutdownEvent event) {
+    @Subscribe
+    public void onProxyShutdown(PostCommandInvocationEvent event) {
+
+        String cmd = event.getCommand().toLowerCase();
+        if (!cmd.startsWith("end") && !cmd.startsWith("shutdown")) return;
+        if (!event.getResult().equals(CommandResult.EXECUTED)) return;
+
         Component disconnectMessage = Component.empty()
-                .append(Component.text("Der Proxy wird neu gestartet", NamedTextColor.RED))
-                .append(Component.newline())
+                .append(Component.text("Der Proxy wird neu gestartet » ", NamedTextColor.RED))
                 .append(Component.text("Bitte verbinde dich in wenigen Sekunden erneut", NamedTextColor.GRAY));
 
         instance.getProxy().getAllPlayers().forEach(player -> player.disconnect(disconnectMessage));
