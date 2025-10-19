@@ -1,6 +1,5 @@
 package de.einfachesache.proxymanager.velocity;
 
-import de.einfachesache.proxymanager.core.Config;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
@@ -15,7 +14,7 @@ public class ScreenBuilder {
             .addLine("§7Bitte schaue später noch einmal vorbei.")
             .addEmptyLine()
             .addLine("§7Weitere Infos findest du auf unserem Discord:")
-            .addLine("§b" + Config.getServerDomainName() + "/discord")
+            .addLine("§b discord.gg/flareon")
             .build();
 
 
