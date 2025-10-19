@@ -85,10 +85,16 @@ public class CoreCommand extends ListenerAdapter {
                 }
 
                 Guild guild = event.getGuild();
-                guild.leave().queue();
+
                 embedBuilder.setDescription("Der Bot hat erfolgreich den Server " + guild.getName() + " verlassen!");
+                event.getHook().sendMessageEmbeds(embedBuilder.build()).setEphemeral(true).complete();
+                Core.warn(guild.getName() + "The bot has successfully left the server!");
+
+                guild.leave().queue();
+
+                return;
             }
         }
-        event.getHook().sendMessageEmbeds(embedBuilder.build()).setEphemeral(true).queue();
+        event.getHook().sendMessageEmbeds(embedBuilder.build()).setEphemeral(true).complete();
     }
 }
