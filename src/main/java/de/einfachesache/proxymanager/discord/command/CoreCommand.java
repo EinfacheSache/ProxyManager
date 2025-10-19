@@ -77,6 +77,17 @@ public class CoreCommand extends ListenerAdapter {
                 embedBuilder.setDescription("Commands wurden global reloaded!");
                 Core.info((event.getGuild() != null ? event.getGuild().getName() + " | " : "") + "Updating Discord slash commands global");
             }
+
+            case "leave-confirm" -> {
+                if (event.getGuild() == null) {
+                    embedBuilder.setDescription("Command kann nur auf einem Server ausgeführt werden!");
+                    break;
+                }
+
+                Guild guild = event.getGuild();
+                guild.leave().queue();
+                embedBuilder.setDescription("Der Bot hat erfolgreich den Server " + guild.getName() + " verlassen!");
+            }
         }
         event.getHook().sendMessageEmbeds(embedBuilder.build()).setEphemeral(true).queue();
     }

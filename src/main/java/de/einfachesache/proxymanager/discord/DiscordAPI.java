@@ -98,7 +98,8 @@ public class DiscordAPI extends ListenerAdapter {
                                 .addSubcommands(new SubcommandData("invite-link", "Generiere Invite Link für den Discord"))
                                 .addSubcommands(new SubcommandData("reload-commands", "Reloade alle Discord Commands"))
                                 .addSubcommands(new SubcommandData("reload-commands-global", "Reloade alle Discord Commands Global"))
-                                .addSubcommands(new SubcommandData("register", "Registers this server and enables the bot to operate on it")),
+                                .addSubcommands(new SubcommandData("register", "Registers this server and enables the bot to operate on it"))
+                                .addSubcommands(new SubcommandData("leave-confirm", "Entferne den Bot vom aktuellen Discord Server")),
                         Commands.slash("ping", "Berechne den Ping des Bots")
                 )
                 .queue();
