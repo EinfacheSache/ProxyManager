@@ -19,16 +19,15 @@ public class DiscordCommand implements SimpleCommand {
             return;
         }
 
-        Component link = Component.text("Jetzt beitreten", NamedTextColor.AQUA, TextDecoration.UNDERLINED)
-                .clickEvent(ClickEvent.copyToClipboard(Config.getDiscordLink()))
+        Component line1 = Component.text("Für Infos und Teilnahme an zukünftigen Flareon-Events\n", NamedTextColor.GOLD);
+        Component line2 = Component.text("Joinen unseren Discord: ", NamedTextColor.GOLD);
+        Component link = Component.text("Jetzt beitreten", NamedTextColor.AQUA)
                 .clickEvent(ClickEvent.openUrl(Config.getDiscordLink()))
                 .hoverEvent(HoverEvent.showText(
-                        Component.text("Klicke, um unserem Discord beizutreten.\n", NamedTextColor.GRAY)
-                                .append(Component.text(Config.getDiscordLink(), NamedTextColor.BLUE, TextDecoration.UNDERLINED))
+                        Component.text("Klicke, um unserem Discord beizutreten.\n", NamedTextColor.GRAY).append(
+                                Component.text(Config.getDiscordLink(), NamedTextColor.BLUE, TextDecoration.UNDERLINED))
                 ));
 
-        Component message = Component.text("Joinen unseren Discord: ", NamedTextColor.GOLD).append(link);
-
-        player.sendMessage(message);
+        player.sendMessage(line1.append(line2).append(link));
     }
 }
