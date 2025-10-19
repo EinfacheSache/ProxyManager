@@ -61,6 +61,7 @@ public class VProxyManager implements ProxyInstance, StatsProvider {
 
         cm.register(cm.metaBuilder("api").build(), new ApiCMD(this));
         cm.register(cm.metaBuilder("proxy").build(), new ProxyCMD());
+        cm.register(cm.metaBuilder("discord").build(), new DiscordCommand());
         cm.register(cm.metaBuilder("resourcepack").build(), new ResourcePackCMD());
         cm.register(cm.metaBuilder("maintenance").build(), new MaintenanceCMD(this));
         cm.register(cm.metaBuilder("event-whitelist").build(), new EventWhitelistCMD(this));

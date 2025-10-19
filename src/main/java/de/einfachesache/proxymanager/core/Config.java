@@ -31,6 +31,7 @@ public class Config {
     private static boolean discordEnable;
     private static String activity;
     private static String activityType;
+    private static String discordLink;
     private static Set<String> guildIDs;
     private static HashMap<String, DiscordServerProfile> discordServerProfiles;
     private static boolean connectTCPServer;
@@ -189,6 +190,7 @@ public class Config {
         discordServerProfiles = new HashMap<>();
 
         discordEnable = discordModule.getBoolean("discord.enabled", false);
+        discordLink = discordModule.get("discord.discord-link", "discord.gg/flareonevents");
         activityType = discordModule.get("discord.activity-type", "");
         activity = discordModule.get("discord.activity", "");
         connectTCPServer = discordModule.getBoolean("discord.tcp-server", false);
@@ -368,6 +370,10 @@ public class Config {
 
     public static String getActivityType() {
         return activityType;
+    }
+
+    public static String getDiscordLink() {
+        return discordLink.startsWith("https://") ? discordLink : "https://" + discordLink;
     }
 
     public static Set<String> getGuildIDs() {
