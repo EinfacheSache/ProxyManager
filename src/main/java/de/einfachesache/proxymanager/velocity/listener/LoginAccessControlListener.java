@@ -26,10 +26,10 @@ public class LoginAccessControlListener {
     private static final Component DENY_MESSAGE = Component.text("⛔ Du bist nicht whitelisted » /whitelist im Discord", NamedTextColor.RED);
     private static final Component EVENT_DENY_MESSAGE = Component.text("⛔ Du bist fürs Event nicht whitelisted » /whitelist im Discord", NamedTextColor.RED);
 
-    private static VProxyManager proxy;
+    private static VProxyManager instance;
 
-    public LoginAccessControlListener(VProxyManager proxy) {
-        LoginAccessControlListener.proxy = proxy;
+    public LoginAccessControlListener(VProxyManager instance) {
+        LoginAccessControlListener.instance = instance;
     }
 
     @Subscribe
@@ -61,7 +61,7 @@ public class LoginAccessControlListener {
             return;
         }
 
-        Optional<RegisteredServer> fallback = proxy.getProxy().getServer(FALLBACK_SERVER);
+        Optional<RegisteredServer> fallback = instance.getProxy().getServer(FALLBACK_SERVER);
         if (fallback.isEmpty()) {
             player.disconnect(denyMessage);
             return;
@@ -81,14 +81,14 @@ public class LoginAccessControlListener {
 
     public static void sendLimboOnWhitelistRemove(String playerName) {
 
-        Optional<Player> oPlayer = proxy.getProxy().getPlayer(playerName);
+        Optional<Player> oPlayer = instance.getProxy().getPlayer(playerName);
         if (oPlayer.isEmpty()) {
             return;
         }
 
         Player player = oPlayer.get();
 
-        Optional<RegisteredServer> fallbackOpt = proxy.getProxy().getServer(FALLBACK_SERVER);
+        Optional<RegisteredServer> fallbackOpt = instance.getProxy().getServer(FALLBACK_SERVER);
         if (fallbackOpt.isEmpty()) {
             disconnectNotWhitelisted(player);
             return;

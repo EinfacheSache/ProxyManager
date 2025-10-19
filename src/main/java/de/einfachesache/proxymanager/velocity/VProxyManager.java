@@ -68,19 +68,20 @@ public class VProxyManager implements ProxyInstance, StatsProvider {
 
         em.register(this, new LoginAccessControlListener(this));
         em.register(this, new PluginMessageListener(this));
+        em.register(this, new ProxyShutdownListener(this));
         em.register(this, new MessageListener(this));
         em.register(this, new CommandListener(this));
         em.register(this, new JoinServerLinkListener());
         em.register(this, new TabCompleteListener());
         em.register(this, new VPermissionProvider());
 
-        if (Config.isCustomMotd()) {
-            em.register(this, new ProxyPingListener());
-        }
-
         if (Config.isHostAllowlist()) {
             new ProxyProtocol(this);
             em.register(this, new LoginHostFilterListener());
+        }
+
+        if (Config.isCustomMotd()) {
+            em.register(this, new ProxyPingListener());
         }
     }
 

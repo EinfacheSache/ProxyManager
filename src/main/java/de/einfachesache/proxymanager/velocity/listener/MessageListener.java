@@ -16,13 +16,13 @@ import java.util.concurrent.ConcurrentHashMap;
 @SuppressWarnings("deprecation")
 public class MessageListener {
 
-    private final VProxyManager proxy;
+    private final VProxyManager instance;
     private final Map<Player, Integer> cooldownCounter = new ConcurrentHashMap<>();
     private final Map<Player, Long> inCooldown = new ConcurrentHashMap<>();
     private final Map<Player, ScheduledTask> taskIDForCooldown = new ConcurrentHashMap<>();
 
-    public MessageListener(VProxyManager proxy) {
-        this.proxy = proxy;
+    public MessageListener(VProxyManager instance) {
+        this.instance = instance;
     }
 
     @Subscribe
@@ -61,8 +61,8 @@ public class MessageListener {
 
     private void scheduleCooldownReduction(Player p) {
         stopCooldownTask(p);
-        ScheduledTask task = proxy.getProxy().getScheduler()
-                .buildTask(proxy, () -> {
+        ScheduledTask task = instance.getProxy().getScheduler()
+                .buildTask(instance, () -> {
                     cooldownCounter.computeIfPresent(p, (player, count) -> count > 1 ? count - 1 : null);
                     if (!cooldownCounter.containsKey(p)) {
                         inCooldown.remove(p);

@@ -18,11 +18,11 @@ import java.util.UUID;
 
 public class PluginMessageListener {
 
-    private final VProxyManager proxy;
+    private final VProxyManager instance;
     private final Gson gson = new Gson();
 
-    public PluginMessageListener(VProxyManager proxy) {
-        this.proxy = proxy;
+    public PluginMessageListener(VProxyManager instance) {
+        this.instance = instance;
     }
 
     @Subscribe
@@ -40,7 +40,7 @@ public class PluginMessageListener {
         TicketPayload payload = gson.fromJson(json, TicketPayload.class);
         payload.context.server = serverConnection.getServerInfo().getName();
 
-        proxy.getProxy().getPlayer(UUID.fromString(payload.reporter.uuid)).ifPresent(player -> {
+        instance.getProxy().getPlayer(UUID.fromString(payload.reporter.uuid)).ifPresent(player -> {
             ProtocolVersion pVersion = player.getProtocolVersion();
             payload.context.protocol = String.valueOf(pVersion.getProtocol());
             payload.context.version = pVersion.getMostRecentSupportedVersion();

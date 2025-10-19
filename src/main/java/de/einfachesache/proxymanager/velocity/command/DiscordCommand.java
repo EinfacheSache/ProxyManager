@@ -19,13 +19,27 @@ public class DiscordCommand implements SimpleCommand {
             return;
         }
 
-        Component line1 = Component.text("Für Infos und Teilnahme an zukünftigen Flareon-Events\n", NamedTextColor.GOLD);
-        Component line2 = Component.text("Joinen unseren Discord: ", NamedTextColor.GOLD);
-        Component link = Component.text("Jetzt beitreten", NamedTextColor.AQUA)
-                .clickEvent(ClickEvent.openUrl(Config.getDiscordLink()))
-                .hoverEvent(HoverEvent.showText(
-                        Component.text("Klicke, um unserem Discord beizutreten.\n", NamedTextColor.GRAY).append(
-                                Component.text(Config.getDiscordLink(), NamedTextColor.BLUE, TextDecoration.UNDERLINED))
+        final String url = Config.getDiscordLink();
+
+        Component line1 = Component.empty()
+                .append(Component.text("Für ", NamedTextColor.GRAY))
+                .append(Component.text("Infos ", NamedTextColor.GOLD))
+                .append(Component.text("und zukünftige ", NamedTextColor.GRAY))
+                .append(Component.text("Flareon-Events", NamedTextColor.GOLD))
+                .append(Component.newline());
+
+        Component line2 = Component.empty()
+                .append(Component.text("Tritt unserem ", NamedTextColor.GRAY))
+                .append(Component.text("Discord", NamedTextColor.GOLD))
+                .append(Component.text(" bei » ", NamedTextColor.GRAY));
+
+        Component link = Component.text("Jetzt beitreten", NamedTextColor.AQUA, TextDecoration.BOLD)
+                .clickEvent(ClickEvent.openUrl(url))
+                .hoverEvent(HoverEvent.showText(Component.empty()
+                        .append(Component.text("Klicke, um unserem ", NamedTextColor.GRAY))
+                        .append(Component.text("Discord ", NamedTextColor.GOLD))
+                        .append(Component.text("beizutreten.\n", NamedTextColor.GRAY))
+                        .append(Component.text(url, NamedTextColor.BLUE, TextDecoration.UNDERLINED))
                 ));
 
         player.sendMessage(line1.append(line2).append(link));
