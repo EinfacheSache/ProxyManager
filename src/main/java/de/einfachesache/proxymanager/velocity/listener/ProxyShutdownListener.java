@@ -3,6 +3,7 @@ package de.einfachesache.proxymanager.velocity.listener;
 import com.velocitypowered.api.command.CommandResult;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.command.PostCommandInvocationEvent;
+import com.velocitypowered.api.proxy.ConsoleCommandSource;
 import de.einfachesache.proxymanager.velocity.VProxyManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -20,7 +21,7 @@ public class ProxyShutdownListener {
 
         String cmd = event.getCommand().toLowerCase();
         if (!cmd.startsWith("end") && !cmd.startsWith("shutdown")) return;
-        if (!event.getResult().equals(CommandResult.EXECUTED)) return;
+        if (!(event.getCommandSource() instanceof ConsoleCommandSource) || !event.getResult().equals(CommandResult.EXECUTED)) return;
 
         Component disconnectMessage = Component.empty()
                 .append(Component.text("Der Proxy wird neu gestartet » ", NamedTextColor.RED))
