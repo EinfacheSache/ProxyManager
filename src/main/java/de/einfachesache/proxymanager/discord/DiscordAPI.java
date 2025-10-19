@@ -56,7 +56,7 @@ public class DiscordAPI extends ListenerAdapter {
                     new TicketCommand(this),
                     new TicketListener(this),
                     new GiveawayCommand(this),
-                    new WhitelistCommand(),
+                    new WhitelistCommand(this),
                     new MessageListener(),
                     new ContextMenuListener(),
                     new BotGuildJoinListener(),
@@ -124,6 +124,9 @@ public class DiscordAPI extends ListenerAdapter {
                                 ),
 
                         Commands.slash("whitelist-list", "Zeige alle Whitelisted Spieler an")
+                                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MODERATE_MEMBERS)),
+
+                        Commands.slash("whitelist-sync", "Whitelist-Sync – Rolle gemäß Konfiguration synchronisieren")
                                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MODERATE_MEMBERS)),
 
                         Commands.slash("close", "Schließe ein Ticket")

@@ -3,10 +3,12 @@ package de.einfachesache.proxymanager.discord.command;
 import de.einfachesache.api.minecraft.MinecraftAPI;
 import de.einfachesache.proxymanager.core.Config;
 import de.einfachesache.proxymanager.core.Core;
+import de.einfachesache.proxymanager.discord.DiscordAPI;
 import de.einfachesache.proxymanager.discord.MessageUtils;
 import de.einfachesache.proxymanager.velocity.listener.LoginAccessControlListener;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -15,16 +17,21 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class WhitelistCommand extends ListenerAdapter {
 
+    private final DiscordAPI discordAPI;
+
     private final Pattern MC_NAME = Pattern.compile("^[A-Za-z0-9_]{3,16}$");
+
+    public WhitelistCommand(DiscordAPI discordAPI) {
+        this.discordAPI = discordAPI;
+    }
 
     public record WhitelistResult(String message, Color color, boolean ephemeral) {
     }
@@ -35,14 +42,62 @@ public class WhitelistCommand extends ListenerAdapter {
         if (event.getGuild() == null || !Config.getGuildIDs().contains(event.getGuild().getId())) return;
 
         switch (event.getName()) {
+            case "whitelist-sync" -> handleSync(event);
             case "whitelist-list" -> handleList(event);
             case "whitelist" -> handleWhitelist(event);
         }
     }
 
-    private void handleList(SlashCommandInteractionEvent event) {
+    private void handleSync(SlashCommandInteractionEvent event) {
 
-        if (!event.getName().equalsIgnoreCase("whitelist-list")) return;
+        event.deferReply(true).queue();
+
+        var shouldBeWhitelisted = Config.getWhitelistedPlayers().keySet();
+        String auditReason = "Whitelist sync – align role with config by " + event.getUser().getAsTag();
+
+        discordAPI.getGuilds().values().forEach(guild-> {
+
+            Role whitelistRole = guild.getRoleById(Config.getWhitelistedRoleID(guild.getId()));
+            if (whitelistRole == null) return;
+
+            Set<String> currentRoleHolders = getDiscordIdsWithRoleCached(guild, whitelistRole);
+
+            Set<String> toAdd = new HashSet<>(shouldBeWhitelisted);
+            toAdd.removeAll(currentRoleHolders);
+
+            Set<String> toRemove = new HashSet<>(currentRoleHolders);
+            toRemove.removeAll(shouldBeWhitelisted);
+
+            for (String discordId : toAdd) {
+                guild.retrieveMemberById(discordId).queue(
+                        member -> guild.addRoleToMember(member, whitelistRole)
+                                .reason(auditReason)
+                                .queue(_ok -> {}, _err -> {}),
+                        _err -> {}
+                );
+            }
+
+            for (String discordId : toRemove) {
+                guild.retrieveMemberById(discordId).queue(
+                        member -> guild.removeRoleFromMember(member, whitelistRole)
+                                .reason(auditReason)
+                                .queue(_ok -> {}, _err -> {}),
+                        _err -> {}
+                );
+            }
+        });
+
+        event.getHook().setEphemeral(true).sendMessageEmbeds(
+                MessageUtils
+                        .getDefaultEmbed()
+                        .setTitle("Whitelist-Sync")
+                        .setDescription("Whitelist-Sync läuft. Rollen werden nun aktualisiert.")
+                        .build())
+                .queue();
+    }
+
+
+    private void handleList(SlashCommandInteractionEvent event) {
 
         var guild = event.getGuild();
         var map = Config.getWhitelistedPlayers();
@@ -71,7 +126,7 @@ public class WhitelistCommand extends ListenerAdapter {
             String discordId = entry.getKey();
             String minecraftName = entry.getValue();
 
-            if(!discordId.matches("^[0-9]+$")) {
+            if (!discordId.matches("^[0-9]+$")) {
                 continue;
             }
 
@@ -82,7 +137,6 @@ public class WhitelistCommand extends ListenerAdapter {
                 fieldsInPage = 0;
             }
 
-            var whitelistedRoles = guild != null ? guild.getRoleById(Config.getWhitelistedRoleID(guild.getId())) : null;
             var member = guild != null ? guild.getMemberById(discordId) : null;
             var user = event.getJDA().getUserById(discordId);
             String fieldName = "`" + minecraftName + "`";
@@ -93,10 +147,6 @@ public class WhitelistCommand extends ListenerAdapter {
 
             page.addField(fieldName, fieldValue, false);
             fieldsInPage++;
-
-            if (guild != null && member != null && whitelistedRoles != null) {
-                guild.addRoleToMember(member, whitelistedRoles).reason("Auto-Role on Whitelist").queue();
-            }
         }
 
         if (fieldsInPage > 0) {
@@ -127,7 +177,6 @@ public class WhitelistCommand extends ListenerAdapter {
     private void handleWhitelist(SlashCommandInteractionEvent event) {
 
         if (event.getMember() == null) return;
-        if (!event.getName().equalsIgnoreCase("whitelist")) return;
 
         EmbedBuilder embed = MessageUtils.getDefaultEmbed().setTitle("Event Whitelist");
         String whitelistChannelId = Config.getDiscordServerProfile(Objects.requireNonNull(event.getGuild()).getId()).getWhitelistChannelId();
@@ -177,7 +226,7 @@ public class WhitelistCommand extends ListenerAdapter {
             if (oldName == null) {
                 return new WhitelistResult("✅ `" + name + "` wurde whitelisted.", Color.GREEN, false);
             } else {
-                if(Core.isMinecraftServer()){
+                if (Core.isMinecraftServer()) {
                     LoginAccessControlListener.sendLimboOnWhitelistRemove(oldName);
                 }
                 return new WhitelistResult("🔄 Aktualisiert: `" + oldName + "` ➜ `" + name + "`. Neuer Spielername whitelisted.", Color.CYAN, false);
@@ -193,5 +242,12 @@ public class WhitelistCommand extends ListenerAdapter {
             event.replyEmbeds(embed.setDescription("❌ Unerwarteter Fehler: " + ex.getMessage()).setColor(Color.RED).build()).queue();
             return null;
         });
+    }
+
+    public static Set<String> getDiscordIdsWithRoleCached(Guild guild, Role whitelistRole) {
+        List<Member> roleHolders = guild.getMembersWithRoles(whitelistRole);
+        return roleHolders.stream()
+                .map(Member::getId)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 }
