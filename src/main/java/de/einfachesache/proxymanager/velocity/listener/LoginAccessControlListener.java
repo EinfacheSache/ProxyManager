@@ -5,6 +5,7 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.LoginEvent;
 import com.velocitypowered.api.event.player.ServerPreConnectEvent;
 import com.velocitypowered.api.proxy.Player;
+import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import de.einfachesache.proxymanager.core.Config;
 import de.einfachesache.proxymanager.core.Core;
@@ -93,7 +94,9 @@ public class LoginAccessControlListener {
 
         Optional<RegisteredServer> fallback = proxy.getProxy().getServer(FALLBACK_SERVER);
         if (fallback.isEmpty()) {
-            player.disconnect(EVENT_DENY_MESSAGE);
+            Optional<ServerConnection> oCurrentServer = player.getCurrentServer();
+            Component denyMessage = oCurrentServer.isPresent() && oCurrentServer.get().getServerInfo().getName().toLowerCase().contains(EVENT_SERVER.toLowerCase()) ? EVENT_DENY_MESSAGE : DENY_MESSAGE;
+            player.disconnect(denyMessage);
             return;
         }
 
