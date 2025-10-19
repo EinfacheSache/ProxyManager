@@ -14,10 +14,9 @@ import de.einfachesache.proxymanager.velocity.VProxyManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 public class LoginAccessControlListener {
 
@@ -68,7 +67,66 @@ public class LoginAccessControlListener {
             return;
         }
 
-        event.setResult(ServerPreConnectEvent.ServerResult.allowed(fallback.get()));
+        event.setResult(ServerPreConnectEvent.ServerResult.denied());
+
+        player.createConnectionRequest(fallback.get()).connect().thenAccept(result -> {
+                    if (result == null || !result.isSuccessful()) {
+                        disconnectNotWhitelisted(player);
+                    }
+                })
+                .exceptionally(ex -> {
+                    disconnectNotWhitelisted(player);
+                    return null;
+                });
+    }
+
+    public static void sendLimboOnWhitelistRemove(String playerName) {
+
+        Optional<Player> oPlayer = proxy.getProxy().getPlayer(playerName);
+        if (oPlayer.isEmpty()) {
+            return;
+        }
+
+        Player player = oPlayer.get();
+
+        Optional<RegisteredServer> fallbackOpt = proxy.getProxy().getServer(FALLBACK_SERVER);
+        if (fallbackOpt.isEmpty()) {
+            disconnectNotWhitelisted(player);
+            return;
+        }
+
+        RegisteredServer fallback = fallbackOpt.get();
+
+        isServerOffline(fallback).thenAccept(isOffline -> {
+
+            if (isOffline) {
+                disconnectNotWhitelisted(player);
+                return;
+            }
+
+            player.createConnectionRequest(fallback).connect().thenAccept(result -> {
+                switch (result.getStatus()) {
+                    case SUCCESS, ALREADY_CONNECTED:
+                        break;
+                    default:
+                        disconnectNotWhitelisted(player);
+                        break;
+                }
+            });
+        });
+    }
+
+    public static CompletableFuture<Boolean> isServerOffline(RegisteredServer server) {
+        return server.ping()
+                .orTimeout(800, TimeUnit.MILLISECONDS)
+                .thenApply(p -> false)
+                .exceptionally(ex -> true);
+    }
+
+    private static void disconnectNotWhitelisted(Player player) {
+        Optional<ServerConnection> oCurrentServer = player.getCurrentServer();
+        boolean onEventServer = oCurrentServer.isPresent() && oCurrentServer.get().getServerInfo().getName().toLowerCase(Locale.ROOT).contains(EVENT_SERVER.toLowerCase(Locale.ROOT));
+        player.disconnect(onEventServer ? EVENT_DENY_MESSAGE : DENY_MESSAGE);
     }
 
     public static boolean hasWhitelistAccess(Player player) {
@@ -81,25 +139,5 @@ public class LoginAccessControlListener {
         if (player.hasPermission(BYPASS_PERMISSION_MAINTENANCE)) return true;
         List<String> maintenanceAccess = Config.getMaintenanceAccess();
         return maintenanceAccess != null && maintenanceAccess.stream().anyMatch(name -> name.equalsIgnoreCase(player.getUsername()));
-    }
-
-    public static void sendLimboOnWhitelistRemove(String playerName) {
-        Optional<Player> oPlayer = proxy.getProxy().getPlayer(playerName);
-
-        if (oPlayer.isEmpty()) {
-            return;
-        }
-
-        Player player = oPlayer.get();
-
-        Optional<RegisteredServer> fallback = proxy.getProxy().getServer(FALLBACK_SERVER);
-        if (fallback.isEmpty()) {
-            Optional<ServerConnection> oCurrentServer = player.getCurrentServer();
-            Component denyMessage = oCurrentServer.isPresent() && oCurrentServer.get().getServerInfo().getName().toLowerCase().contains(EVENT_SERVER.toLowerCase()) ? EVENT_DENY_MESSAGE : DENY_MESSAGE;
-            player.disconnect(denyMessage);
-            return;
-        }
-
-        player.createConnectionRequest(fallback.get()).connect();
     }
 }
