@@ -37,16 +37,20 @@ public class ReadyListener implements EventListener {
 
             Core.info("DiscordAPI is ready!");
             Core.info("Logged in as " + jda.getSelfUser().getName() + "#" + jda.getSelfUser().getDiscriminator());
-            Core.info("Connected to " + joinedGuilds.size() + " Guilds : " + Arrays.toString(joinedGuilds.toArray()));
+            Core.info("Connected to " + joinedGuilds.size() + " Guilds: " +
+                    joinedGuilds.stream().map(g -> g.getName() + "(ID=" + g.getId() + ")")
+                    .collect(Collectors.joining(", ")));
 
             if (connectedGuilds.isEmpty()) {
                 Core.severe("Running for Guild : NULL");
                 return;
             }
 
-            Core.info("Running for Guilds: " + connectedGuilds.stream()
+            Core.info("Running for " + connectedGuilds.size() + " Guilds: " + connectedGuilds.stream()
                     .map(g -> g.getName() + "(Members=" + g.getMembers().size() + ")")
                     .collect(Collectors.joining(", ")));
+
+            Core.info("Running for " + connectedGuilds.stream().mapToLong(Guild::getMemberCount).sum() + " Users");
 
 
             connectedGuilds.forEach(guild ->
