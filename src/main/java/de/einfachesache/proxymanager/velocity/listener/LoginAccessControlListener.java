@@ -70,14 +70,13 @@ public class LoginAccessControlListener {
         event.setResult(ServerPreConnectEvent.ServerResult.denied());
 
         player.createConnectionRequest(fallback.get()).connect().thenAccept(result -> {
-                    if (result == null || !result.isSuccessful()) {
-                        disconnectNotWhitelisted(player);
-                    }
-                })
-                .exceptionally(ex -> {
-                    disconnectNotWhitelisted(player);
-                    return null;
-                });
+            if (result == null || !result.isSuccessful()) {
+                disconnectNotWhitelisted(player, event.getOriginalServer());
+            }
+        }).exceptionally(ex -> {
+            disconnectNotWhitelisted(player, event.getOriginalServer());
+            return null;
+        });
     }
 
     public static void sendLimboOnWhitelistRemove(String playerName) {
@@ -105,12 +104,8 @@ public class LoginAccessControlListener {
             }
 
             player.createConnectionRequest(fallback).connect().thenAccept(result -> {
-                switch (result.getStatus()) {
-                    case SUCCESS, ALREADY_CONNECTED:
-                        break;
-                    default:
-                        disconnectNotWhitelisted(player);
-                        break;
+                if (result == null || !result.isSuccessful()) {
+                    disconnectNotWhitelisted(player);
                 }
             });
         });
@@ -123,9 +118,14 @@ public class LoginAccessControlListener {
                 .exceptionally(ex -> true);
     }
 
+    private static void disconnectNotWhitelisted(Player player, RegisteredServer targetServer) {
+        boolean onEventServer = targetServer.getServerInfo().getName().toLowerCase().contains(EVENT_SERVER.toLowerCase());
+        player.disconnect(onEventServer ? EVENT_DENY_MESSAGE : DENY_MESSAGE);
+    }
+
     private static void disconnectNotWhitelisted(Player player) {
         Optional<ServerConnection> oCurrentServer = player.getCurrentServer();
-        boolean onEventServer = oCurrentServer.isPresent() && oCurrentServer.get().getServerInfo().getName().toLowerCase(Locale.ROOT).contains(EVENT_SERVER.toLowerCase(Locale.ROOT));
+        boolean onEventServer = oCurrentServer.isPresent() && oCurrentServer.get().getServerInfo().getName().toLowerCase().contains(EVENT_SERVER.toLowerCase(Locale.ROOT));
         player.disconnect(onEventServer ? EVENT_DENY_MESSAGE : DENY_MESSAGE);
     }
 
