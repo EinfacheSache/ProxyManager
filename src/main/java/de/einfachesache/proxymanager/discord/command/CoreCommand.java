@@ -86,7 +86,7 @@ public class CoreCommand extends ListenerAdapter {
 
                 Guild guild = event.getGuild();
 
-                embedBuilder.setDescription("Der Bot hat erfolgreich den Server " + guild.getName() + " verlassen!");
+                embedBuilder.setDescription("Der Bot hat erfolgreich den Server **" + guild.getName() + "** verlassen!").setColor(Color.RED);
                 event.getHook().sendMessageEmbeds(embedBuilder.build()).setEphemeral(true).complete();
                 Core.warn(guild.getName() + "The bot has successfully left the server!");
 
