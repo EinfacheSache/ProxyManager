@@ -102,13 +102,13 @@
         <dependency>
             <groupId>com.github.EinfacheSache</groupId>
             <artifactId>easyapi</artifactId>
-            <version>04a5da3880</version>
+            <version>da8f09cdf7</version>
         </dependency>
 
         <dependency>
             <groupId>net.dv8tion</groupId>
             <artifactId>JDA</artifactId>
-            <version>6.0.0</version>
+            <version>6.1.0</version>
         </dependency>
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>

@@ -68,27 +68,34 @@ public class Config {
     }
 
     public static CompletableFuture<Boolean> reloadFilesAsync() {
-        return CompletableFuture.allOf(
+        var futures = List.of(
                 Core.data.reloadConfigurationAsync(),
                 Core.config.reloadConfigurationAsync(),
                 Core.mysqlModule.reloadConfigurationAsync(),
                 Core.redisModule.reloadConfigurationAsync(),
                 Core.discordModule.reloadConfigurationAsync(),
                 Core.minecraftModule.reloadConfigurationAsync()
-        ).thenRunAsync(() -> {
-            loadData();
-            loadConfig();
-            loadMySQLModule();
-            loadRedisModule();
-            loadDiscordModule();
-            loadMinecraftModule();
-        }, AsyncExecutor.getService()).thenApply((ok) -> {
-            Core.info("Config successfully reloaded");
-            return true;
-        }).exceptionally((ex) -> {
-            Core.severe("Config reload failed", ex);
-            return false;
-        });
+        );
+
+        return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new))
+                .thenApply(v -> futures.stream().allMatch(CompletableFuture::join))
+                .thenApplyAsync(allOk -> {
+                    if (allOk) {
+                        loadData();
+                        loadConfig();
+                        loadMySQLModule();
+                        loadRedisModule();
+                        loadDiscordModule();
+                        loadMinecraftModule();
+                        Core.info("Config successfully reloaded");
+                    } else {
+                        Core.severe("Config reload failed (one or more files could not be reloaded)");
+                    }
+                    return allOk;
+                }, AsyncExecutor.getService()).exceptionally(ex -> {
+                    Core.severe("Config reload failed (unexpected error)", ex);
+                    return false;
+                });
     }
 
     private static final FileUtils config = Core.config;
@@ -439,10 +446,10 @@ public class Config {
     }
 
     public static boolean removeFromWhitelist(String minecraftName) {
-        boolean wasWhitelisted= whitelistedPlayers.values().
+        boolean wasWhitelisted = whitelistedPlayers.values().
                 removeIf(value -> value == null || value.equalsIgnoreCase(minecraftName));
 
-        if(wasWhitelisted) {
+        if (wasWhitelisted) {
             data.saveAsync("minecraft.whitelist", whitelistedPlayers);
         }
 
