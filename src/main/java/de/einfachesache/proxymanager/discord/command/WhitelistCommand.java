@@ -68,18 +68,18 @@ public class WhitelistCommand extends ListenerAdapter {
                                 .thenComparing(Map.Entry.comparingByKey())
                 ).toList()) {
 
-            if (fieldsInPage == 25) {
-                pages.add(page.build());
-                page = MessageUtils.getDefaultEmbed()
-                        .setTitle("Whitelist – Übersicht");
-                fieldsInPage = 0;
-            }
-
             String discordId = entry.getKey();
             String minecraftName = entry.getValue();
 
             if(!discordId.matches("^[0-9]+$")) {
                 continue;
+            }
+
+            if (fieldsInPage == 25) {
+                pages.add(page.build());
+                page = MessageUtils.getDefaultEmbed()
+                        .setTitle("Whitelist – Übersicht");
+                fieldsInPage = 0;
             }
 
             var whitelistedRoles = guild != null ? guild.getRoleById(Config.getWhitelistedRoleID(guild.getId())) : null;
@@ -103,7 +103,25 @@ public class WhitelistCommand extends ListenerAdapter {
             pages.add(page.build());
         }
 
-        event.replyEmbeds(pages).setEphemeral(true).queue();
+        event.deferReply(true).queue(hook -> {
+            int i = 0;
+            while (i < pages.size()) {
+                List<MessageEmbed> batch = new ArrayList<>();
+                int batchLen = 0;
+
+                while (i < pages.size() && batch.size() < 10) {
+                    MessageEmbed em = pages.get(i);
+                    int emLen = em.getLength();
+
+                    if (!batch.isEmpty() && batchLen + emLen > 5900) break;
+
+                    batch.add(em);
+                    batchLen += emLen;
+                    i++;
+                }
+                hook.sendMessageEmbeds(batch).setEphemeral(true).queue();
+            }
+        });
     }
 
     private void handleWhitelist(SlashCommandInteractionEvent event) {
