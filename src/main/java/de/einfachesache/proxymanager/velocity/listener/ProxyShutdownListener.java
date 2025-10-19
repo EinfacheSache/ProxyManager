@@ -20,7 +20,7 @@ public class ProxyShutdownListener {
     public void onProxyShutdown(PostCommandInvocationEvent event) {
 
         String cmd = event.getCommand().toLowerCase();
-        if (!cmd.startsWith("end") && !cmd.startsWith("shutdown")) return;
+        if (!cmd.equals("end") && !cmd.equals("shutdown")) return;
         if (!(event.getCommandSource() instanceof ConsoleCommandSource) || !event.getResult().equals(CommandResult.EXECUTED)) return;
 
         Component disconnectMessage = Component.empty()
