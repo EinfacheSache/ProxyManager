@@ -1,5 +1,6 @@
 package de.einfachesache.proxymanager.velocity.listener;
 
+import com.velocitypowered.api.event.ResultedEvent;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.LoginEvent;
 import com.velocitypowered.api.event.player.ServerPreConnectEvent;
@@ -38,7 +39,7 @@ public class LoginAccessControlListener {
             return;
         }
 
-        player.disconnect(ScreenBuilder.getMaintenanceScreen());
+        event.setResult(ResultedEvent.ComponentResult.denied(ScreenBuilder.getMaintenanceScreen()));
     }
 
     @Subscribe

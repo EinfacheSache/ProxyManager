@@ -1,5 +1,6 @@
 package de.einfachesache.proxymanager.velocity.listener;
 
+import com.velocitypowered.api.event.ResultedEvent;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.LoginEvent;
 import com.velocitypowered.api.proxy.InboundConnection;
@@ -21,12 +22,12 @@ public class LoginHostFilterListener {
             return;
         }
 
-        connection.disconnect(new ScreenBuilder()
+        event.setResult(ResultedEvent.ComponentResult.denied(new ScreenBuilder()
                 .addLine("§c§l✖ Verbindung nicht möglich ✖")
                 .addEmptyLine()
                 .addLine("§7Login über §e" + virtualHost + " §7ist nicht erlaubt.")
                 .addLine("§7Bitte verbinde dich über: §b" + Config.getServerDomainName())
-                .build());
+                .build()));
     }
 
     public static boolean hostAllowed(String host) {
