@@ -55,7 +55,7 @@ public class WhitelistCommand extends ListenerAdapter {
         var shouldBeWhitelisted = Config.getWhitelistedPlayers().keySet();
         String auditReason = "Whitelist sync – align role with config by " + event.getUser().getAsTag();
 
-        discordAPI.getGuilds().values().forEach(guild-> {
+        discordAPI.getGuilds().values().forEach(guild -> {
 
             Role whitelistRole = guild.getRoleById(Config.getWhitelistedRoleID(guild.getId()));
             if (whitelistRole == null) return;
@@ -72,8 +72,11 @@ public class WhitelistCommand extends ListenerAdapter {
                 guild.retrieveMemberById(discordId).queue(
                         member -> guild.addRoleToMember(member, whitelistRole)
                                 .reason(auditReason)
-                                .queue(_ok -> {}, _err -> {}),
-                        _err -> {}
+                                .queue(_ok -> {
+                                }, _err -> {
+                                }),
+                        _err -> {
+                        }
                 );
             }
 
@@ -81,18 +84,21 @@ public class WhitelistCommand extends ListenerAdapter {
                 guild.retrieveMemberById(discordId).queue(
                         member -> guild.removeRoleFromMember(member, whitelistRole)
                                 .reason(auditReason)
-                                .queue(_ok -> {}, _err -> {}),
-                        _err -> {}
+                                .queue(_ok -> {
+                                }, _err -> {
+                                }),
+                        _err -> {
+                        }
                 );
             }
         });
 
         event.getHook().setEphemeral(true).sendMessageEmbeds(
-                MessageUtils
-                        .getDefaultEmbed()
-                        .setTitle("Whitelist-Sync")
-                        .setDescription("Whitelist-Sync läuft. Rollen werden nun aktualisiert.")
-                        .build())
+                        MessageUtils
+                                .getDefaultEmbed()
+                                .setTitle("Whitelist-Sync")
+                                .setDescription("Whitelist-Sync läuft. Rollen werden nun aktualisiert.")
+                                .build())
                 .queue();
     }
 
@@ -171,6 +177,12 @@ public class WhitelistCommand extends ListenerAdapter {
                 }
                 hook.sendMessageEmbeds(batch).setEphemeral(true).queue();
             }
+
+            hook.setEphemeral(true).sendMessageEmbeds(MessageUtils.getDefaultEmbed()
+                            .setTitle("Whitelist – Übersicht")
+                            .setDescription("Aktuell sind **" + map.size() + " Spieler** whitelisted")
+                            .build())
+                    .queue();
         });
     }
 
