@@ -45,8 +45,8 @@ public class ProxyPingListener {
         RedisConnector jedis = Core.getRedisConnector();
         String playerName = jedis.get(getPlayerAddress(connection));
 
-        String line1 = "§7§kKK§r §2§l100 Spieler Events §7§l| §b§lAlpha Test §c[1.21.x] §7§kKK§r";
-        String line2 = MOTDUtils.getCenteredMessage("§7§kK§r §6Willkommen auf §l" + Config.getServerDomainName() + " §7§kK§r");
+        String line1 = MOTDUtils.getCenteredMessage("§7§kKK§r §5§lHalloween Event §8| §6§lBattle Royale §8[§c1.21.x§8] §7§kKK§r");
+        String line2 = MOTDUtils.getCenteredMessage("§7§kK§r §2§l§o100 Spieler §8• §6Willkommen auf " + Config.getServerDomainName() + " §7§kK§r");
 
         ServerPing original = event.getPing();
         ServerPing.Builder builder = ServerPing.builder();
