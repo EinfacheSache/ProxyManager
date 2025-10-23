@@ -129,6 +129,11 @@ public class LoginAccessControlListener {
         player.disconnect(onEventServer ? EVENT_DENY_MESSAGE : DENY_MESSAGE);
     }
 
+    public static boolean hasWhitelistAccess(String playerName) {
+        Optional<Player> player = instance.getProxy().getPlayer(playerName);
+        return player.filter(LoginAccessControlListener::hasWhitelistAccess).isPresent();
+    }
+
     public static boolean hasWhitelistAccess(Player player) {
         if (Objects.equals(player.getUniqueId(), Core.DEV_UUID)) return true;
         Map<String, String> wl = Config.getWhitelistedPlayers();

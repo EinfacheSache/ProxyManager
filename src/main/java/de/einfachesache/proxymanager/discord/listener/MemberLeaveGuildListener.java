@@ -10,11 +10,6 @@ public class MemberLeaveGuildListener extends ListenerAdapter {
     public void onGuildMemberRemove(GuildMemberRemoveEvent event) {
         if (!Config.getGuildIDs().contains(event.getGuild().getId())) return;
 
-        String minecraftName = Config.getWhitelistedPlayers().get(event.getUser().getId());
-
-        if(minecraftName == null)
-            return;
-
-        Config.removeFromWhitelistByPlayer(minecraftName);
+        Config.removeFromWhitelistByUser(event.getUser().getId());
     }
 }

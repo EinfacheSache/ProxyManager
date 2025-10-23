@@ -446,6 +446,18 @@ public class Config {
         data.saveAsync("minecraft.whitelist", whitelistedPlayers);
     }
 
+    public static void removeFromWhitelistByUser(String discordId) {
+        String minecraftName = whitelistedPlayers.remove(discordId);
+
+        if (minecraftName != null) {
+            data.saveAsync("minecraft.whitelist", whitelistedPlayers);
+
+            if (!LoginAccessControlListener.hasWhitelistAccess(minecraftName) && Core.isMinecraftServer()) {
+                LoginAccessControlListener.sendLimboOnWhitelistRemove(minecraftName);
+            }
+        }
+    }
+
     public static boolean removeFromWhitelistByPlayer(String minecraftName) {
         boolean wasWhitelisted = whitelistedPlayers.values().
                 removeIf(value -> value == null || value.equalsIgnoreCase(minecraftName));
@@ -453,7 +465,7 @@ public class Config {
         if (wasWhitelisted) {
             data.saveAsync("minecraft.whitelist", whitelistedPlayers);
 
-            if (Core.isMinecraftServer()) {
+            if (!LoginAccessControlListener.hasWhitelistAccess(minecraftName) && Core.isMinecraftServer()) {
                 LoginAccessControlListener.sendLimboOnWhitelistRemove(minecraftName);
             }
         }
