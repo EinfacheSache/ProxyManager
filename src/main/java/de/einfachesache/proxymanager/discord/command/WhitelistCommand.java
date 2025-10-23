@@ -229,11 +229,16 @@ public class WhitelistCommand extends ListenerAdapter {
 
             String oldName = Config.getWhitelistedPlayers().getOrDefault(discordId, null);
             Config.whitelistPlayer(discordId, name);
-            Guild guild = event.getGuild();
-            Role whitelistedRole = guild.getRoleById(Config.getWhitelistedRoleID(guild.getId()));
-            if (whitelistedRole != null) {
-                event.getGuild().addRoleToMember(event.getMember(), whitelistedRole).reason("Auto-Role on Whitelist").queue();
-            }
+
+            Core.getDiscordAPI().getGuilds().forEach((guildID, guild) -> {
+
+                Role whitelistedRole = guild.getRoleById(Config.getWhitelistedRoleID(guildID));
+                if (whitelistedRole == null) return;
+
+                guild.addRoleToMember(event.getUser(), whitelistedRole)
+                        .reason("Auto-Role on Whitelist")
+                        .queue(success -> { }, error -> { });
+            });
 
             if (oldName == null) {
                 return new WhitelistResult("✅ `" + name + "` wurde whitelisted.", Color.GREEN, false);
@@ -252,6 +257,7 @@ public class WhitelistCommand extends ListenerAdapter {
                         .queue()
         ).exceptionally(ex -> {
             event.replyEmbeds(embed.setDescription("❌ Unerwarteter Fehler: " + ex.getMessage()).setColor(Color.RED).build()).queue();
+            Core.severe(ex.getMessage(), ex);
             return null;
         });
     }
