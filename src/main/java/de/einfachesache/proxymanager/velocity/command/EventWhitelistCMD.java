@@ -72,7 +72,6 @@ public class EventWhitelistCMD implements SimpleCommand {
                     return;
                 }
 
-                LoginAccessControlListener.sendLimboOnWhitelistRemove(args[1]);
                 source.sendMessage(Component.text("§cDu hast " + args[1] + " von der Event-Whitelist entfernt"));
                 return;
             }

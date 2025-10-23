@@ -5,6 +5,7 @@ import de.einfachesache.api.util.FileUtils;
 import de.einfachesache.proxymanager.discord.DiscordAPI;
 import de.einfachesache.proxymanager.discord.DiscordServerProfile;
 import de.einfachesache.proxymanager.velocity.VPermissionProvider;
+import de.einfachesache.proxymanager.velocity.listener.LoginAccessControlListener;
 import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 
 import java.io.InputStream;
@@ -451,6 +452,10 @@ public class Config {
 
         if (wasWhitelisted) {
             data.saveAsync("minecraft.whitelist", whitelistedPlayers);
+
+            if (Core.isMinecraftServer()) {
+                LoginAccessControlListener.sendLimboOnWhitelistRemove(minecraftName);
+            }
         }
 
         return wasWhitelisted;
