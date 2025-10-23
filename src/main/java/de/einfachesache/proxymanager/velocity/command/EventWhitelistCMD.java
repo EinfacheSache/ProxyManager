@@ -65,7 +65,7 @@ public class EventWhitelistCMD implements SimpleCommand {
             }
 
             if (args[0].equalsIgnoreCase("remove")) {
-                boolean wasWhitelisted = Config.removeFromWhitelist(args[1]);
+                boolean wasWhitelisted = Config.removeFromWhitelistByPlayer(args[1]);
 
                 if (!wasWhitelisted) {
                     source.sendMessage(Component.text("§c" + args[1] + " konnte von der Event-Whitelist nicht entfernt"));

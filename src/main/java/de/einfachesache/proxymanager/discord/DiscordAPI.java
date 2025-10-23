@@ -60,7 +60,8 @@ public class DiscordAPI extends ListenerAdapter {
                     new MessageListener(),
                     new ContextMenuListener(),
                     new BotGuildJoinListener(),
-                    new MemberJoinGuildListener()
+                    new MemberJoinGuildListener(),
+                    new MemberLeaveGuildListener()
             );
 
             TcpServer.run();

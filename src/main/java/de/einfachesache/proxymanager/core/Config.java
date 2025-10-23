@@ -445,7 +445,7 @@ public class Config {
         data.saveAsync("minecraft.whitelist", whitelistedPlayers);
     }
 
-    public static boolean removeFromWhitelist(String minecraftName) {
+    public static boolean removeFromWhitelistByPlayer(String minecraftName) {
         boolean wasWhitelisted = whitelistedPlayers.values().
                 removeIf(value -> value == null || value.equalsIgnoreCase(minecraftName));
 
