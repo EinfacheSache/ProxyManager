@@ -9,7 +9,10 @@ import de.einfachesache.proxymanager.velocity.listener.LoginAccessControlListene
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -52,8 +55,14 @@ public class MaintenanceCMD implements SimpleCommand {
             }
 
             if (args[0].equalsIgnoreCase("list")) {
-                source.sendMessage(Component.text("Maintenance Accessed Player", NamedTextColor.YELLOW));
-                Config.getMaintenanceAccess().forEach(access -> source.sendMessage(Component.text("- " + access, NamedTextColor.YELLOW)));
+
+                if (Config.getMaintenanceAccess().isEmpty()) {
+                    source.sendMessage(Component.text("No players have maintenance access.", NamedTextColor.GRAY));
+                    return;
+                }
+
+                source.sendMessage(Component.text("Players with maintenance access (" + Config.getMaintenanceAccess().size() + "):", NamedTextColor.YELLOW));
+                Config.getMaintenanceAccess().stream().sorted().forEach(access -> source.sendMessage(Component.text("- " + access, NamedTextColor.YELLOW)));
                 return;
             }
         }
