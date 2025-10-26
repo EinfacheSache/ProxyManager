@@ -55,7 +55,7 @@ public class Config {
     private static String verifyServer;
     private static String pingVersionName;
     private static String assignedGuildID;
-    private static List<String> maintenanceAccess;
+    private static Set<String> maintenanceAccess;
     private static List<String> allowedDomains;
     private static List<String> allowedSubnet;
 
@@ -150,7 +150,7 @@ public class Config {
     private static final FileUtils data = Core.data;
 
     private static void loadData() {
-        maintenanceAccess = new ArrayList<>();
+        maintenanceAccess = new TreeSet<>();
         countingNumbers = new HashMap<>();
         giveawayEndtimes = new HashMap<>();
         whitelistedPlayers = new HashMap<>();
@@ -302,7 +302,7 @@ public class Config {
         return eligibleUsersForGiveawaySets.get(guildID);
     }
 
-    public static List<String> getMaintenanceAccess() {
+    public static Set<String> getMaintenanceAccess() {
         return maintenanceAccess;
     }
 
@@ -473,14 +473,16 @@ public class Config {
         return wasWhitelisted;
     }
 
-    public static void addMaintenanceAccess(String minecraftName) {
-        maintenanceAccess.add(minecraftName);
+    public static boolean addMaintenanceAccess(String minecraftName) {
+        boolean added = maintenanceAccess.add(minecraftName);
         data.saveAsync("minecraft.maintenance-access", maintenanceAccess);
+        return added;
     }
 
-    public static void removeMaintenanceAccess(String minecraftName) {
-        maintenanceAccess.remove(minecraftName);
+    public static boolean removeMaintenanceAccess(String minecraftName) {
+        boolean removed = maintenanceAccess.remove(minecraftName);
         data.saveAsync("minecraft.maintenance-access", maintenanceAccess);
+        return removed;
     }
 
     public static void setCountingNumber(String guildId, Integer countingNumber) {

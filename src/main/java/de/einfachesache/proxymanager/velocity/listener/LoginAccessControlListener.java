@@ -142,7 +142,7 @@ public class LoginAccessControlListener {
 
     public static boolean hasMaintenanceAccess(Player player) {
         if (player.hasPermission(BYPASS_PERMISSION_MAINTENANCE)) return true;
-        List<String> maintenanceAccess = Config.getMaintenanceAccess();
+        Set<String> maintenanceAccess = Config.getMaintenanceAccess();
         return maintenanceAccess != null && maintenanceAccess.stream().anyMatch(name -> name.equalsIgnoreCase(player.getUsername()));
     }
 }

@@ -69,14 +69,26 @@ public class MaintenanceCMD implements SimpleCommand {
 
         if (args.length == 2) {
             if (args[0].equalsIgnoreCase("add")) {
-                Config.addMaintenanceAccess(args[1]);
-                source.sendMessage(Component.text("Du hast " + args[1] + " zum Maintenance Access hinzugefügt", NamedTextColor.YELLOW));
+                boolean added = Config.addMaintenanceAccess(args[1]);
+
+                if (added) {
+                    source.sendMessage(Component.text("Du hast " + args[1] + " zum Maintenance Access hinzugefügt", NamedTextColor.YELLOW));
+                } else {
+                    source.sendMessage(Component.text(args[1] + " hat bereits Maintenance Access.", NamedTextColor.RED));
+                }
+
                 return;
             }
 
             if (args[0].equalsIgnoreCase("remove")) {
-                Config.removeMaintenanceAccess(args[1]);
-                source.sendMessage(Component.text("§cDu hast " + args[1] + " vom Maintenance Access entfernt", NamedTextColor.RED));
+                boolean removed = Config.removeMaintenanceAccess(args[1]);
+
+                if (removed) {
+                    source.sendMessage(Component.text("§cDu hast " + args[1] + " vom Maintenance Access entfernt", NamedTextColor.RED));
+                } else {
+                    source.sendMessage(Component.text(args[1] + " hat keinen Maintenance Access.", NamedTextColor.RED));
+                }
+
                 return;
             }
         }
