@@ -478,6 +478,11 @@ public class Config {
         data.saveAsync("minecraft.maintenance-access", maintenanceAccess);
     }
 
+    public static void removeMaintenanceAccess(String minecraftName) {
+        maintenanceAccess.remove(minecraftName);
+        data.saveAsync("minecraft.maintenance-access", maintenanceAccess);
+    }
+
     public static void setCountingNumber(String guildId, Integer countingNumber) {
         countingNumbers.put(guildId, countingNumber);
         data.saveAsync("servers." + guildId + ".counting.current-number", countingNumber);
