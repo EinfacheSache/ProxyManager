@@ -475,13 +475,13 @@ public class Config {
 
     public static boolean addMaintenanceAccess(String minecraftName) {
         boolean added = maintenanceAccess.add(minecraftName);
-        data.saveAsync("minecraft.maintenance-access", maintenanceAccess);
+        data.saveAsync("minecraft.maintenance-access", maintenanceAccess.stream().toList());
         return added;
     }
 
     public static boolean removeMaintenanceAccess(String minecraftName) {
         boolean removed = maintenanceAccess.remove(minecraftName);
-        data.saveAsync("minecraft.maintenance-access", maintenanceAccess);
+        data.saveAsync("minecraft.maintenance-access", maintenanceAccess.stream().toList());
         return removed;
     }
 
