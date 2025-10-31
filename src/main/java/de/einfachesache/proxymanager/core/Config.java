@@ -11,6 +11,7 @@ import org.bspfsystems.yamlconfiguration.configuration.ConfigurationSection;
 import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("unused")
 public class Config {
@@ -18,11 +19,11 @@ public class Config {
     private static String logLevel;
     private static String serverName;
 
-    private static Map<String, String> whitelistedPlayers;
     private static Map<String, Integer> countingNumbers;
     private static Map<String, Long> giveawayEndtimes;
     private static Map<String, Set<String>> giveawayParticipantSets;
     private static Map<String, Set<String>> eligibleUsersForGiveawaySets;
+    private static Map<String, Map<String, String>> whitelistedPlayersByServers;
 
     private static int portRedis;
     private static String hostRedis;
@@ -151,9 +152,10 @@ public class Config {
 
     private static void loadData() {
         maintenanceAccess = new TreeSet<>();
+        whitelistedPlayersByServers = new TreeMap<>();
+
         countingNumbers = new HashMap<>();
         giveawayEndtimes = new HashMap<>();
-        whitelistedPlayers = new HashMap<>();
         giveawayParticipantSets = new HashMap<>();
         eligibleUsersForGiveawaySets = new HashMap<>();
 
@@ -166,17 +168,13 @@ public class Config {
             eligibleUsersForGiveawaySets.put(guildID, new HashSet<>(data.getStringList("servers." + guildID + ".giveaway.eligible-users")));
         });
 
-        Map<String, Object> raw = data.getMap("minecraft.whitelist", true);
-        for (var e : raw.entrySet()) {
-            String discordID = e.getKey();
-            String minecraftName = e.getValue().toString();
-            try {
-                whitelistedPlayers.put(discordID, minecraftName);
-                Core.debug("User " + discordID + " whitelisted player " + minecraftName);
-            } catch (Exception ex) {
-                Core.severe("Whitelist: Invalid entry - key='" + discordID + "' value='" + minecraftName + "' (" + ex.getMessage() + "). Skipped.");
-            }
-        }
+        Set<String> whitelistServer = data.getMap("minecraft.whitelist", false).keySet();
+
+        whitelistServer.forEach(serverID -> {
+            Map<String, String> byServerWhitelistedPlayers = data.getMap("minecraft.whitelist." + serverID, true).entrySet().stream()
+                    .collect(Collectors.toMap(Map.Entry::getKey, e -> String.valueOf(e.getValue())));
+            whitelistedPlayersByServers.put(serverID, byServerWhitelistedPlayers);
+        });
 
         VPermissionProvider.clearPermissions();
         ConfigurationSection section = data.getConfigurationSection("minecraft.permissions");
@@ -307,7 +305,18 @@ public class Config {
     }
 
     public static Map<String, String> getWhitelistedPlayers() {
-        return whitelistedPlayers;
+
+        if (whitelistedPlayersByServers == null) {
+            return Collections.emptyMap();
+        }
+
+        Map<String, String> merged = new LinkedHashMap<>();
+        for (Map<String, String> inner : whitelistedPlayersByServers.values()) {
+            if (inner == null) continue;
+            merged.putAll(inner);
+        }
+
+        return Collections.unmodifiableMap(merged);
     }
 
 
@@ -441,16 +450,25 @@ public class Config {
     }
 
 
-    public static void whitelistPlayer(String userId, String minecraftName) {
-        whitelistedPlayers.put(userId, minecraftName);
-        data.saveAsync("minecraft.whitelist", whitelistedPlayers);
+    public static void whitelistPlayer(String serverId, String userId, String minecraftName) {
+        Map<String, String> whitelist = whitelistedPlayersByServers.computeIfAbsent(serverId, id -> new HashMap<>());
+
+        whitelist.put(userId, minecraftName);
+
+        data.saveAsync("minecraft.whitelist." + serverId, whitelist);
     }
 
     public static void removeFromWhitelistByUser(String discordId) {
-        String minecraftName = whitelistedPlayers.remove(discordId);
+        whitelistedPlayersByServers.keySet().forEach(serverId -> removeFromWhitelistByUser(serverId, discordId));
+    }
+
+    public static void removeFromWhitelistByUser(String serverId, String discordId) {
+        Map<String, String> whitelist = whitelistedPlayersByServers.computeIfAbsent(serverId, id -> new HashMap<>());
+
+        String minecraftName = whitelist.remove(discordId);
 
         if (minecraftName != null) {
-            data.saveAsync("minecraft.whitelist", whitelistedPlayers);
+            data.saveAsync("minecraft.whitelist." + serverId, whitelist);
 
             if (!LoginAccessControlListener.hasWhitelistAccess(minecraftName) && Core.isMinecraftServer()) {
                 LoginAccessControlListener.sendLimboOnWhitelistRemove(minecraftName);
@@ -459,11 +477,25 @@ public class Config {
     }
 
     public static boolean removeFromWhitelistByPlayer(String minecraftName) {
-        boolean wasWhitelisted = whitelistedPlayers.values().
-                removeIf(value -> value == null || value.equalsIgnoreCase(minecraftName));
+        Set<String> affectedServerIds = new LinkedHashSet<>();
+
+        for (Map.Entry<String, Map<String, String>> outerEntry : whitelistedPlayersByServers.entrySet()) {
+            String serverId = outerEntry.getKey();
+            Map<String, String> innerMap = outerEntry.getValue();
+
+            boolean removedFromThis = innerMap.values().removeIf(v -> v == null || v.equalsIgnoreCase(minecraftName));
+            if (removedFromThis) {
+                affectedServerIds.add(serverId);
+            }
+        }
+
+        boolean wasWhitelisted = !affectedServerIds.isEmpty();
 
         if (wasWhitelisted) {
-            data.saveAsync("minecraft.whitelist", whitelistedPlayers);
+            for (String serverId : affectedServerIds) {
+                Map<String, String> partToSave = whitelistedPlayersByServers.get(serverId);
+                data.saveAsync("minecraft.whitelist." + serverId, partToSave);
+            }
 
             if (!LoginAccessControlListener.hasWhitelistAccess(minecraftName) && Core.isMinecraftServer()) {
                 LoginAccessControlListener.sendLimboOnWhitelistRemove(minecraftName);
@@ -535,7 +567,7 @@ public class Config {
 
     public static void setEventWhitelist(boolean eventWhitelist) {
         Config.eventWhitelist = eventWhitelist;
-        minecraftModule.saveAsync("maintenance-mode", eventWhitelist);
+        minecraftModule.saveAsync("event-whitelist", eventWhitelist);
     }
 
     public static void resetLastGiveaway(String guildId) {

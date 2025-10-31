@@ -228,7 +228,9 @@ public class WhitelistCommand extends ListenerAdapter {
             }
 
             String oldName = Config.getWhitelistedPlayers().getOrDefault(discordId, null);
-            Config.whitelistPlayer(discordId, name);
+
+            Config.removeFromWhitelistByUser(discordId);
+            Config.whitelistPlayer(event.getGuild().getId(), discordId, name);
 
             Core.getDiscordAPI().getGuilds().forEach((guildID, guild) -> {
 

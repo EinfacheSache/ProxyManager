@@ -59,7 +59,7 @@ public class EventWhitelistCMD implements SimpleCommand {
                     return;
                 }
 
-                Config.whitelistPlayer(args[1] + "_by_" + getSourceName(source), args[1]);
+                Config.whitelistPlayer("in-game",args[1] + "_by_" + getSourceName(source), args[1]);
                 source.sendMessage(Component.text("§cDu hast " + args[1] + " zu der Event-Whitelist hinzugefügt"));
                 return;
             }

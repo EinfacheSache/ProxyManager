@@ -12,6 +12,6 @@ public class MemberLeaveGuildListener extends ListenerAdapter {
         if (!Config.getGuildIDs().contains(event.getGuild().getId())) return;
         if (Core.getDiscordAPI().getGuilds().values().stream().anyMatch(guild -> guild.getMemberById(event.getUser().getId()) != null)) return;
 
-        Config.removeFromWhitelistByUser(event.getUser().getId());
+        Config.removeFromWhitelistByUser(event.getGuild().getId(), event.getUser().getId());
     }
 }
