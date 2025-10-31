@@ -222,7 +222,7 @@ public class WhitelistCommand extends ListenerAdapter {
                 return new WhitelistResult("ℹ️ Der Spieler `" + name + "` existiert nicht.", Color.RED, true);
             }
 
-            boolean alreadyWhitelisted = Config.getWhitelistedPlayers().values().stream().anyMatch(mapName -> mapName.equalsIgnoreCase(name));
+            boolean alreadyWhitelisted = Config.getWhitelistedPlayers().values().stream().anyMatch(mcName -> mcName.equalsIgnoreCase(name));
             if (alreadyWhitelisted) {
                 return new WhitelistResult("ℹ️ Der Spieler `" + name + "` ist bereits whitelisted.", Color.YELLOW, true);
             }
