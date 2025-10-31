@@ -119,7 +119,9 @@ public class MemberJoinGuildListener extends ListenerAdapter {
                         inviteLogChannel.sendMessage("📥 " + event.getMember().getAsMention() + " wurde eingeladen von " + inviter.getAsMention()).queue();
                     LogUtils.write(logFilePath, LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")) + " " + event.getUser().getName() + " wurde eingeladen von " + inviter.getName());
 
-                    Config.addEligibleUserForGiveaway(guild.getId(), inviter.getId());
+                    if (Config.getGiveawayEndtimeInMilli(guild.getId()) != -1) {
+                        Config.addEligibleUserForGiveaway(guild.getId(), inviter.getId());
+                    }
 
                     break;
                 }
