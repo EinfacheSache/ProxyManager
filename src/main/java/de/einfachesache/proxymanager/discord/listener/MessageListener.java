@@ -3,6 +3,7 @@ package de.einfachesache.proxymanager.discord.listener;
 import de.einfachesache.api.util.LogUtils;
 import de.einfachesache.proxymanager.core.Config;
 import de.einfachesache.proxymanager.core.Core;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
@@ -27,20 +28,47 @@ public class MessageListener extends ListenerAdapter {
         if (event.getAuthor().isBot()) return;
 
         if (event.isFromType(ChannelType.PRIVATE)) {
-            String logLine = "DM from " + event.getAuthor().getName() + ": " + event.getMessage().getContentDisplay();
-            LogUtils.write(Path.of((Core.isMinecraftServer() ? "plugins/ProxyManager/" : "./") + "logs/DM/" + event.getAuthor().getName() + ".log"), LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")) + " " + logLine);
-            Core.warn(logLine);
+            handleDM(event);
             return;
         }
-
-        if (!Config.getGuildIDs().contains(event.getGuild().getId())) return;
 
         String guildID = event.getGuild().getId();
         GuildMessageChannel channel = event.getChannel().asGuildMessageChannel();
-        if (!channel.getId().equals(Config.getCountingChannelID(guildID))) {
+
+        if (!Config.getGuildIDs().contains(guildID)) {
             return;
         }
 
+        if (channel.getId().equals(Config.getCountingChannelID(guildID))) {
+            handleCounting(event);
+            return;
+        }
+
+        if (channel.getId().equals(Config.getDiscordServerProfile(guildID).getWhitelistChannelId())) {
+            handleMessageInWhitelistChannel(event);
+        }
+    }
+
+
+    private void handleDM(MessageReceivedEvent event) {
+        String logLine = "DM from " + event.getAuthor().getName() + ": " + event.getMessage().getContentDisplay();
+        LogUtils.write(Path.of((Core.isMinecraftServer() ? "plugins/ProxyManager/" : "./") + "logs/DM/" + event.getAuthor().getName() + ".log"), LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")) + " " + logLine);
+        Core.warn(logLine);
+    }
+
+    private void handleMessageInWhitelistChannel(MessageReceivedEvent event) {
+        if (event.getMember() == null) return;
+        if (event.getMember().getPermissions().contains(Permission.MODERATE_MEMBERS)) return;
+
+        event.getMessage().delete().queue();
+        event.getMessage()
+                .reply("Bitte Verwende `/whitelist <Ingame-Name>`")
+                .queue(sentMessage -> sentMessage.delete().queueAfter(12, TimeUnit.SECONDS));
+    }
+
+    private void handleCounting(MessageReceivedEvent event) {
+
+        String guildID = event.getGuild().getId();
         String content = event.getMessage().getContentRaw().trim().toLowerCase().replaceAll("pi", "3");
 
         if (!content.matches("\\d+")) {
