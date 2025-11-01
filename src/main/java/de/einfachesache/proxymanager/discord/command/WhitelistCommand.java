@@ -144,6 +144,12 @@ public class WhitelistCommand extends ListenerAdapter {
             }
 
             var member = guild != null ? guild.getMemberById(discordId) : null;
+
+            OptionMapping filterRoleString = event.getOption("filter");
+            if (filterRoleString != null && (member == null || !member.getRoles().contains(filterRoleString.getAsRole()))) {
+                continue;
+            }
+
             var user = event.getJDA().getUserById(discordId);
             String fieldName = "`" + minecraftName + "`";
             String fieldValue = (member != null)
@@ -239,7 +245,9 @@ public class WhitelistCommand extends ListenerAdapter {
 
                 guild.addRoleToMember(event.getUser(), whitelistedRole)
                         .reason("Auto-Role on Whitelist")
-                        .queue(success -> { }, error -> { });
+                        .queue(success -> {
+                        }, error -> {
+                        });
             });
 
             if (oldName == null) {

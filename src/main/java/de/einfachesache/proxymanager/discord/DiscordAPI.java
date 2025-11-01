@@ -125,7 +125,11 @@ public class DiscordAPI extends ListenerAdapter {
                                 ),
 
                         Commands.slash("whitelist-list", "Zeige alle Whitelisted Spieler an")
-                                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MODERATE_MEMBERS)),
+                                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MODERATE_MEMBERS))
+                                .addOptions(
+                                        new OptionData(OptionType.ROLE, "filter", "Filter die whitelist nach Rollen", false)
+                                ),
+
 
                         Commands.slash("whitelist-sync", "Whitelist-Sync – Rolle gemäß Konfiguration synchronisieren")
                                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MODERATE_MEMBERS)),
