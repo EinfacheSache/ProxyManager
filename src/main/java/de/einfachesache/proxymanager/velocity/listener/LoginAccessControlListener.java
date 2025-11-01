@@ -4,6 +4,7 @@ import com.velocitypowered.api.event.ResultedEvent;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.LoginEvent;
 import com.velocitypowered.api.event.player.ServerPreConnectEvent;
+import com.velocitypowered.api.proxy.ConnectionRequestBuilder;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
@@ -96,7 +97,7 @@ public class LoginAccessControlListener {
 
         RegisteredServer fallback = fallbackOpt.get();
 
-        isServerOffline(fallback).thenAccept(isOffline -> {
+        canConnectToFallbackServer(fallback).thenAccept(isOffline -> {
 
             if (isOffline) {
                 disconnectNotWhitelisted(player);
@@ -104,18 +105,22 @@ public class LoginAccessControlListener {
             }
 
             player.createConnectionRequest(fallback).connect().thenAccept(result -> {
-                if (result == null || !result.isSuccessful()) {
+                if (result == null || (!result.isSuccessful() && !result.getStatus().equals(ConnectionRequestBuilder.Status.CONNECTION_IN_PROGRESS))) {
+                    Core.warn("Can't connect " + playerName + " to " + FALLBACK_SERVER);
                     disconnectNotWhitelisted(player);
                 }
             });
         });
     }
 
-    public static CompletableFuture<Boolean> isServerOffline(RegisteredServer server) {
+    public static CompletableFuture<Boolean> canConnectToFallbackServer(RegisteredServer server) {
         return server.ping()
                 .orTimeout(800, TimeUnit.MILLISECONDS)
                 .thenApply(p -> false)
-                .exceptionally(ex -> true);
+                .exceptionally(ex -> {
+                    Core.severe("Can't get connection to " + FALLBACK_SERVER + ": " + ex.getMessage());
+                    return true;
+                });
     }
 
     private static void disconnectNotWhitelisted(Player player, RegisteredServer targetServer) {
