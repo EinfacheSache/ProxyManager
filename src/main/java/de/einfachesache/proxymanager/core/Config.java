@@ -51,6 +51,7 @@ public class Config {
     private static boolean customMotd;
     private static boolean hostAllowlist;
     private static boolean proxyProtocol;
+    private static boolean debugPingHandler;
     private static String serverDomainName;
     private static String verifyServerDomain;
     private static String verifyServer;
@@ -136,6 +137,7 @@ public class Config {
         proxyProtocol = minecraftModule.getBoolean("proxy-protocol", false);
         eventWhitelist = minecraftModule.getBoolean("event-whitelist", false);
         maintenanceMode = minecraftModule.getBoolean("maintenance-mode", false);
+        debugPingHandler = minecraftModule.getBoolean("debug-ping-handler", false);
         playerHeadAsServerIcon = minecraftModule.getBoolean("ping.icon.use-player-head", false);
 
         pingVersionName = minecraftModule.get("ping.version-name", "Version 1.x");
@@ -342,6 +344,10 @@ public class Config {
 
     public static boolean isProxyProtocol() {
         return proxyProtocol;
+    }
+
+    public static boolean isDebugPingHandler() {
+        return debugPingHandler;
     }
 
     public static String getServerDomainName() {

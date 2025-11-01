@@ -1,5 +1,6 @@
 server-domain: 'your-server-domain.de'
 
+debug-ping-handler: false    # Nur ein debug Tool
 maintenance-mode: true       # Spieler ohne Bypass fliegen beim Join raus
 event-whitelist: true        # (falls du das hier weiterverwenden willst)
 host-allowlist: true         # prüft VirtualHost/Domain vor dem Login

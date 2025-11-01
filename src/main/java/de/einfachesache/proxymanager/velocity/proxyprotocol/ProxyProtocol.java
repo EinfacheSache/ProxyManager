@@ -29,14 +29,15 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class ProxyProtocol {
 
     private final Reflection.MethodInvoker initChannelMethod = Reflection.getMethod(ChannelInitializer.class, "initChannel", Channel.class);
-    private final List<String> directConnectWhitelist = new ArrayList<>();
-    private final List<Object> neoIPS = new ArrayList<>();
+    private final Set<String> directConnectWhitelist = ConcurrentHashMap.newKeySet();
+    private final Set<Object> neoIPS = ConcurrentHashMap.newKeySet();
 
     private static final ConcurrentHashMap<String, ArrayList<DebugPingResponse>> debugPingResponses = new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<KeepAliveResponseKey, Long> pingMap = new ConcurrentHashMap<>();
@@ -68,30 +69,30 @@ public class ProxyProtocol {
                         AtomicReference<InetSocketAddress> playerAddress = new AtomicReference<>();
                         String sourceAddress = ((InetSocketAddress) channel.remoteAddress()).getAddress().getHostAddress();
 
-                        if (channel.localAddress().toString().startsWith("local:") || sourceAddress.equals("Config.getGeyserServerIP()")) {
-                            Core.debug("Detected bedrock player (return)");
+                        if (directConnectWhitelist.contains(sourceAddress)) {
                             return;
                         }
 
-                        if (!directConnectWhitelist.contains(sourceAddress)) {
-                            if (Config.isProxyProtocol() && (neoIPS.isEmpty() || neoIPS.stream().noneMatch(ipRange -> isIPInRange(String.valueOf(ipRange), sourceAddress)))) {
-                                channel.close();
-                                Core.debug("Close connection IP (" + channel.remoteAddress() + ") doesn't match to Neo-IPs (close / return)");
-                                return;
-                            }
+                        /*if (channel.localAddress().toString().startsWith("local:") || sourceAddress.equals("Config.getGeyserServerIP()")) {
+                            Core.debug("Detected bedrock player (return)");
+                            return;
+                        } */
 
-                            Core.debug("Adding handler...");
-
-                            if (Config.isProxyProtocol()) {
-                                addProxyProtocolHandler(channel, playerAddress);
-                                Core.debug("ProxyProtocol is on (Added proxyProtocolHandler)");
-                            }
-
-                            addKeepAlivePacketHandler(channel, playerAddress, velocityServer);
-                            Core.debug("Added keepAlivePacketHandler");
+                        if (Config.isProxyProtocol() && (neoIPS.isEmpty() || neoIPS.stream().noneMatch(ipRange -> isIPInRange(String.valueOf(ipRange), sourceAddress)))) {
+                            channel.close();
+                            Core.debug("Close connection IP (" + channel.remoteAddress() + ") doesn't match to Proxy-IPs (closed)");
+                            return;
                         }
 
-                        Core.debug("Connecting finished");
+                        if (Config.isProxyProtocol()) {
+                            addProxyProtocolHandler(channel, playerAddress);
+                            Core.debug("ProxyProtocol is on (Added proxyProtocolHandler)");
+                        }
+
+                        if (Config.isDebugPingHandler()) {
+                            addDebugPingResponseHandler(channel, playerAddress, velocityServer);
+                            Core.debug("Added keepAlivePacketHandler");
+                        }
 
                     } catch (Exception ex) {
                         Core.severe("Cannot inject incoming channel " + channel, ex);
@@ -114,12 +115,10 @@ public class ProxyProtocol {
     }
 
     public void addProxyProtocolHandler(Channel channel, AtomicReference<InetSocketAddress> inetAddress) {
-        channel.pipeline().names().forEach((n) -> {
-            if (n.equals("HAProxyMessageDecoder#0"))
-                channel.pipeline().remove("HAProxyMessageDecoder#0");
-            if (n.equals("ProxyProtocol$1#0"))
-                channel.pipeline().remove("ProxyProtocol$1#0");
-        });
+
+        if (channel.pipeline().names().contains("HAProxyMessageDecoder#0")) {
+            channel.pipeline().remove("HAProxyMessageDecoder#0");
+        }
 
         channel.pipeline().addFirst("haproxy-decoder", new HAProxyMessageDecoder());
         channel.pipeline().addAfter("haproxy-decoder", "haproxy-handler", new ChannelInboundHandlerAdapter() {
@@ -136,7 +135,8 @@ public class ProxyProtocol {
         });
     }
 
-    public void addKeepAlivePacketHandler(Channel channel, AtomicReference<InetSocketAddress> inetAddress, VelocityServer velocityServer) {
+    public void addDebugPingResponseHandler(Channel channel, AtomicReference<InetSocketAddress> inetAddress, VelocityServer velocityServer) {
+
         if (!channel.pipeline().names().contains("minecraft-decoder")) {
             Core.warn("Failed to add KeepAlivePacketHandler (minecraft-decoder can't be found)");
             return;
@@ -153,15 +153,13 @@ public class ProxyProtocol {
 
                 ConcurrentHashMap<KeepAliveResponseKey, Long> pingMap = ProxyProtocol.pingMap;
 
-                Core.trace("Received KeepAlivePackets (" + keepAlive.getRandomId() + ")");
-
                 for (KeepAliveResponseKey keepAliveResponseKey : pingMap.keySet()) {
 
                     if (!keepAliveResponseKey.getAddress().equals(inetAddress.get()) || !(keepAliveResponseKey.getId() == keepAlive.getRandomId())) {
                         continue;
                     }
 
-                    Core.debug("KeepAlivePackets matched to DebugKeepAlivePacket");
+                    Core.info("KeepAlivePackets matched to DebugKeepAlivePacket");
 
                     for (Player player : velocityServer.getAllPlayers()) {
 
@@ -169,7 +167,7 @@ public class ProxyProtocol {
                             continue;
                         }
 
-                        Core.debug("Player matched to DebugKeepAlivePacket (loading data...)");
+                        Core.info("Player matched to DebugKeepAlivePacket (loading data...)");
 
                         EpollTcpInfo tcpInfo = ((EpollSocketChannel) channel).tcpInfo();
                         EpollTcpInfo tcpInfoBackend = null;
@@ -197,8 +195,8 @@ public class ProxyProtocol {
 
                         map.get(player.getUsername()).add(new DebugPingResponse(ping, neoRTT, backendRTT, inetAddress.get(), channel.remoteAddress()));
 
-                        Core.debug("Loading completed");
-                        Core.debug(" ");
+                        Core.info("Loading completed");
+                        Core.info(" ");
 
                     }
                     pingMap.remove(keepAliveResponseKey);
@@ -207,37 +205,49 @@ public class ProxyProtocol {
         });
     }
 
-    public static boolean isIPInRange(String ipRange, String ipAddress) {
-        if (!ipRange.contains("/")) {
-            ipRange = ipRange + "/32";
+    public static long ipToDecimal(String ipAddress) {
+        if (ipAddress == null) return -1;
+        int len = ipAddress.length();
+        long result = 0L;
+        int octet = 0;
+        int octetCount = 0;
+
+        for (int i = 0; i < len; i++) {
+            char c = ipAddress.charAt(i);
+            if (c == '.') {
+                if (octet < 0) return -1;
+                result = (result << 8) | (octet & 0xFFL);
+                octet = 0;
+                octetCount++;
+                continue;
+            }
+            if (c < '0' || c > '9') return -1;
+            octet = octet * 10 + (c - '0');
+            if (octet > 255) return -1;
         }
-
-        long targetIntAddress = ipToDecimal(ipAddress);
-
-        int range = Integer.parseInt(ipRange.split("/")[1]);
-        String startIP = ipRange.split("/")[0];
-
-        long startIntAddress = ipToDecimal(startIP);
-
-        return targetIntAddress <= (startIntAddress + (long) Math.pow(2, (32 - range))) && targetIntAddress >= startIntAddress;
+        if (octetCount != 3) return -1;
+        if (octet < 0) return -1;
+        result = (result << 8) | (octet & 0xFFL);
+        return result & 0xFFFFFFFFL;
     }
 
-    public static long ipToDecimal(String ipAddress) throws IllegalArgumentException {
-        String[] parts = ipAddress.split("\\.");
-        if (parts.length != 4) {
-            return -1;
-        }
+    public static boolean isIPInRange(String ipRange, String ipAddress) {
+        if (ipRange == null || ipAddress == null) return false;
+        String normalized = ipRange.contains("/") ? ipRange : ipRange + "/32";
 
-        long decimal = 0;
-        for (int i = 0; i < 4; i++) {
-            int octet = Integer.parseInt(parts[i]);
-            if (octet < 0 || octet > 255) {
-                return -1;
-            }
-            decimal += (long) (octet * Math.pow(256, 3 - i));
-        }
+        int slash = normalized.indexOf('/');
+        if (slash <= 0) return false;
+        String prefixStr = normalized.substring(slash + 1);
+        int prefix;
+        try { prefix = Integer.parseInt(prefixStr); } catch (NumberFormatException ex) { return false; }
+        if (prefix < 0 || prefix > 32) return false;
 
-        return decimal;
+        long target = ipToDecimal(ipAddress);
+        long network = ipToDecimal(normalized.substring(0, slash));
+        if (target == -1 || network == -1) return false;
+
+        long mask = (prefix == 0) ? 0L : ((0xFFFFFFFFL << (32 - prefix)) & 0xFFFFFFFFL);
+        return (target & mask) == (network & mask);
     }
 
     private List<Object> getNeoIPs() {
