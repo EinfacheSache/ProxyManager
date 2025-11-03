@@ -97,13 +97,13 @@ public class TicketListener extends ListenerAdapter {
     public static void createBugReportTicket(String guildID, String userID, String report) {
         User user = Core.getDiscordAPI().getJDA().getUserById(userID);
 
-        if (!Core.getDiscordAPI().getGuilds().containsKey(guildID)) {
-            Core.warn("Can't create bugreport. guild with ID " + guildID + " is null");
+        if (user == null) {
+            Core.warn("Can't create bugreport. user with ID " + userID + " is null");
             return;
         }
 
-        if (user == null) {
-            Core.warn("Can't create bugreport. user with ID " + userID + " is null");
+        if (!Core.getDiscordAPI().getGuilds().containsKey(guildID)) {
+            Core.warn("Can't create bugreport. guild with ID " + guildID + " is null");
             return;
         }
 

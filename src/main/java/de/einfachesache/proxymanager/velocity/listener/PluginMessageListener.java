@@ -50,7 +50,7 @@ public class PluginMessageListener {
                 Config.getAssignedGuildID(),
                 Config.getWhitelistedPlayers().entrySet().stream()
                         .filter(e -> Objects.equals(e.getValue().toLowerCase(), payload.reporter.name.toLowerCase()))
-                        .map(Map.Entry::getKey).toList().getFirst(),
+                        .map(Map.Entry::getKey).findFirst().orElse("-1"),
                 buildTicketText(payload));
     }
 
