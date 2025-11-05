@@ -7,10 +7,7 @@ import de.einfachesache.proxymanager.discord.DiscordAPI;
 import de.einfachesache.proxymanager.discord.MessageUtils;
 import de.einfachesache.proxymanager.velocity.listener.LoginAccessControlListener;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -20,6 +17,7 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -52,7 +50,10 @@ public class WhitelistCommand extends ListenerAdapter {
 
         event.deferReply(true).queue();
 
-        var shouldBeWhitelisted = Config.getWhitelistedPlayers().keySet();
+        AtomicInteger toAddCount = new AtomicInteger();
+        AtomicInteger toRemoveCount = new AtomicInteger();
+
+        Set<String> shouldBeWhitelisted = Config.getWhitelistedPlayers().keySet();
         String auditReason = "Whitelist sync – align role with config by " + event.getUser().getAsTag();
 
         discordAPI.getGuilds().values().forEach(guild -> {
@@ -61,12 +62,18 @@ public class WhitelistCommand extends ListenerAdapter {
             if (whitelistRole == null) return;
 
             Set<String> currentRoleHolders = getDiscordIdsWithRoleCached(guild, whitelistRole);
+            Set<String> memberIds = guild.getMembers().stream()
+                    .map(ISnowflake::getId)
+                    .collect(Collectors.toSet());
 
             Set<String> toAdd = new HashSet<>(shouldBeWhitelisted);
+            toAdd.retainAll(memberIds);
             toAdd.removeAll(currentRoleHolders);
+            toAddCount.addAndGet(toAdd.size());
 
             Set<String> toRemove = new HashSet<>(currentRoleHolders);
             toRemove.removeAll(shouldBeWhitelisted);
+            toRemoveCount.addAndGet(toRemove.size());
 
             for (String discordId : toAdd) {
                 guild.retrieveMemberById(discordId).queue(
@@ -93,11 +100,18 @@ public class WhitelistCommand extends ListenerAdapter {
             }
         });
 
-        event.getHook().setEphemeral(true).sendMessageEmbeds(
+        String description =
+                "Whitelist-Sync läuft. Rollen werden nun aktualisiert.\n\n" +
+                        "➕ " + toAddCount.get() + "x Whitelist-Rolle wird vergeben.\n" +
+                        "➖ " + toRemoveCount.get() + "x Whitelist-Rolle wird entfernt.";
+
+        event.getHook()
+                .setEphemeral(true)
+                .sendMessageEmbeds(
                         MessageUtils
                                 .getDefaultEmbed()
                                 .setTitle("Whitelist-Sync")
-                                .setDescription("Whitelist-Sync läuft. Rollen werden nun aktualisiert.")
+                                .setDescription(description)
                                 .build())
                 .queue();
     }
