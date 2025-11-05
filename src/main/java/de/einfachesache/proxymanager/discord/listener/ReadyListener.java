@@ -27,7 +27,7 @@ public class ReadyListener implements EventListener {
 
             JDA jda = event.getJDA();
             Thread.currentThread().setName("DISCORD");
-            discordAPI.getGuilds().putAll(Config.getGuildIDs().stream()
+            discordAPI.addGuilds(Config.getGuildIDs().stream()
                     .map(jda::getGuildById)
                     .filter(Objects::nonNull)
                     .collect(Collectors.toMap(Guild::getId, g -> g)));

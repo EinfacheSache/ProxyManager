@@ -31,7 +31,9 @@ import java.awt.*;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 public class DiscordAPI extends ListenerAdapter {
 
@@ -60,6 +62,7 @@ public class DiscordAPI extends ListenerAdapter {
                     new MessageListener(),
                     new ContextMenuListener(),
                     new BotGuildJoinListener(),
+                    new BotGuildLeaveListener(),
                     new MemberJoinGuildListener(),
                     new MemberLeaveGuildListener()
             );
@@ -74,8 +77,14 @@ public class DiscordAPI extends ListenerAdapter {
     public CompletableFuture<Boolean> reloadGuildsAsync() {
         return CompletableFuture
                 .runAsync(() -> {
+                    guilds.clear();
+                    guilds.putAll(Config.getGuildIDs().stream()
+                            .map(JDA::getGuildById)
+                            .filter(Objects::nonNull)
+                            .collect(Collectors.toMap(Guild::getId, g -> g)));
+
                     loadGlobalDiscordCommands();
-                    this.getGuilds().forEach((id, guild) -> this.loadGuildDiscordCommands(guild));
+                    guilds.forEach((id, guild) -> loadGuildDiscordCommands(guild));
                 }, AsyncExecutor.getService())
                 .thenApply(v -> {
                     Core.info("Discord commands successfully reloaded");
@@ -195,11 +204,25 @@ public class DiscordAPI extends ListenerAdapter {
     }
 
     public Guild getGuild(String guildID) {
-        return guilds.get(guildID);
+        return this.guilds.get(guildID);
     }
 
     public Map<String, Guild> getGuilds() {
-        return guilds;
+        return this.guilds.entrySet().stream()
+                .filter(entry -> entry.getValue().getSelfMember().hasPermission(Permission.ADMINISTRATOR))
+                .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    public void addGuilds(Map<String,Guild> guilds) {
+        this.guilds.putAll(guilds);
+    }
+
+    public void addGuild(Guild guild) {
+        this.guilds.put(guild.getId(), guild);
+    }
+
+    public void removeGuild(String guildId) {
+        this.guilds.remove(guildId);
     }
 
     public Role getStaffRole(String guildID) {
