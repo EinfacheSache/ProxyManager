@@ -7,6 +7,7 @@ public class DiscordServerProfile {
     private final String name;
     private final String guildId;
     private final String joinRoleId;
+    private final String leaveChannelId;
     private final String welcomeChannelId;
     private final String whitelistedRoleId;
     private final String countingChannelId;
@@ -27,6 +28,7 @@ public class DiscordServerProfile {
                                 String betaTesterRoleId,
                                 String whitelistedRoleId,
                                 String logChannelId,
+                                String leaveChannelId,
                                 String welcomeChannelId,
                                 String ticketCategoryId,
                                 String countingChannelId,
@@ -42,6 +44,7 @@ public class DiscordServerProfile {
         this.whitelistedRoleId = whitelistedRoleId;
 
         this.logChannelId = logChannelId;
+        this.leaveChannelId = leaveChannelId;
         this.welcomeChannelId = welcomeChannelId;
         this.ticketCategoryId = ticketCategoryId;
         this.countingChannelId = countingChannelId;
@@ -59,6 +62,7 @@ public class DiscordServerProfile {
         this.betaTesterRoleId = null;
         this.whitelistedRoleId = null;
 
+        this.leaveChannelId = null;
         this.welcomeChannelId = null;
         this.countingChannelId = null;
         this.giveawayChannelId = null;
@@ -111,6 +115,10 @@ public class DiscordServerProfile {
         this.logChannelId = logChannelId;
     }
 
+    public String getLeaveChannelId() {
+        return leaveChannelId;
+    }
+
     public String getWelcomeChannelId() {
         return welcomeChannelId;
     }
@@ -146,12 +154,13 @@ public class DiscordServerProfile {
                 ", ticketCategoryId='" + ticketCategoryId + '\'' +
                 ", staffRoleId='" + staffRoleId + '\'' +
                 ", logChannelId='" + logChannelId + '\'' +
+                ", leaveChannelId='" + leaveChannelId + '\'' +
                 ", welcomeChannelId='" + welcomeChannelId + '\'' +
                 ", countingChannelId='" + countingChannelId + '\'' +
                 ", giveawayChannelId='" + giveawayChannelId + '\'' +
                 ", whitelistChannelId='" + whitelistChannelId + '\'' +
                 ", betaTesterRoleId='" + betaTesterRoleId + '\'' +
-                ", whitelistedRoleId='" + whitelistChannelId + '\'' +
+                ", whitelistedRoleId='" + whitelistedRoleId + '\'' +
                 '}';
     }
 }

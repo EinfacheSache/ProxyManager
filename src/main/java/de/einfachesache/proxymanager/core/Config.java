@@ -220,6 +220,8 @@ public class Config {
 
                 // logChannelId
                 String.valueOf(discordModule.getLong("servers." + guildId + ".log-channel-id", -1)),
+                // leaveChannelId
+                String.valueOf(discordModule.getLong("servers." + guildId + ".leave-channel-id", -1)),
                 // welcomeChannelId
                 String.valueOf(discordModule.getLong("servers." + guildId + ".welcome-channel-id", -1)),
                 // ticketCategoryId

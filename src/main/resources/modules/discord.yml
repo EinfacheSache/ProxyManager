@@ -13,11 +13,13 @@ servers:
     user-role-id: 1007349225383788634
     staff-role-id: 1402702044695105548
     beta-tester-role-id: 1398068570201522257
+    whitelisted-role-id: 1430894295447244972
     # Channel IDs
     log-channel-id: 1396658613405356072
+    leave-channel-id: 1006339616053411932
     welcome-channel-id: 1006339616053411932
     tickets-category-id: 1120488702511161447
     counting-channel-id: 1389001094109331627
     giveaway-channel-id: 1110668721296511086
-    whitelist-channel-id: 1397695956605992996
+    whitelist-channel-id: 1110668721296511086
     invite-log-channel-id: 1396658613405356072
