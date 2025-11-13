@@ -34,6 +34,6 @@ public class MemberLeaveGuildListener extends ListenerAdapter {
             return;
         }
 
-        channel.sendMessage( "↩️ " + user.getAsMention() + " hat den Server verlassen!").queue();
+        channel.sendMessage("↩️ <@" + user.getId() + "> (" + user.getName() + ") hat den Server verlassen!").queue();
     }
 }
